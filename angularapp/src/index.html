@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>GridPulse</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#17181c">
+  <meta name="description" content="GridPulse - motorsport track booking and live race control">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%2317181c'/%3E%3Cpath d='M4 17h7l3-9 5 16 3-7h6' fill='none' stroke='%23ff5b14' stroke-width='3' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E">
+  <!-- Archivo (text + wide headings) and JetBrains Mono (times, prices); no internet = system fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <!-- Razorpay checkout.js, used by PaymentService -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js" defer></script>
+</head>
+<body>
+  <app-root>
+    <!-- shown until Angular has started (hidden until styles.css is there). the name also makes the browser fetch the font early -->
+    <div class="loader boot" style="visibility: hidden">
+      <span class="display loader-name">GridPulse</span>
+      <div class="loader-track"><div class="loader-lane"><span class="loader-car"></span></div></div>
+      <span class="loader-label">Starting</span>
+    </div>
+  </app-root>
+</body>
+</html>
