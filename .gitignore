@@ -1,0 +1,23 @@
+# build output
+node_modules/
+dist/
+out-tsc/
+.angular/
+target/
+
+# local only, never pushed
+secrets.properties
+logs/
+.gridpulse-backups/
+springapp/src/main/resources/static/
+
+# laptop notes, helper scripts and editor settings
+/CLAUDE.md
+/docs/
+/tools/
+/run-*.cmd
+/*.pdf
+/*.docx
+.vscode/
+.idea/
+*.iml
