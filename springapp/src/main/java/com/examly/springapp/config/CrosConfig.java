@@ -1,0 +1,26 @@
+package com.examly.springapp.config;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import com.examly.springapp.config.properties.CorsProperties;
+
+import lombok.RequiredArgsConstructor;
+
+// lets angular (8081) call the backend (8080); allowed origins come from CorsProperties
+@Configuration
+@RequiredArgsConstructor
+public class CrosConfig implements WebMvcConfigurer {
+
+    private final CorsProperties corsProperties;
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOriginPatterns(corsProperties.allowedOrigins().toArray(String[]::new))
+                .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
+                .maxAge(3600);
+    }
+}
