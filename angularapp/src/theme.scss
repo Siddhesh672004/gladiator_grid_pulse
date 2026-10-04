@@ -1,0 +1,41 @@
+@use '@angular/material' as mat;
+
+// Angular Material is used for one thing only: the dialog that shows our popups. this file gives it our font and colours
+// (the popup box itself is styled in styles.css)
+
+$asphalt: (
+  50: #e9e9ea, 100: #c7c8c9, 200: #a2a3a5, 300: #7c7d81, 400: #606166,
+  500: #17181c, 600: #141519, 700: #101114, 800: #0c0d10, 900: #060608,
+  contrast: (
+    50: #17181c, 100: #17181c, 200: #17181c, 300: #ffffff, 400: #ffffff,
+    500: #ffffff, 600: #ffffff, 700: #ffffff, 800: #ffffff, 900: #ffffff
+  )
+);
+
+$orange: (
+  50: #ffede4, 100: #ffd2bc, 200: #ffb48f, 300: #ff9662, 400: #ff7f40,
+  500: #ff5b14, 600: #f25410, 700: #d9470b, 800: #c2410c, 900: #9a3209,
+  contrast: (
+    50: #17181c, 100: #17181c, 200: #17181c, 300: #17181c, 400: #17181c,
+    500: #17181c, 600: #17181c, 700: #ffffff, 800: #ffffff, 900: #ffffff
+  )
+);
+
+$type: mat.define-typography-config(
+  $font-family: '"Archivo", "Segoe UI", system-ui, sans-serif',
+  $button: mat.define-typography-level(14px, 20px, 700, $letter-spacing: 0)
+);
+
+$theme: mat.define-light-theme((
+  color: (
+    primary: mat.define-palette($asphalt, 500, 100, 700),
+    accent: mat.define-palette($orange, 500, 100, 700),
+    warn: mat.define-palette(mat.$red-palette, 700)
+  ),
+  typography: $type,
+  density: 0
+));
+
+@include mat.core();
+@include mat.core-theme($theme);
+@include mat.dialog-theme($theme);
