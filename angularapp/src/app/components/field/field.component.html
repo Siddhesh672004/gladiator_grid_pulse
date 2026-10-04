@@ -1,0 +1,26 @@
+<div class="field" [class.invalid]="showError">
+  <label [for]="inputId">{{ label }}<span *ngIf="!optional"> *</span></label>
+
+  <div class="field-box">
+    <select *ngIf="options" [id]="inputId" [formControl]="box">
+      <option *ngIf="nothingChosen" [ngValue]="box.value" disabled>Select</option>
+      <option *ngFor="let option of options" [ngValue]="option.value">{{ option.text }}</option>
+    </select>
+
+    <textarea *ngIf="!options && rows" [id]="inputId" [rows]="rows" [formControl]="box"
+              [attr.maxlength]="maxlength || null" (input)="cleanTyping($event)"></textarea>
+
+    <input *ngIf="!options && !rows" [id]="inputId" [type]="boxType" [formControl]="box"
+           [attr.autocomplete]="autocomplete" [attr.min]="min || null" [attr.max]="max || null"
+           [attr.maxlength]="maxlength || null" [attr.inputmode]="digits ? 'numeric' : null"
+           (input)="cleanTyping($event)" (paste)="pasteDigits($event)">
+
+    <button *ngIf="type === 'password'" class="field-eye" type="button" (click)="showPassword = !showPassword"
+            [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'">
+      <app-icon [name]="showPassword ? 'visibility_off' : 'visibility'"></app-icon>
+    </button>
+  </div>
+
+  <small class="hint" *ngIf="hint && !showError">{{ hint }}</small>
+  <div class="error-text" *ngIf="showError">{{ message }}</div>
+</div>
