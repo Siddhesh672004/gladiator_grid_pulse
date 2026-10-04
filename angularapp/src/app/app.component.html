@@ -1,0 +1,15 @@
+<!-- a lazy part of the app (site / admin / user pages) is on its way: the car drives across the window -->
+<div class="page-loader" *ngIf="loading">
+  <app-loader label="Loading" [brand]="true"></app-loader>
+</div>
+
+<ng-container *ngIf="!onPublicPage">
+  <app-adminnav *ngIf="isAdmin"></app-adminnav>
+  <app-usernav *ngIf="isUser"></app-usernav>
+</ng-container>
+
+<main>
+  <router-outlet></router-outlet>
+</main>
+
+<app-chatbot></app-chatbot>
