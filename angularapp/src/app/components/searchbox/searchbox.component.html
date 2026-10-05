@@ -1,0 +1,5 @@
+<div class="search-box">
+  <app-icon name="search"></app-icon>
+  <input type="search" maxlength="100" [placeholder]="label" [attr.aria-label]="label"
+         [ngModel]="text" (ngModelChange)="textChange.emit($event)">
+</div>

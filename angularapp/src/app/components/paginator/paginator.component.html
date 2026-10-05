@@ -1,0 +1,7 @@
+<div class="pager" *ngIf="total > pageSize" role="group" aria-label="Pages of the list">
+  <span class="pager-range">{{ firstRow }} – {{ lastRow }} of {{ total }}</span>
+  <button type="button" aria-label="First page" [disabled]="shownPage === 1" (click)="goTo(1)">&laquo;</button>
+  <button type="button" aria-label="Previous page" [disabled]="shownPage === 1" (click)="goTo(shownPage - 1)">&lsaquo;</button>
+  <button type="button" aria-label="Next page" [disabled]="shownPage === lastPage" (click)="goTo(shownPage + 1)">&rsaquo;</button>
+  <button type="button" aria-label="Last page" [disabled]="shownPage === lastPage" (click)="goTo(lastPage)">&raquo;</button>
+</div>
