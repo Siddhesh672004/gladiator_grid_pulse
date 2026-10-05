@@ -1,0 +1,67 @@
+<app-authshell title="Get your grid slot" text="One account for every track on GridPulse." photo="karting"
+               [points]="['A 6-digit code checks your email', 'Your driving license is saved once', 'Drivers must be 18 or older']">
+
+  <!-- step 1: details -->
+  <form class="auth-box wide" *ngIf="step === 'form'" [formGroup]="signupForm" (ngSubmit)="sendCode()" novalidate>
+    <p class="auth-step"><app-startlights [lit]="1" [total]="2"></app-startlights>Step 1 of 2 · your details</p>
+    <h2 class="display">Signup</h2>
+
+    <div class="field-grid">
+      <app-field label="Username" inputId="username" autocomplete="name" [maxlength]="50"
+                 [control]="signupForm.get('username')"></app-field>
+      <app-field label="Email" type="email" inputId="email" autocomplete="email" [maxlength]="100"
+                 [control]="signupForm.get('email')"></app-field>
+      <app-field label="Mobile number" type="tel" inputId="mobileNumber" autocomplete="tel" [digits]="true" [maxlength]="10"
+                 [control]="signupForm.get('mobileNumber')"></app-field>
+      <app-field label="Date of birth" type="date" inputId="dateOfBirth" [min]="earliestBirthDate" [max]="latestBirthDate"
+                 [control]="signupForm.get('dateOfBirth')"></app-field>
+      <app-field class="full" label="Driving license number" name="License number" inputId="driverLicenseNumber"
+                 [upper]="true" [maxlength]="6" hint="DL and 4 digits, like DL1234"
+                 [control]="signupForm.get('driverLicenseNumber')"></app-field>
+      <app-field label="Password" type="password" inputId="password" autocomplete="new-password" [maxlength]="64"
+                 [control]="signupForm.get('password')"></app-field>
+      <app-field label="Confirm password" type="password" inputId="confirmPassword" autocomplete="new-password" [maxlength]="64"
+                 [control]="signupForm.get('confirmPassword')"></app-field>
+    </div>
+
+    <div class="server-error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+
+    <button class="btn btn-main btn-big btn-block go" type="submit" [disabled]="isSaving">
+      {{ isSaving ? 'Sending code...' : 'Signup' }}<app-icon name="arrow_forward"></app-icon>
+    </button>
+
+    <div class="auth-links">
+      <p class="auth-switch">We email you a 6-digit code to check your address.</p>
+      <p class="auth-switch">Already have an account? <a routerLink="/login">Login</a></p>
+    </div>
+  </form>
+
+  <!-- step 2: code -->
+  <form class="auth-box" *ngIf="step === 'code'" [formGroup]="codeForm" (ngSubmit)="register()" novalidate>
+    <p class="auth-step"><app-startlights [lit]="2" [total]="2"></app-startlights>Step 2 of 2 · the code</p>
+    <h2 class="display">Verify Email</h2>
+    <p class="auth-info">{{ infoMessage }} ({{ email }})</p>
+
+    <app-field label="6-digit code" name="Code" type="tel" inputId="otp" autocomplete="one-time-code"
+               [digits]="true" [maxlength]="6" [control]="codeForm.get('otp')"></app-field>
+
+    <div class="server-error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+
+    <button class="btn btn-main btn-big btn-block go" type="submit" [disabled]="isSaving">
+      {{ isSaving ? 'Checking...' : 'Verify' }}<app-icon name="arrow_forward"></app-icon>
+    </button>
+
+    <div class="auth-links">
+      <p class="auth-switch"><a href="" (click)="$event.preventDefault(); resend()">Send a new code</a></p>
+      <p class="auth-switch"><a href="" (click)="$event.preventDefault(); backToForm()">Change my details</a></p>
+    </div>
+  </form>
+
+</app-authshell>
+
+<ng-template [appPopup]="showModal">
+  <div class="modal-box" *ngIf="showModal">
+    <p>User Registration is Successful!</p>
+    <button class="btn btn-main" (click)="closeModal()">Ok</button>
+  </div>
+</ng-template>
