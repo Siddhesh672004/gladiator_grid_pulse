@@ -1,0 +1,17 @@
+<section class="auth">
+  <aside class="auth-art">
+    <img [src]="photoLink" alt="">
+    <a class="auth-logo" routerLink="/" aria-label="GridPulse start page"><app-logo></app-logo></a>
+    <div class="auth-pitch cut">
+      <h1 class="display">{{ title }}</h1>
+      <p>{{ text }}</p>
+      <ul>
+        <li *ngFor="let point of points"><span class="slot"></span>{{ point }}</li>
+      </ul>
+    </div>
+  </aside>
+
+  <div class="auth-main">
+    <ng-content></ng-content>
+  </div>
+</section>
