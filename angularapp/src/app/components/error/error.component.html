@@ -1,0 +1,13 @@
+<section class="error-page">
+  <a class="error-logo" routerLink="/" *ngIf="!isLoggedIn" aria-label="GridPulse start page"><app-logo></app-logo></a>
+  <span class="red-flag" aria-hidden="true"></span>
+  <p class="tag">Red flag</p>
+  <h1 class="display">This page is off the track</h1>
+  <p>The address is wrong, or the page is not open for your account.</p>
+  <div class="error-actions">
+    <a class="btn btn-main btn-big go" [routerLink]="isLoggedIn ? '/home' : '/login'">
+      {{ isLoggedIn ? 'Back to Home' : 'Go to Login' }}<app-icon name="arrow_forward"></app-icon>
+    </a>
+    <a class="btn btn-main btn-outline btn-big" routerLink="/how-it-works">How it works</a>
+  </div>
+</section>
