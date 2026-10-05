@@ -1,0 +1,138 @@
+<app-sitehead [sections]="sections" [current]="current" (jump)="goTo($event)"></app-sitehead>
+
+<!-- every section is as high as the window -->
+<section class="screen hero">
+  <div class="hero-text">
+    <span class="tag">Track booking · Live race control</span>
+    <h1 class="display">Book the track.<br>Follow <mark>every lap.</mark></h1>
+    <p class="hero-lead">Reserve a session on a real circuit and watch the timing board, lap by lap.</p>
+    <div class="cta">
+      <a class="btn btn-main btn-accent btn-big go" [routerLink]="startLink">
+        {{ startText }}<app-icon name="arrow_forward"></app-icon>
+      </a>
+      <a class="btn btn-main btn-outline btn-big" routerLink="/how-it-works">How it works</a>
+    </div>
+    <div class="stats">
+      <div><b class="mono">{{ trackCount }}</b><span>Tracks open</span></div>
+      <div><b class="mono">{{ sessionCount }}</b><span>Sessions to book</span></div>
+      <div><b class="mono">{{ competitionCount }}</b><span>Competitions ahead</span></div>
+    </div>
+  </div>
+
+  <div class="hero-photo">
+    <img [src]="photo" alt="GT cars racing on a circuit">
+  </div>
+</section>
+
+<section class="screen white" id="tracks">
+  <div class="wrap" appReveal>
+    <div class="block-head">
+      <h2 class="display sec-title">Tracks open for booking</h2>
+      <a class="btn btn-main btn-outline" *ngIf="tracks.length" [routerLink]="isDriver ? '/user/view/tracks' : '/login'">See all tracks</a>
+    </div>
+
+    <app-loader *ngIf="isLoading" label="Loading tracks"></app-loader>
+    <app-empty *ngIf="!isLoading && tracks.length === 0" title="No session is open right now"
+               text="New sessions show up here as soon as an admin schedules them."></app-empty>
+
+    <div class="card-grid">
+      <article class="pic-card" *ngFor="let track of tracks">
+        <div class="cover">
+          <img *ngIf="track.imageUrls?.length" [src]="track.imageUrls[0] | cloudImage:640" [alt]="track.trackName" loading="lazy">
+        </div>
+        <div class="body">
+          <span class="tag">{{ track.trackCategory }}</span>
+          <h3>{{ track.trackName }}</h3>
+          <span class="meta">{{ track.location }} · {{ track.isIndoor ? 'Indoor' : 'Outdoor' }}</span>
+          <div class="foot">
+            <span class="price">From ₹{{ track.fromPrice }}
+              <small>{{ track.upcomingSessions }} session{{ track.upcomingSessions === 1 ? '' : 's' }} open</small>
+            </span>
+            <a class="btn btn-main" [routerLink]="bookLink(track)">Book</a>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="raceday">
+  <div class="wrap" appReveal>
+    <h2 class="display sec-title">From sign up to chequered flag</h2>
+
+    <ol class="race-day">
+      <li *ngFor="let step of steps; let i = index">
+        <app-startlights [lit]="i + 1"></app-startlights>
+        <strong>{{ step.title }}</strong>
+        <span>{{ step.text }}</span>
+      </li>
+    </ol>
+
+    <a class="btn btn-main btn-outline" routerLink="/how-it-works">See how everything works</a>
+  </div>
+</section>
+
+<section class="screen white" id="control">
+  <div class="wrap split" appReveal>
+    <div class="tower">
+      <div class="tower-head">
+        <span>LIVE<span class="live-dot"></span></span>
+        <span>LAP 7 / 15</span>
+      </div>
+      <div class="tower-row" *ngFor="let car of board; let i = index" [class.leader]="i === 0">
+        <span class="pos">P{{ i + 1 }}</span>
+        <span><b>{{ car.driver }}</b><small>#{{ car.car }} · {{ car.laps }} laps</small></span>
+        <span class="lap" [class.best]="i === 0">{{ car.lastLap }}</span>
+      </div>
+      <p class="tower-note">Sample board</p>
+    </div>
+
+    <div>
+      <h2 class="display sec-title">Race control, lap by lap</h2>
+      <ul class="points">
+        <li><span class="slot"></span>One board to start cars, add laps and retire cars.</li>
+        <li><span class="slot"></span>Sorted again on every lap.</li>
+        <li><span class="slot"></span>Refreshed every 4 seconds for the drivers.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="rules">
+  <div class="wrap split" appReveal>
+    <div>
+      <h2 class="display sec-title">Four kinds of track, one rulebook</h2>
+      <p>The track category sets the laps and the grid size of a competition.</p>
+    </div>
+
+    <div class="table-wrap">
+      <table class="gp-table">
+        <thead>
+          <tr><th>Category</th><th>Qualifying laps</th><th>Race laps</th><th>Cars on the grid</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let rule of rules">
+            <td><strong>{{ rule.category }}</strong></td>
+            <td data-label="Qualifying laps" class="mono">{{ rule.qualifyingLaps }}</td>
+            <td data-label="Race laps" class="mono">{{ rule.raceLaps }}</td>
+            <td data-label="Cars on the grid" class="mono">{{ rule.maxCars }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="wrap">
+    <h2 class="display">Your slot on the grid is waiting</h2>
+    <div class="cta">
+      <a class="btn btn-main btn-big go" [routerLink]="startLink">
+        {{ startText }}<app-icon name="arrow_forward"></app-icon>
+      </a>
+      <a class="btn btn-main btn-outline btn-big" *ngIf="!loggedIn" routerLink="/login">Driver login</a>
+    </div>
+  </div>
+</section>
+
+<app-sitefoot></app-sitefoot>

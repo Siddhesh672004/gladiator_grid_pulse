@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+  <!-- night circuit with light trails, used by the login panel and the home banner -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#05070d"/>
+      <stop offset="0.45" stop-color="#121725"/>
+      <stop offset="0.62" stop-color="#2a1d2b"/>
+      <stop offset="0.7" stop-color="#1a1b25"/>
+    </linearGradient>
+    <linearGradient id="asphalt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1b1d24"/>
+      <stop offset="1" stop-color="#08090c"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.72" cy="0.58" r="0.5">
+      <stop offset="0" stop-color="#ff4d4d" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#ff4d4d" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="blur" x="-10%" y="-200%" width="120%" height="500%">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+    <filter id="soft" x="-10%" y="-300%" width="120%" height="700%">
+      <feGaussianBlur stdDeviation="9"/>
+    </filter>
+    <pattern id="checker" width="60" height="30" patternUnits="userSpaceOnUse">
+      <rect width="60" height="30" fill="#101217"/>
+      <rect width="30" height="15" fill="#2a2d35"/>
+      <rect x="30" y="15" width="30" height="15" fill="#2a2d35"/>
+    </pattern>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#sky)"/>
+  <rect width="1600" height="900" fill="url(#glow)"/>
+
+  <!-- grandstand silhouette with floodlights -->
+  <path d="M0 420 L0 250 L120 230 L330 215 L470 250 L520 330 L560 455 Z" fill="#0b0d14"/>
+  <path d="M0 300 L360 268 M0 335 L410 300 M0 370 L455 335" stroke="#20263a" stroke-width="3"/>
+  <g fill="#fff6d8">
+    <circle cx="70" cy="215" r="4"/><circle cx="110" cy="210" r="4"/><circle cx="150" cy="206" r="4"/>
+    <circle cx="190" cy="203" r="4"/><circle cx="230" cy="200" r="3.5"/>
+  </g>
+  <g fill="#fff6d8" opacity="0.35" filter="url(#soft)">
+    <circle cx="150" cy="208" r="40"/>
+  </g>
+  <g fill="#ffd9a0" opacity="0.7">
+    <rect x="40" y="285" width="5" height="3"/><rect x="95" y="281" width="5" height="3"/><rect x="160" y="276" width="5" height="3"/>
+    <rect x="230" y="270" width="5" height="3"/><rect x="290" y="265" width="5" height="3"/><rect x="60" y="322" width="5" height="3"/>
+    <rect x="140" y="315" width="5" height="3"/><rect x="250" y="306" width="5" height="3"/><rect x="340" y="298" width="5" height="3"/>
+  </g>
+
+  <!-- catch fence on the right -->
+  <g stroke="#2b3142" stroke-width="2">
+    <path d="M1600 300 L1050 470"/><path d="M1600 340 L1050 482"/>
+    <path d="M1580 305 L1580 400 M1500 330 L1500 418 M1420 355 L1420 436 M1340 380 L1340 452 M1260 405 L1260 466 M1180 428 L1180 476 M1110 450 L1110 482"/>
+  </g>
+
+  <!-- track surface, sweeping right -->
+  <path d="M0 900 L0 560 C380 505 760 470 1060 470 C1260 470 1450 520 1600 590 L1600 900 Z" fill="url(#asphalt)"/>
+  <!-- red / white kerb on the right-hand bend -->
+  <path d="M1180 900 C1240 760 1330 650 1600 600 L1600 640 C1360 690 1290 780 1250 900 Z" fill="#e8e8e8" opacity="0.85"/>
+  <path d="M1196 862 L1230 862 L1246 820 L1212 820 Z M1228 778 L1262 778 L1282 740 L1248 740 Z M1272 702 L1306 702 L1334 668 L1298 670 Z M1340 640 L1376 636 L1414 614 L1378 620 Z M1452 604 L1490 598 L1530 588 L1492 596 Z" fill="#c8102e"/>
+  <!-- start / finish checkers in the foreground -->
+  <path d="M0 900 L0 790 L520 760 L760 900 Z" fill="url(#checker)" opacity="0.55"/>
+
+  <!-- light trails -->
+  <g filter="url(#soft)" opacity="0.8">
+    <path d="M0 610 C400 560 760 520 1100 505" stroke="#ff2e2e" stroke-width="10" fill="none"/>
+    <path d="M0 680 C420 610 800 560 1150 530" stroke="#ff3b3b" stroke-width="8" fill="none"/>
+  </g>
+  <g filter="url(#blur)" fill="none" stroke-linecap="round">
+    <path d="M0 610 C400 560 760 520 1100 505" stroke="#ff6a6a" stroke-width="3"/>
+    <path d="M40 640 C430 585 780 545 1120 515" stroke="#ffffff" stroke-width="1.6" opacity="0.75"/>
+    <path d="M0 680 C420 610 800 560 1150 530" stroke="#ff4545" stroke-width="3"/>
+    <path d="M120 720 C500 640 860 585 1180 545" stroke="#ff8a3d" stroke-width="2" opacity="0.8"/>
+    <path d="M300 520 C620 495 900 482 1060 478" stroke="#cfd8ff" stroke-width="1.4" opacity="0.6"/>
+  </g>
+</svg>
