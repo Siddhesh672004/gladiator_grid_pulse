@@ -1,0 +1,20 @@
+<header class="bar">
+  <a class="brand" routerLink="/" aria-label="GridPulse start page"><app-logo></app-logo></a>
+
+  <nav class="links" aria-label="Sections">
+    <button type="button" class="link" *ngFor="let section of sections"
+            [class.active]="section.id === current" (click)="jump.emit(section.id)">{{ section.label }}</button>
+    <a class="link" routerLink="/" *ngIf="sections.length === 0">Start page</a>
+    <a class="link" routerLink="/how-it-works" routerLinkActive="active">How it works</a>
+  </nav>
+
+  <span class="spacer"></span>
+
+  <ng-container *ngIf="!loggedIn">
+    <a class="btn btn-main btn-outline" routerLink="/login">Login</a>
+    <a class="btn btn-main btn-accent" routerLink="/signup">Sign up</a>
+  </ng-container>
+  <a class="btn btn-main" *ngIf="loggedIn" [routerLink]="homeLink">
+    <span class="long">Open my dashboard</span><span class="short">Dashboard</span>
+  </a>
+</header>
