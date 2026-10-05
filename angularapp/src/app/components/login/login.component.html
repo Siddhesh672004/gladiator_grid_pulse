@@ -1,0 +1,26 @@
+<app-authshell title="Back on the grid" text="Log in to book sessions and follow your races." photo="race"
+               [points]="['Book a practice or competition session', 'See if your booking was approved', 'Watch the timing board lap by lap']">
+
+  <form class="auth-box" [formGroup]="loginForm" (ngSubmit)="login()" novalidate>
+    <p class="tag">Driver</p>
+    <h2 class="display">Login</h2>
+
+    <app-field label="Email" type="email" inputId="email" autocomplete="username" [maxlength]="100"
+               [control]="loginForm.get('email')"></app-field>
+    <app-field label="Password" type="password" inputId="password" autocomplete="current-password"
+               [control]="loginForm.get('password')"></app-field>
+
+    <div class="server-error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+
+    <button class="btn btn-main btn-big btn-block go" type="submit" [disabled]="isSaving">
+      {{ isSaving ? 'Logging in...' : 'Login' }}<app-icon name="arrow_forward"></app-icon>
+    </button>
+
+    <div class="auth-links">
+      <p class="auth-switch"><a routerLink="/forgot-password">Forgot password?</a></p>
+      <p class="auth-switch">Don't have an account? <a routerLink="/signup">Signup</a></p>
+      <p class="auth-switch">Admin? <a routerLink="/admin-login">Login here</a></p>
+    </div>
+  </form>
+
+</app-authshell>
