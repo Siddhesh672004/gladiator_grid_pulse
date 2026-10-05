@@ -1,0 +1,25 @@
+<app-authshell title="Race control" text="For track admins and the super admin." photo="paddock"
+               [points]="['Add tracks and schedule sessions', 'Approve bookings and run the timing board', 'Admins are invited by the super admin']">
+
+  <form class="auth-box" [formGroup]="loginForm" (ngSubmit)="login()" novalidate>
+    <p class="tag">Admin</p>
+    <h2 class="display">Admin Login</h2>
+
+    <app-field label="Admin email" name="Email" type="email" inputId="email" autocomplete="username" [maxlength]="100"
+               [control]="loginForm.get('email')"></app-field>
+    <app-field label="Password" type="password" inputId="password" autocomplete="current-password"
+               [control]="loginForm.get('password')"></app-field>
+
+    <div class="server-error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+
+    <button class="btn btn-main btn-big btn-block go" type="submit" [disabled]="isSaving">
+      {{ isSaving ? 'Logging in...' : 'Login' }}<app-icon name="arrow_forward"></app-icon>
+    </button>
+
+    <div class="auth-links">
+      <p class="auth-switch"><a routerLink="/forgot-password" [queryParams]="{ from: 'admin' }">Forgot password?</a></p>
+      <p class="auth-switch">Not an admin? <a routerLink="/login">Driver login</a></p>
+    </div>
+  </form>
+
+</app-authshell>
