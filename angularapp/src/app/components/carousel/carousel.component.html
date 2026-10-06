@@ -1,0 +1,18 @@
+<div class="carousel" *ngIf="images.length > 0" role="group" aria-roledescription="carousel"
+     [attr.aria-label]="alt + ' pictures'" (keydown.arrowLeft)="previous()" (keydown.arrowRight)="next()">
+  <img *ngFor="let image of images; let i = index" class="slide" [class.active]="i === index"
+       [src]="image | cloudImage:1280" [alt]="i === index ? alt + ' - picture ' + (i + 1) + ' of ' + images.length : ''"
+       width="1280" height="720">
+
+  <ng-container *ngIf="images.length > 1">
+    <button type="button" class="arrow prev" (click)="previous()" aria-label="Previous picture">&lsaquo;</button>
+    <button type="button" class="arrow next" (click)="next()" aria-label="Next picture">&rsaquo;</button>
+    <span class="counter">{{ index + 1 }} / {{ images.length }}</span>
+    <div class="dots">
+      <button type="button" class="dot" *ngFor="let image of images; let i = index" [class.active]="i === index"
+              (click)="show(i)" [attr.aria-label]="'Show picture ' + (i + 1)" [attr.aria-current]="i === index"></button>
+    </div>
+  </ng-container>
+</div>
+
+<div class="carousel empty" *ngIf="images.length === 0">No pictures of this track yet</div>

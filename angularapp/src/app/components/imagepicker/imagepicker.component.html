@@ -1,0 +1,22 @@
+<div class="thumbs">
+  <div class="thumb" *ngFor="let url of urls; let i = index">
+    <img [src]="url | cloudImage:240" [alt]="'Picture ' + (i + 1)" width="120" height="80">
+    <span class="cover-tag" *ngIf="i === 0 && max > 1">Cover</span>
+    <button type="button" class="thumb-remove" (click)="remove(url)" [attr.aria-label]="'Remove picture ' + (i + 1)">&times;</button>
+  </div>
+
+  <div class="thumb uploading" *ngIf="uploading > 0">Uploading{{ uploading > 1 ? ' ' + uploading : '' }}...</div>
+
+  <button type="button" class="add-tile" [id]="inputId" *ngIf="roomLeft > 0" (click)="fileBox.click()">
+    <span class="add-plus" aria-hidden="true">+</span>
+    <span>{{ max === 1 ? 'Choose picture' : 'Add picture' }}</span>
+  </button>
+</div>
+
+<input #fileBox type="file" class="file-box" accept="image/jpeg,image/png,image/webp" [multiple]="max > 1"
+       (change)="choose($event)" tabindex="-1" aria-hidden="true">
+
+<p class="picker-hint">
+  {{ urls.length }} of {{ max }} · JPG, PNG or WebP, up to {{ maxMb }} MB{{ max > 1 ? ' each' : '' }}
+</p>
+<div class="error-text" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
