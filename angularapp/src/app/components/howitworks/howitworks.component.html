@@ -1,0 +1,192 @@
+<app-sitehead></app-sitehead>
+
+<nav class="chapter-bar" aria-label="Chapters">
+  <span class="tag">How it works</span>
+  <ng-container *ngFor="let group of groups">
+    <span class="group">{{ group.role }}</span>
+    <button type="button" *ngFor="let chapter of group.chapters" [class.current]="chapter.id === current"
+            [title]="chapter.title" [attr.aria-label]="chapter.title" (click)="goTo(chapter.id)">{{ chapter.number }}</button>
+  </ng-container>
+</nav>
+
+<!-- one chapter per window: a few words on the left, the drawn screen on the right -->
+<section class="slide" *ngFor="let chapter of chapters; let odd = odd" [class.white]="odd" [id]="chapter.id">
+  <div class="wrap">
+    <div>
+      <span class="tag">{{ chapter.number }} · {{ chapter.role }}</span>
+      <h2 class="display">{{ chapter.title }}</h2>
+      <p class="say">{{ chapter.text }}</p>
+      <ul class="points">
+        <li *ngFor="let rule of chapter.rules"><span class="slot"></span>{{ rule }}</li>
+      </ul>
+    </div>
+
+    <!-- its title bar says where to find the page -->
+    <div class="window">
+      <div class="window-bar mono">{{ chapter.where }}</div>
+      <div class="window-body" [ngSwitch]="chapter.id">
+
+        <ng-container *ngSwitchCase="'signup'">
+          <div class="box"><small>Email</small>driver&#64;example.com</div>
+          <div class="box"><small>Driving license number</small>DL1234</div>
+          <div class="code mono"><span>4</span><span>8</span><span>2</span><span>9</span><span>1</span><span>5</span></div>
+          <p class="note">The 6-digit code arrives by email</p>
+        </ng-container>
+
+        <ng-container *ngSwitchCase="'tracks'">
+          <div class="row">
+            <span><span class="tag">Circuit</span><b>Coastal Circuit</b><small>Chennai · Outdoor</small></span>
+            <span class="mono">From ₹2,500<small>3 sessions open</small></span>
+          </div>
+          <div class="row">
+            <span><span class="tag">Karting</span><b>Apex Karting Arena</b><small>Pune · Indoor</small></span>
+            <span class="mono">From ₹900<small>5 sessions open</small></span>
+          </div>
+        </ng-container>
+
+        <ng-container *ngSwitchCase="'book'">
+          <div class="chips">
+            <span class="chip on"><b>Practice</b><small class="mono">16:00 - 17:00 · ₹2,500</small></span>
+            <span class="chip"><b>Practice</b><small class="mono">18:00 - 19:00 · ₹2,500</small></span>
+          </div>
+          <div class="pair">
+            <div class="box"><small>Car category</small>GT3</div>
+            <div class="box"><small>Car number</small>27</div>
+          </div>
+          <span class="btn btn-accent btn-block">Pay ₹2,500</span>
+        </ng-container>
+
+        <ng-container *ngSwitchCase="'approval'">
+          <div class="row">
+            <span><b>Coastal Circuit</b><small class="mono">10 Oct · 16:00 - 17:00</small></span>
+            <span class="flag green"><i></i>Approved</span><span class="pay-badge PAID">PAID</span>
+          </div>
+          <div class="row">
+            <span><b>Apex Karting Arena</b><small class="mono">11 Oct · 09:30 - 10:15</small></span>
+            <span class="flag yellow"><i></i>Pending</span><span class="pay-badge PAID">PAID</span>
+          </div>
+          <div class="row">
+            <span><b>Redline Raceway</b><small class="mono">04 Oct · 14:00 - 15:30</small></span>
+            <span class="flag red"><i></i>Rejected</span><span class="pay-badge REFUNDED">REFUNDED</span>
+          </div>
+        </ng-container>
+
+        <ng-container *ngSwitchCase="'live'">
+          <p class="phase-line">LIVE<span class="live-dot"></span><span>LAP 7 / 15</span></p>
+          <div class="tower-row leader"><span class="pos">P1</span><span><b>Aarav Rao</b><small>#27 · 7 laps</small></span><span class="lap best">1:42.306</span></div>
+          <div class="tower-row"><span class="pos">P2</span><span><b>Meera Nair</b><small>#08 · 7 laps</small></span><span class="lap">1:42.911</span></div>
+          <div class="tower-row"><span class="pos">P3</span><span><b>Kabir Shah</b><small>#14 · 6 laps</small></span><span class="lap">1:43.480</span></div>
+        </ng-container>
+
+        <ng-container *ngSwitchCase="'feedback'">
+          <p class="stars big" aria-label="4 of 5 stars">★★★★☆</p>
+          <div class="box"><small>Your feedback</small>Great track, pit lane was a bit crowded.</div>
+          <p class="note">Improve with AI, pick one of three:</p>
+          <span class="chip on">The circuit was excellent. The pit lane felt crowded at times.</span>
+        </ng-container>
+
+        <ng-container *ngSwitchCase="'assistant'">
+          <p class="bubble me">Book me a GT3 race session tomorrow at 4 PM</p>
+          <p class="bubble">Which car number?</p>
+          <p class="bubble me">27</p>
+          <p class="bubble">GT3 Practice, Coastal Circuit, 16:00 - 17:00, ₹2,500. Type yes to pay.</p>
+        </ng-container>
+
+        <ng-container *ngSwitchCase="'dashboard'">
+          <div class="kpis">
+            <span><small>Users</small><b class="mono">187</b></span>
+            <span><small>Bookings</small><b class="mono">201</b></span>
+            <span><small>Live races</small><b class="mono">2</b></span>
+            <span><small>Revenue</small><b class="mono">₹48,200</b></span>
+          </div>
+          <div class="bars"><i *ngFor="let bar of bars" [style.height.%]="bar"></i></div>
+          <p class="note">Bookings per month</p>
+        </ng-container>
+
+        <ng-container *ngSwitchCase="'schedule'">
+          <div class="chips">
+            <span class="chip on"><b>Practice</b><small>One session</small></span>
+            <span class="chip"><b>Competition</b><small>Qualifying + race</small></span>
+          </div>
+          <div class="pair">
+            <div class="box"><small>Date</small>10 Oct 2026</div>
+            <div class="box"><small>Time</small>16:00 - 17:00</div>
+          </div>
+          <div class="pair">
+            <div class="box"><small>Price</small>₹2,500</div>
+            <div class="box"><small>Max cars</small>10</div>
+          </div>
+        </ng-container>
+
+        <ng-container *ngSwitchCase="'approve'">
+          <div class="row">
+            <span><b>Aarav Rao</b><small class="mono">Car #27 · GT3</small></span>
+            <span class="flag yellow"><i></i>Pending</span>
+            <span class="acts"><span class="btn btn-small btn-green">Approve</span><span class="btn btn-small btn-danger">Reject</span></span>
+          </div>
+          <div class="row">
+            <span><b>Meera Nair</b><small class="mono">Car #08 · GT3</small></span>
+            <span class="flag green"><i></i>Approved</span>
+            <span class="mono">9 / 10 seats</span>
+          </div>
+        </ng-container>
+
+        <ng-container *ngSwitchCase="'control'">
+          <p class="phase-line"><app-startlights [lit]="4"></app-startlights>RACING</p>
+          <div class="row">
+            <span><b>#27 Aarav Rao</b><small class="mono">7 laps · 1:42.306</small></span>
+            <span class="flag green"><i></i>RACING</span>
+            <span class="acts"><span class="btn btn-small">+1 Lap</span><span class="btn btn-small btn-grey">Retire</span></span>
+          </div>
+          <div class="row">
+            <span><b>#14 Kabir Shah</b><small class="mono">6 laps</small></span>
+            <span class="flag"><i></i>RETIRED</span>
+          </div>
+        </ng-container>
+
+        <ng-container *ngSwitchCase="'money'">
+          <div class="row">
+            <span><b class="mono">₹2,500</b><small>Aarav Rao · Coastal Circuit</small></span>
+            <span class="pay-badge PAID">PAID</span>
+          </div>
+          <div class="row">
+            <span><b class="mono">₹900</b><small>Meera Nair · Apex Karting Arena</small></span>
+            <span class="pay-badge REFUND_PENDING">REFUND PENDING</span>
+          </div>
+          <div class="row">
+            <span><b class="mono">₹4,200</b><small>Kabir Shah · Redline Raceway</small></span>
+            <span class="pay-badge REFUND_FAILED">REFUND FAILED</span>
+            <span class="btn btn-small btn-grey">Retry refund</span>
+          </div>
+        </ng-container>
+
+        <ng-container *ngSwitchCase="'voices'">
+          <div class="row">
+            <span><b class="stars">★★★★★</b><small>Best karting track I have driven.</small></span>
+            <span class="flag green"><i></i>Positive</span>
+          </div>
+          <div class="row">
+            <span><b class="stars">★★☆☆☆</b><small>Marshal post 3 had no flags.</small></span>
+            <span class="flag red"><i></i>Negative</span><span class="pay-badge FAILED">NEEDS ATTENTION</span>
+          </div>
+        </ng-container>
+
+        <ng-container *ngSwitchCase="'people'">
+          <div class="row">
+            <span><b>Aarav Rao</b><small>Driver</small></span>
+            <span class="flag green"><i></i>Active</span>
+            <span class="btn btn-small btn-grey">Deactivate</span>
+          </div>
+          <div class="row">
+            <span><b>Track Admin</b><small>Admin, invited by email</small></span>
+            <span class="flag red"><i></i>Disabled</span>
+            <span class="btn btn-small btn-grey">Enable</span>
+          </div>
+        </ng-container>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<app-sitefoot></app-sitefoot>
