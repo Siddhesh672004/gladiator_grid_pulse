@@ -1,0 +1,70 @@
+<div class="page">
+  <app-pagehead title="Tracks" subtitle="Every track, newest first. A track that had a session can be deactivated, not deleted.">
+    <a class="btn btn-main btn-accent" routerLink="/admin/add/track"><app-icon name="add"></app-icon>Add Track</a>
+  </app-pagehead>
+
+  <div class="toolbar">
+    <app-searchbox label="Search by track name or description" [(text)]="searchText" (textChange)="page = 1"></app-searchbox>
+    <app-filterbox label="Indoor / outdoor" [options]="typeOptions" [(value)]="filterType" (valueChange)="page = 1"></app-filterbox>
+    <span class="muted mono count" *ngIf="!isLoading">{{ filteredTracks.length }} track{{ filteredTracks.length === 1 ? '' : 's' }}</span>
+  </div>
+
+  <div class="server-error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+  <p class="success-text" *ngIf="successMessage">{{ successMessage }}</p>
+  <app-loader *ngIf="isLoading" label="Loading tracks"></app-loader>
+  <app-empty *ngIf="!isLoading && filteredTracks.length === 0"
+             [title]="tracks.length === 0 ? 'No tracks yet' : 'No track matches the search'"
+             [text]="tracks.length === 0 ? 'Add the first track to start scheduling sessions.' : 'Try another name or filter.'"></app-empty>
+
+  <!-- paginator stays after the table, same *ngIf -->
+  <ng-container *ngIf="filteredTracks.length > 0">
+    <div class="table-wrap">
+      <table class="gp-table">
+        <thead>
+          <tr>
+            <th>Track</th>
+            <th>Category</th>
+            <th>Upcoming Sessions</th>
+            <th>Timing</th>
+            <th>Description</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let track of pagedTracks">
+            <td>
+              <span class="track-name-cell">
+                <img *ngIf="track.imageUrls?.length" class="track-thumb" [src]="track.imageUrls[0] | cloudImage:160" alt=""
+                     width="64" height="40" loading="lazy">
+                <span *ngIf="!track.imageUrls?.length" class="track-thumb" aria-hidden="true"></span>
+                <span><strong>{{ track.trackName }}</strong><small>{{ track.location }} · {{ track.isIndoor ? 'Indoor' : 'Outdoor' }}</small></span>
+              </span>
+            </td>
+            <td data-label="Category">{{ track.trackCategory }}</td>
+            <td data-label="Upcoming Sessions" class="mono">{{ track.upcomingSessions || 0 }}</td>
+            <td data-label="Timing" class="mono nowrap">{{ track.openTime | slice:0:5 }} - {{ track.closeTime | slice:0:5 }}</td>
+            <td data-label="Description" class="text-cell"><span class="cell-clamp">{{ track.description }}</span></td>
+            <td data-label="Status"><app-flag [status]="track.active ? 'Active' : 'Inactive'"></app-flag></td>
+            <td class="actions">
+              <button class="btn btn-light btn-small" (click)="editTrack(track.trackId!)">Edit</button>
+              <button class="btn btn-grey btn-small" (click)="toggleActive(track)">{{ track.active ? 'Deactivate' : 'Activate' }}</button>
+              <button class="btn btn-danger btn-small" (click)="askDelete(track)">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <app-paginator [total]="filteredTracks.length" [page]="page" [pageSize]="pageSize" (pageChange)="page = $event"></app-paginator>
+  </ng-container>
+</div>
+
+<ng-template [appPopup]="trackToDelete">
+  <div class="modal-box" *ngIf="trackToDelete">
+    <p>Are you sure you want to delete?</p>
+    <div class="modal-actions">
+      <button class="btn btn-danger" (click)="deleteTrack()">Yes, Delete</button>
+      <button class="btn btn-grey" (click)="trackToDelete = null">Cancel</button>
+    </div>
+  </div>
+</ng-template>
