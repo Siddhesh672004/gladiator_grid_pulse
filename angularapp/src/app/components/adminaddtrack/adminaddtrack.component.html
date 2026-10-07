@@ -1,0 +1,18 @@
+<div class="page">
+  <app-pagehead title="Create New Track" subtitle="A track is the place. Its sessions, with their price, are added afterwards."></app-pagehead>
+
+  <!-- typing in a box takes the last answer of the server away -->
+  <form [formGroup]="trackForm" (ngSubmit)="addTrack()" (input)="errorMessage = ''" novalidate>
+    <app-trackform [form]="trackForm">
+      <div class="server-error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+      <button class="btn btn-main btn-big" type="submit" [disabled]="isSaving">{{ isSaving ? 'Saving...' : 'Submit' }}</button>
+    </app-trackform>
+  </form>
+</div>
+
+<ng-template [appPopup]="showModal">
+  <div class="modal-box" *ngIf="showModal">
+    <p>Successfully Added!</p>
+    <button class="btn btn-main" (click)="closeModal()">Ok</button>
+  </div>
+</ng-template>

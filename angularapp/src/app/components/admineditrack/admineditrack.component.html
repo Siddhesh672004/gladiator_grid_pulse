@@ -1,0 +1,23 @@
+<div class="page">
+  <app-pagehead title="Edit Track" subtitle="Drivers see the changes at once. A track needs 1 to 5 pictures.">
+    <button class="btn btn-main btn-outline" type="button" (click)="goBack()"><app-icon name="arrow_back"></app-icon>Back</button>
+  </app-pagehead>
+
+  <app-loader *ngIf="isLoading" label="Loading track"></app-loader>
+  <div class="server-error" *ngIf="notFound" role="alert">{{ errorMessage }}</div>
+
+  <!-- typing in a box takes the last answer of the server away -->
+  <form *ngIf="!isLoading && !notFound" [formGroup]="trackForm" (ngSubmit)="updateTrack()" (input)="errorMessage = ''" novalidate>
+    <app-trackform [form]="trackForm">
+      <div class="server-error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+      <button class="btn btn-main btn-big" type="submit" [disabled]="isSaving">{{ isSaving ? 'Saving...' : 'Update Track' }}</button>
+    </app-trackform>
+  </form>
+</div>
+
+<ng-template [appPopup]="showModal">
+  <div class="modal-box" *ngIf="showModal">
+    <p class="success-text">Track updated successfully!</p>
+    <button class="btn btn-main" (click)="closeModal()">OK</button>
+  </div>
+</ng-template>
