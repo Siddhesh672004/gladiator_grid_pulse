@@ -1,0 +1,118 @@
+<div class="page">
+  <app-pagehead [title]="isEdit ? 'Edit Practice Session' : 'Create New Session'"
+                subtitle="A session is a time slot on a track, with its own price and number of cars.">
+    <button class="btn btn-main btn-outline" type="button" (click)="goBack()"><app-icon name="arrow_back"></app-icon>Back</button>
+  </app-pagehead>
+
+  <div class="two-col">
+    <section class="panel">
+      <h2 class="sub-title"><span class="mono">01</span>Track</h2>
+      <div class="field" [class.invalid]="submitted && !selectedTrackId">
+        <label for="sessionTrack">Track *</label>
+        <div class="field-box">
+          <select id="sessionTrack" [(ngModel)]="selectedTrackId" (ngModelChange)="onTrackOrTypeChange()">
+            <option *ngIf="selectedTrackId === null" [ngValue]="null" disabled>Select</option>
+            <option *ngFor="let track of tracks" [ngValue]="track.trackId">{{ track.trackName }} ({{ track.trackCategory }})</option>
+          </select>
+        </div>
+        <div class="error-text" *ngIf="submitted && !selectedTrackId">Track is required</div>
+      </div>
+
+      <ng-container *ngIf="!isEdit">
+        <h2 class="sub-title"><span class="mono">02</span>Session Type</h2>
+        <div class="type-row">
+          <label class="type-option" [class.chosen]="isPractice">
+            <input type="radio" id="typePractice" name="sessionType" [value]="types.PRACTICE" [(ngModel)]="sessionType" (ngModelChange)="onTrackOrTypeChange()">
+            <span><strong>Practice</strong>One time slot, drivers run freely</span>
+          </label>
+          <label class="type-option" [class.chosen]="!isPractice">
+            <input type="radio" id="typeCompetition" name="sessionType" [value]="types.COMPETITION" [(ngModel)]="sessionType" (ngModelChange)="onTrackOrTypeChange()">
+            <span><strong>Competition</strong>Qualifying + Race</span>
+          </label>
+        </div>
+      </ng-container>
+
+      <h2 class="sub-title"><span class="mono">{{ isEdit ? '02' : '03' }}</span>Date, time and price</h2>
+
+      <!-- practice. typing in a box takes the last answer of the server away -->
+      <form *ngIf="isPractice" [formGroup]="practiceForm" (ngSubmit)="save()" (input)="errorMessage = ''" novalidate>
+        <div class="field-grid">
+          <app-field class="full" label="Date" type="date" inputId="sessionDate" [min]="today" [max]="lastDay" [control]="practiceForm.get('sessionDate')"></app-field>
+          <app-field label="Start Time" type="time" inputId="startTime" [control]="practiceForm.get('startTime')"></app-field>
+          <app-field label="End Time" type="time" inputId="endTime" [control]="practiceForm.get('endTime')"></app-field>
+          <app-field label="Price per booking (₹)" name="Price" inputId="price" hint="What one driver pays" [digits]="true" [maxlength]="6"
+                     [control]="practiceForm.get('price')"></app-field>
+          <app-field label="Max Cars" inputId="maxCars" [digits]="true" [maxlength]="3" [control]="practiceForm.get('maxCars')"></app-field>
+        </div>
+
+        <div class="form-foot">
+          <div class="server-error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+          <button class="btn btn-main btn-big" type="submit" [disabled]="isSaving">{{ isSaving ? 'Saving...' : 'Submit' }}</button>
+        </div>
+      </form>
+
+      <!-- competition -->
+      <form *ngIf="!isPractice" [formGroup]="competitionForm" (ngSubmit)="save()" (input)="errorMessage = ''" novalidate>
+        <div class="field-grid">
+          <app-field label="Competition Name" inputId="competitionName" hint="For example Sunday Cup" [maxlength]="100"
+                     [control]="competitionForm.get('competitionName')"></app-field>
+          <app-field label="Date" type="date" inputId="competitionDate" [min]="today" [max]="lastDay" [control]="competitionForm.get('competitionDate')"></app-field>
+          <app-field label="Qualifying start" name="Qualifying Start Time" type="time" inputId="qualifyingStartTime"
+                     [control]="competitionForm.get('qualifyingStartTime')"></app-field>
+          <app-field label="Qualifying end" name="Qualifying End Time" type="time" inputId="qualifyingEndTime"
+                     [control]="competitionForm.get('qualifyingEndTime')"></app-field>
+          <app-field label="Race start" name="Race Start Time" type="time" inputId="raceStartTime"
+                     [control]="competitionForm.get('raceStartTime')"></app-field>
+          <app-field label="Race end" name="Race End Time" type="time" inputId="raceEndTime"
+                     [control]="competitionForm.get('raceEndTime')"></app-field>
+          <app-field class="full" label="Entry Fee (₹)" name="Entry fee" inputId="entryFee" [digits]="true" [maxlength]="6"
+                     [control]="competitionForm.get('entryFee')"></app-field>
+        </div>
+
+        <div class="form-foot">
+          <div class="server-error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+          <button class="btn btn-main btn-big" type="submit" [disabled]="isSaving">{{ isSaving ? 'Saving...' : 'Submit' }}</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- what the chosen track and type mean for this session -->
+    <aside class="side">
+      <section class="panel">
+        <span class="tag">The slot</span>
+        <div class="facts slot-facts">
+          <span class="fact-name">Track</span><span class="fact-value">{{ selectedTrack ? selectedTrack.trackName : '-' }}</span>
+          <span class="fact-name">Open</span>
+          <span class="fact-value mono">{{ openHours }}</span>
+          <span class="fact-name">Type</span><span class="fact-value">{{ isPractice ? 'Practice' : 'Competition' }}</span>
+        </div>
+      </section>
+
+      <section class="panel" *ngIf="!isPractice && rule">
+        <span class="tag">{{ rule.trackCategory }} rule</span>
+        <div class="facts slot-facts">
+          <span class="fact-name">Qualifying</span><span class="fact-value mono">{{ rule.qualifyingLaps }} lap{{ rule.qualifyingLaps === 1 ? '' : 's' }}</span>
+          <span class="fact-name">Race</span><span class="fact-value mono">{{ rule.raceLaps }} lap{{ rule.raceLaps === 1 ? '' : 's' }}</span>
+          <span class="fact-name">Grid</span><span class="fact-value mono">Max {{ rule.maxCars }} cars</span>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2 class="sub-title">A slot is accepted when</h2>
+        <ul class="points">
+          <li><span class="slot"></span>The track is active.</li>
+          <li><span class="slot"></span>It is not in the past.</li>
+          <li><span class="slot"></span>It lies inside the opening hours.</li>
+          <li><span class="slot"></span>No other session on the track overlaps it.</li>
+        </ul>
+      </section>
+    </aside>
+  </div>
+</div>
+
+<ng-template [appPopup]="successText">
+  <div class="modal-box" *ngIf="successText">
+    <p>{{ successText }}</p>
+    <button class="btn btn-main" (click)="closeModal()">Ok</button>
+  </div>
+</ng-template>
