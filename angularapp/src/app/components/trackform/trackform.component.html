@@ -1,0 +1,45 @@
+<div class="two-col">
+  <section class="panel">
+    <div class="field-grid">
+      <app-field label="Track Name" inputId="trackName" [maxlength]="100" [control]="form.get('trackName')"></app-field>
+      <app-field label="Location" inputId="location" [maxlength]="200" [control]="form.get('location')"></app-field>
+      <app-field class="full" label="Description" inputId="description" [rows]="2" [maxlength]="1000" [control]="form.get('description')"></app-field>
+      <app-field label="Track Category" inputId="trackCategory" [options]="categoryOptions"
+                 [control]="form.get('trackCategory')"></app-field>
+      <app-field label="Indoor/Outdoor" name="Indoor/Outdoor information" inputId="isIndoor" [options]="indoorOptions"
+                 [control]="form.get('isIndoor')"></app-field>
+      <app-field label="Opening Time" type="time" inputId="openTime" [control]="form.get('openTime')"></app-field>
+      <app-field label="Closing Time" type="time" inputId="closeTime" [control]="form.get('closeTime')"></app-field>
+      <app-field class="full" label="Facilities" requiredText="Facilities are required" inputId="facilities" [maxlength]="500"
+                 hint="For example Pit Lane, Garage, Fuel Station" [control]="form.get('facilities')"></app-field>
+    </div>
+
+    <h2 class="sub-title pictures-title">Track Pictures *</h2>
+    <p class="muted pictures-hint">1 to {{ maxPictures }} pictures. Drivers see them while booking, the first one is the cover.</p>
+    <app-imagepicker [urls]="form.get('imageUrls')?.value" (urlsChange)="setPictures($event)"
+                     [max]="maxPictures" kind="track" inputId="trackPictures"></app-imagepicker>
+    <app-fielderror [control]="form.get('imageUrls')" label="Track pictures"
+                    requiredText="Please add at least 1 picture of the track"></app-fielderror>
+
+    <div class="form-foot"><ng-content></ng-content></div>
+  </section>
+
+  <!-- the card of the driver's View Tracks page, filled while the admin types -->
+  <aside class="side">
+    <span class="tag">How drivers will see it</span>
+    <article class="pic-card">
+      <div class="cover">
+        <img *ngIf="form.value.imageUrls?.length" [src]="form.value.imageUrls[0] | cloudImage:640" alt="">
+        <span class="cover-empty" *ngIf="!form.value.imageUrls?.length">The first picture becomes the cover</span>
+      </div>
+      <div class="body">
+        <span class="tag">{{ form.value.trackCategory || 'Category' }}</span>
+        <h3>{{ form.value.trackName || 'Track name' }}</h3>
+        <span class="meta">{{ form.value.location || 'Location' }}<ng-container *ngIf="form.value.isIndoor !== null"> · {{ form.value.isIndoor ? 'Indoor' : 'Outdoor' }}</ng-container></span>
+        <span class="meta mono">Open {{ form.value.openTime }} - {{ form.value.closeTime }}</span>
+        <span class="meta clamp">{{ form.value.facilities }}</span>
+      </div>
+    </article>
+    <p class="muted preview-note">The price and the open sessions come from the sessions you add to this track.</p>
+  </aside>
+</div>
