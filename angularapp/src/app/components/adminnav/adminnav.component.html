@@ -1,0 +1,51 @@
+<header class="topbar">
+  <nav class="navbar">
+    <a class="brand" routerLink="/admin/dashboard" (click)="closeMenus()"><app-logo></app-logo></a>
+
+    <app-profilemenu (logoutClicked)="askLogout()"></app-profilemenu>
+
+    <button class="icon-btn menu-toggle" type="button" (click)="menuOpen = !menuOpen" [attr.aria-expanded]="menuOpen" aria-label="Menu">
+      <app-icon [name]="menuOpen ? 'close' : 'menu'"></app-icon>
+    </button>
+
+    <!-- a group (Tracks ...) is a button that opens its list of links under it -->
+    <div class="nav-links" [class.open]="menuOpen">
+      <a routerLink="/admin/dashboard" routerLinkActive="active" (click)="closeMenus()">Dashboard</a>
+      <div class="nav-menu" [class.active]="isOn('/track')">
+        <button type="button" (click)="toggleMenu('tracks')" [attr.aria-expanded]="openMenu === 'tracks'">Tracks<app-icon name="expand_more"></app-icon></button>
+        <div class="nav-menu-list" *ngIf="openMenu === 'tracks'">
+          <a routerLink="/admin/add/track" (click)="closeMenus()">Add Track</a>
+          <a routerLink="/admin/view/tracks" (click)="closeMenus()">View Tracks</a>
+        </div>
+      </div>
+      <div class="nav-menu" [class.active]="isOn('/session') || isOn('/competition')">
+        <button type="button" (click)="toggleMenu('sessions')" [attr.aria-expanded]="openMenu === 'sessions'">Sessions<app-icon name="expand_more"></app-icon></button>
+        <div class="nav-menu-list" *ngIf="openMenu === 'sessions'">
+          <a routerLink="/admin/add/session" (click)="closeMenus()">Add Session</a>
+          <a routerLink="/admin/view/sessions" (click)="closeMenus()">View Sessions</a>
+          <a routerLink="/admin/view/sessions" [queryParams]="{ type: 'Competition' }" (click)="closeMenus()">Competitions</a>
+        </div>
+      </div>
+      <a routerLink="/admin/view/registrations" routerLinkActive="active" (click)="closeMenus()">Registrations</a>
+      <a routerLink="/admin/race-control" routerLinkActive="active" (click)="closeMenus()">Practice Control</a>
+      <a routerLink="/admin/view/feedback" routerLinkActive="active" (click)="closeMenus()">Feedbacks</a>
+      <a routerLink="/admin/view/payments" routerLinkActive="active" (click)="closeMenus()">Payments</a>
+      <a routerLink="/admin/manage-users" routerLinkActive="active" (click)="closeMenus()">Users</a>
+      <a *ngIf="isSuperAdmin" routerLink="/admin/manage-admins" routerLinkActive="active" (click)="closeMenus()">Admins</a>
+    </div>
+
+    <!-- a click anywhere else closes the open list -->
+    <div class="menu-backdrop" *ngIf="openMenu" (click)="openMenu = ''"></div>
+  </nav>
+</header>
+
+<!-- logout confirmation popup -->
+<ng-template [appPopup]="showLogoutPopup">
+  <div class="modal-box white" *ngIf="showLogoutPopup">
+    <p>Are you sure you want to logout?</p>
+    <div class="modal-actions">
+      <button class="btn" (click)="logout()">Yes, Logout</button>
+      <button class="btn btn-grey" (click)="showLogoutPopup = false">Cancel</button>
+    </div>
+  </div>
+</ng-template>
