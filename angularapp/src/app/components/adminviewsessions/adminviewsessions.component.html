@@ -1,0 +1,67 @@
+<div class="page">
+  <app-pagehead title="Sessions" subtitle="Every session, newest date first. A competition has two rows: its qualifying and its race.">
+    <a class="btn btn-main btn-accent" routerLink="/admin/add/session"><app-icon name="add"></app-icon>Add Session</a>
+  </app-pagehead>
+
+  <div class="toolbar">
+    <app-searchbox label="Search by track or competition" [(text)]="searchText" (textChange)="page = 1"></app-searchbox>
+    <app-filterbox label="Type" [options]="typeOptions" [value]="typeFilter" (valueChange)="setType($event)"></app-filterbox>
+    <app-filterbox label="Status" [options]="statusOptions" [(value)]="statusFilter" (valueChange)="page = 1"></app-filterbox>
+    <span class="muted mono count" *ngIf="!isLoading">{{ filteredSessions.length }} session{{ filteredSessions.length === 1 ? '' : 's' }}</span>
+  </div>
+
+  <div class="server-error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+  <p class="success-text" *ngIf="successMessage">{{ successMessage }}</p>
+  <app-loader *ngIf="isLoading" label="Loading sessions"></app-loader>
+  <app-empty *ngIf="!isLoading && filteredSessions.length === 0"
+             [title]="sessions.length === 0 ? 'No sessions yet' : 'No session matches the search'"
+             [text]="sessions.length === 0 ? 'Add a practice session or a competition to a track.' : 'Try another name, type or status.'"></app-empty>
+
+  <!-- paginator stays after the table, same *ngIf -->
+  <ng-container *ngIf="filteredSessions.length > 0">
+    <div class="table-wrap">
+      <table class="gp-table">
+        <thead>
+          <tr>
+            <th>Track / session</th>
+            <th>Date / time</th>
+            <th>Status</th>
+            <th>Approved / Max</th>
+            <th>Price</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let session of pagedSessions">
+            <td><strong>{{ session.trackName }}</strong><small>{{ label(session) }}</small></td>
+            <td data-label="Date / time" class="mono">{{ session.sessionDate }}<small class="mono">{{ time(session) }}</small></td>
+            <td data-label="Status"><app-flag [status]="session.status"></app-flag></td>
+            <td data-label="Approved / Max" class="mono" *ngIf="!waitsForGrid(session)">{{ session.approvedCars }} / {{ session.maxCars }}</td>
+            <td data-label="Approved / Max" class="muted" *ngIf="waitsForGrid(session)">Grid after qualifying</td>
+            <td data-label="Price" class="mono" *ngIf="!isRaceStage(session)">₹{{ session.price }}</td>
+            <td data-label="Price" class="muted" *ngIf="isRaceStage(session)">In qualifying fee</td>
+            <td class="actions">
+              <ng-container *ngIf="canChange(session)">
+                <button class="btn btn-light btn-small" (click)="editSession(session)">Edit</button>
+                <button class="btn btn-danger btn-small" (click)="askCancel(session)">Cancel</button>
+              </ng-container>
+              <button *ngIf="!isPractice(session)" class="btn btn-small" (click)="openCompetition(session)">Control</button>
+              <span class="muted" *ngIf="isPractice(session) && !canChange(session)">-</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <app-paginator [total]="filteredSessions.length" [page]="page" [pageSize]="pageSize" (pageChange)="page = $event"></app-paginator>
+  </ng-container>
+</div>
+
+<ng-template [appPopup]="sessionToCancel">
+  <div class="modal-box" *ngIf="sessionToCancel">
+    <p>Cancel this session? Every booking in it is rejected, the payments are refunded and the drivers get an email.</p>
+    <div class="modal-actions">
+      <button class="btn btn-danger" (click)="cancelSession()">Yes, Cancel</button>
+      <button class="btn btn-grey" (click)="sessionToCancel = null">No</button>
+    </div>
+  </div>
+</ng-template>
