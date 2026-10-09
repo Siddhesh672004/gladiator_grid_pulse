@@ -1,0 +1,69 @@
+<div class="page">
+  <app-pagehead title="My Profile" subtitle="Your account, your picture and, for drivers, the two values every booking needs."></app-pagehead>
+
+  <app-loader *ngIf="isLoading" label="Loading your profile"></app-loader>
+  <div class="server-error" *ngIf="!profile && errorMessage" role="alert">{{ errorMessage }}</div>
+
+  <div class="two-col" *ngIf="profile">
+    <form class="panel" [formGroup]="profileForm" (ngSubmit)="save()" novalidate>
+      <h2 class="sub-title">Profile Picture <small class="muted">(optional)</small></h2>
+      <app-imagepicker #picker [(urls)]="pictures" (urlsChange)="clearMessages()" [max]="1" kind="profile"
+                       inputId="profilePicture"></app-imagepicker>
+
+      <!-- drivers only: filled in once, then locked -->
+      <ng-container *ngIf="isDriver">
+        <h2 class="sub-title next-part">Additional Profile Information</h2>
+
+        <p class="profile-note" *ngIf="!isLocked">
+          Please complete your profile before booking a race. These two values are saved once and cannot be changed later.
+        </p>
+
+        <div class="field-grid">
+          <app-field label="Date of birth" type="date" inputId="dateOfBirth" [min]="earliestBirthDate" [max]="latestBirthDate"
+                     [control]="profileForm.get('dateOfBirth')"></app-field>
+          <app-field label="Driving license number" name="License number" inputId="driverLicenseNumber" [upper]="true" [maxlength]="6"
+                     [hint]="isLocked ? '' : 'DL and 4 digits, like DL1234'" [control]="profileForm.get('driverLicenseNumber')"></app-field>
+        </div>
+
+        <p class="muted" *ngIf="isLocked">Date of birth and driving license number are fixed for this account.</p>
+      </ng-container>
+
+      <div class="server-error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+      <div class="success-text" *ngIf="successMessage" role="status">{{ successMessage }}</div>
+
+      <!-- a picture that is still uploading would not be saved, so the button waits for it -->
+      <button class="btn btn-main btn-big update-btn" type="submit" [disabled]="isSaving || picker.uploading > 0">
+        {{ isSaving ? 'Saving...' : 'Update Profile' }}
+      </button>
+    </form>
+
+    <!-- the account as a paddock pass -->
+    <aside class="side">
+      <section class="pass cut">
+        <div class="pass-body">
+          <span class="tag">GridPulse pass</span>
+          <div class="pass-who">
+            <img *ngIf="pictures[0]" [src]="pictures[0] | cloudImage:160" alt="" width="64" height="64">
+            <span class="pass-initial" *ngIf="!pictures[0]">{{ profile.username.charAt(0) | uppercase }}</span>
+            <div>
+              <strong>{{ profile.username }}</strong>
+              <span class="mono">{{ profile.userRole }}</span>
+            </div>
+          </div>
+
+          <div class="facts">
+            <span class="fact-name">Email</span><span class="fact-value">{{ profile.email }}</span>
+            <span class="fact-name">Mobile Number</span><span class="fact-value mono">{{ profile.mobileNumber || '-' }}</span>
+            <ng-container *ngIf="isDriver">
+              <span class="fact-name">License</span><span class="fact-value mono">{{ profile.driverLicenseNumber || '-' }}</span>
+              <span class="fact-name">Date of birth</span><span class="fact-value mono">{{ profile.dateOfBirth || '-' }}</span>
+            </ng-container>
+          </div>
+
+          <app-flag *ngIf="isDriver" [status]="isLocked ? 'Approved' : 'Pending'"
+                    [label]="isLocked ? 'Ready to book' : 'Profile not complete'"></app-flag>
+        </div>
+      </section>
+    </aside>
+  </div>
+</div>
