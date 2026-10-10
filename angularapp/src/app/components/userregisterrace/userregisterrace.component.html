@@ -1,0 +1,114 @@
+<div class="page">
+  <app-pagehead title="Register for a Race"
+                [subtitle]="trackLine">
+    <button class="btn btn-main btn-outline" type="button" (click)="goBack()"><app-icon name="arrow_back"></app-icon>Back</button>
+  </app-pagehead>
+
+  <app-loader *ngIf="isLoading" label="Loading track"></app-loader>
+  <div class="server-error" *ngIf="!track && errorMessage" role="alert">{{ errorMessage }}</div>
+
+  <!-- the steps on the left, what the driver is about to pay for on the right -->
+  <form class="two-col" *ngIf="track" [formGroup]="bookingForm" (ngSubmit)="register()" novalidate>
+    <div class="main">
+      <app-carousel [images]="track.imageUrls || []" [alt]="track.trackName"></app-carousel>
+
+      <section class="panel">
+        <h2 class="sub-title"><span class="mono">01</span>Race date</h2>
+        <app-field label="Race Date" name="Race date" type="date" inputId="raceDate" [min]="today" [max]="lastDay"
+                   [control]="bookingForm.get('raceDate')"></app-field>
+      </section>
+
+      <section class="panel">
+        <h2 class="sub-title"><span class="mono">02</span>Pick a Session</h2>
+        <p class="muted" *ngIf="bookingForm.get('raceDate')?.invalid">Pick a race date to see the sessions on that day.</p>
+        <p class="muted" *ngIf="loadingSessions">Loading sessions...</p>
+        <p class="muted" *ngIf="bookingForm.get('raceDate')?.valid && !loadingSessions && !sessionsError && sessions.length === 0">
+          No sessions are open for booking on this track on this date.
+        </p>
+        <div class="server-error" *ngIf="sessionsError" role="alert">{{ sessionsError }}</div>
+        <div class="session-list" *ngIf="sessions.length > 0">
+          <button type="button" class="session-chip" *ngFor="let session of sessions"
+                  [class.selected]="selectedSession === session" [disabled]="isFull(session)" (click)="selectSession(session)">
+            <strong class="mono">{{ time(session) }}</strong>
+            {{ label(session) }} · <span class="mono">₹{{ session.price }}</span>
+            <span class="seat-line">{{ session.approvedCars }} of {{ session.maxCars }} seats taken</span>
+            <span class="join-label">{{ chipText(session) }}</span>
+          </button>
+        </div>
+        <div class="error-text" *ngIf="submitted && !selectedSession">Please pick a session</div>
+      </section>
+
+      <section class="panel">
+        <h2 class="sub-title"><span class="mono">03</span>Your car</h2>
+        <app-field label="Car Number" name="Car number" inputId="carNumber" hint="A whole number from 1 to 999"
+                   [digits]="true" [maxlength]="3" [control]="bookingForm.get('carNumber')"></app-field>
+
+        <span class="tiles-label" id="carCategoryLabel">Car Category *</span>
+        <div class="car-tiles" role="radiogroup" aria-labelledby="carCategoryLabel">
+          <label class="car-tile" *ngFor="let category of carCategories"
+                 [class.selected]="bookingForm.get('carCategory')?.value === category.name">
+            <input type="radio" name="carCategory" formControlName="carCategory" [value]="category.name">
+            <img *ngIf="category.imageUrl" [src]="category.imageUrl | cloudImage:320" alt="" width="160" height="100"
+                 loading="lazy" (error)="hidePicture(category)">
+            <span class="car-name">{{ category.name }}</span>
+          </label>
+        </div>
+        <app-fielderror [control]="bookingForm.get('carCategory')" label="Car category"></app-fielderror>
+
+        <app-field label="Comments" inputId="comments" [rows]="3" [optional]="true" [maxlength]="500"
+                   [control]="bookingForm.get('comments')"></app-field>
+      </section>
+
+      <section class="panel">
+        <h2 class="sub-title"><span class="mono">04</span>Terms</h2>
+        <label class="terms-label" for="termsAccepted">
+          <input type="checkbox" id="termsAccepted" formControlName="termsAccepted">
+          <span>I accept the Terms &amp; Conditions: {{ termsText }}</span>
+        </label>
+        <app-fielderror [control]="bookingForm.get('termsAccepted')" label="Terms"
+                        requiredText="Please accept the terms and conditions"></app-fielderror>
+      </section>
+    </div>
+
+    <aside class="side">
+      <section class="panel summary">
+        <div class="summary-head">
+          <span class="tag">Booking summary</span>
+          <app-startlights [lit]="lightsOn"></app-startlights>
+        </div>
+
+        <div class="facts">
+          <span class="fact-name">Track</span><span class="fact-value">{{ track.trackName }}</span>
+          <span class="fact-name">Date</span><span class="fact-value mono">{{ bookingForm.get('raceDate')?.value || '-' }}</span>
+          <span class="fact-name">Session</span><span class="fact-value">{{ selectedSession ? label(selectedSession) : '-' }}</span>
+          <span class="fact-name">Time</span><span class="fact-value mono">{{ selectedSession ? time(selectedSession) : '-' }}</span>
+          <span class="fact-name">Car</span>
+          <span class="fact-value">{{ bookingForm.get('carCategory')?.value }}<span class="mono" *ngIf="bookingForm.get('carNumber')?.value"> · #{{ bookingForm.get('carNumber')?.value }}</span></span>
+        </div>
+
+        <p class="amount">Amount payable <b class="mono">{{ amountText }}</b></p>
+
+        <div class="server-error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+
+        <!-- profile incomplete = no booking -->
+        <div class="server-error" *ngIf="profileIncomplete" role="alert">
+          Please complete your profile before booking a race.
+          <a routerLink="/profile">Complete my profile</a>
+        </div>
+
+        <button class="btn btn-main btn-accent btn-big btn-block go" type="submit" [disabled]="isSaving">
+          {{ payText }}<app-icon name="arrow_forward"></app-icon>
+        </button>
+        <p class="muted pay-note">You pay with Razorpay. The booking then waits for an admin's approval.</p>
+      </section>
+    </aside>
+  </form>
+</div>
+
+<ng-template [appPopup]="showModal">
+  <div class="modal-box" *ngIf="showModal">
+    <p>Payment received and race registration submitted successfully!</p>
+    <p class="modal-hint">Your booking now waits for the admin's approval. If it is rejected, the amount is refunded.</p>
+    <button class="btn btn-main" (click)="closeModal()">Ok</button>
+  </div>
+</ng-template>
