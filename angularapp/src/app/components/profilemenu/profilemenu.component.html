@@ -1,0 +1,14 @@
+<button type="button" class="profile-icon" (click)="menuOpen = !menuOpen" [attr.aria-expanded]="menuOpen"
+        aria-label="Profile menu" [title]="username + ' / ' + role">
+  <img *ngIf="picture" [src]="picture | cloudImage:96" alt="" width="38" height="38" (error)="picture = null">
+  <ng-container *ngIf="!picture">{{ initial }}</ng-container>
+</button>
+
+<div class="profile-list" *ngIf="menuOpen">
+  <span class="user-badge">{{ username }} / {{ role }}</span>
+  <button type="button" (click)="showProfile()"><app-icon name="person"></app-icon>Show User Profile</button>
+  <button type="button" (click)="logOut()"><app-icon name="logout"></app-icon>Log Out</button>
+</div>
+
+<!-- a click anywhere else closes the list -->
+<div class="menu-backdrop" *ngIf="menuOpen" (click)="menuOpen = false"></div>

@@ -1,0 +1,45 @@
+<header class="topbar">
+  <nav class="navbar">
+    <a class="brand" routerLink="/home" (click)="closeMenus()"><app-logo></app-logo></a>
+
+    <app-profilemenu (logoutClicked)="askLogout()"></app-profilemenu>
+
+    <button class="icon-btn menu-toggle" type="button" (click)="menuOpen = !menuOpen" [attr.aria-expanded]="menuOpen" aria-label="Menu">
+      <app-icon [name]="menuOpen ? 'close' : 'menu'"></app-icon>
+    </button>
+
+    <!-- a group (Tracks ...) is a button that opens its list of links under it -->
+    <div class="nav-links" [class.open]="menuOpen">
+      <a routerLink="/home" routerLinkActive="active" (click)="closeMenus()">Home</a>
+      <div class="nav-menu" [class.active]="isOn('/tracks') || isOn('/regist')">
+        <button type="button" (click)="toggleMenu('tracks')" [attr.aria-expanded]="openMenu === 'tracks'">Tracks<app-icon name="expand_more"></app-icon></button>
+        <div class="nav-menu-list" *ngIf="openMenu === 'tracks'">
+          <a routerLink="/user/view/tracks" (click)="closeMenus()">View Tracks</a>
+          <a routerLink="/user/view/registrations" (click)="closeMenus()">My Registrations</a>
+        </div>
+      </div>
+      <a routerLink="/user/live-timing" routerLinkActive="active" (click)="closeMenus()">Live Timing</a>
+      <div class="nav-menu" [class.active]="isOn('/feedback')">
+        <button type="button" (click)="toggleMenu('feedback')" [attr.aria-expanded]="openMenu === 'feedback'">Feedback<app-icon name="expand_more"></app-icon></button>
+        <div class="nav-menu-list" *ngIf="openMenu === 'feedback'">
+          <a routerLink="/user/add/feedback" (click)="closeMenus()">Add Feedback</a>
+          <a routerLink="/user/view/feedback" (click)="closeMenus()">My Feedback</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- a click anywhere else closes the open list -->
+    <div class="menu-backdrop" *ngIf="openMenu" (click)="openMenu = ''"></div>
+  </nav>
+</header>
+
+<!-- logout popup -->
+<ng-template [appPopup]="showLogoutPopup">
+  <div class="modal-box white" *ngIf="showLogoutPopup">
+    <p>Are you sure you want to logout?</p>
+    <div class="modal-actions">
+      <button class="btn" (click)="logout()">Yes, Logout</button>
+      <button class="btn btn-grey" (click)="showLogoutPopup = false">Cancel</button>
+    </div>
+  </div>
+</ng-template>
