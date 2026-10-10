@@ -1,0 +1,89 @@
+<div class="page wide-page">
+  <app-pagehead title="Payments" subtitle="Every Razorpay payment with its status. Refunds are sent in the background.">
+    <button class="btn btn-main btn-outline" type="button" id="refreshPayments" (click)="load()"><app-icon name="refresh"></app-icon>Refresh</button>
+  </app-pagehead>
+
+  <section class="kpi-row" *ngIf="summary" aria-label="Money">
+    <div class="kpi"><span>Collected</span><b>₹{{ summary.collected | number:'1.0-2' }}</b><small>paid and kept</small></div>
+    <div class="kpi"><span>Refund in progress</span><b>₹{{ summary.refundInProgress | number:'1.0-2' }}</b><small>on its way back</small></div>
+    <div class="kpi"><span>Refunded</span><b>₹{{ summary.refunded | number:'1.0-2' }}</b><small>returned to drivers</small></div>
+    <div class="kpi"><span>Paid bookings</span><b>{{ summary.paidBookings }}</b><small>with a kept payment</small></div>
+  </section>
+
+  <div class="toolbar">
+    <app-searchbox label="Search by driver or track" [(text)]="searchText" (textChange)="page = 1"></app-searchbox>
+    <app-filterbox label="Status" [options]="statusOptions" [(value)]="statusFilter" (valueChange)="page = 1"></app-filterbox>
+    <span class="muted mono count" *ngIf="!isLoading">{{ filteredPayments.length }} payment{{ filteredPayments.length === 1 ? '' : 's' }}</span>
+  </div>
+
+  <div class="server-error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+  <app-loader *ngIf="isLoading" label="Loading payments"></app-loader>
+  <app-empty *ngIf="!isLoading && filteredPayments.length === 0"
+             [title]="payments.length === 0 ? 'No payments yet' : 'No payment matches the search'"
+             [text]="payments.length === 0 ? 'A payment shows up here as soon as a driver starts to book.' : 'Try another name or status.'"></app-empty>
+
+  <!-- paginator stays after the table, same *ngIf -->
+  <ng-container *ngIf="filteredPayments.length > 0">
+    <div class="table-wrap">
+      <table class="gp-table">
+        <thead>
+          <tr>
+            <th>Driver</th>
+            <th>Session</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Ordered On</th>
+            <th>Razorpay Payment</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let payment of pagedPayments">
+            <td><strong>{{ payment.user.username }}</strong></td>
+            <td data-label="Session">{{ sessionText(payment.session) }}</td>
+            <td data-label="Amount" class="mono">₹{{ payment.amount }}</td>
+            <td data-label="Status"><span class="pay-badge" [ngClass]="payment.status">{{ label(payment.status) }}</span></td>
+            <!-- the backend sends UTC, the page shows India time -->
+            <td data-label="Ordered On" class="mono nowrap">{{ payment.createdAt | date:'dd/MM/yyyy HH:mm':'+0530' }}</td>
+            <td data-label="Razorpay Payment" class="mono small-id">{{ payment.razorpayPaymentId || '-' }}</td>
+            <td class="actions">
+              <button class="btn btn-light btn-small" (click)="showMore(payment)">Show More</button>
+              <button class="btn btn-small" *ngIf="payment.status === 'REFUND_FAILED'" [disabled]="busyId === payment.paymentId"
+                      (click)="retryRefund(payment)">Retry refund</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <app-paginator [total]="filteredPayments.length" [page]="page" [pageSize]="pageSize" (pageChange)="page = $event"></app-paginator>
+  </ng-container>
+</div>
+
+<!-- Show More: the payment + its audit trail -->
+<ng-template [appPopup]="selected" [closeOutside]="true" (closed)="selected = null">
+  <div class="modal-box details trail-box" *ngIf="selected">
+    <button class="modal-close" (click)="selected = null" aria-label="Close">X</button>
+    <span class="tag">Payment Details</span>
+    <h3 class="display trail-title mono">₹{{ selected.amount }}</h3>
+    <div class="facts">
+      <span class="fact-name">Driver</span><span class="fact-value">{{ selected.user.username }} ({{ selected.user.email }})</span>
+      <span class="fact-name">Session</span><span class="fact-value">{{ sessionText(selected.session) }}</span>
+      <span class="fact-name">Status</span><span class="fact-value"><span class="pay-badge" [ngClass]="selected.status">{{ label(selected.status) }}</span></span>
+      <ng-container *ngIf="selected.note"><span class="fact-name">Note</span><span class="fact-value">{{ selected.note }}</span></ng-container>
+      <span class="fact-name">Razorpay Order</span><span class="fact-value mono small-id">{{ selected.razorpayOrderId }}</span>
+      <ng-container *ngIf="selected.razorpayPaymentId"><span class="fact-name">Razorpay Payment</span><span class="fact-value mono small-id">{{ selected.razorpayPaymentId }}</span></ng-container>
+      <ng-container *ngIf="selected.razorpayRefundId"><span class="fact-name">Razorpay Refund</span><span class="fact-value mono small-id">{{ selected.razorpayRefundId }}</span></ng-container>
+    </div>
+
+    <h4 class="sub-title trail-head">Audit Trail</h4>
+    <p class="muted" *ngIf="trailLoading">Loading...</p>
+    <ol class="trail" *ngIf="!trailLoading">
+      <li *ngFor="let line of trail">
+        <span class="trail-time">{{ line.createdAt | date:'dd/MM HH:mm:ss':'+0530' }}</span>
+        <strong>{{ line.event }}</strong>
+        <span class="trail-detail">{{ line.detail }}</span>
+      </li>
+      <li *ngIf="trail.length === 0" class="muted">No entries yet</li>
+    </ol>
+  </div>
+</ng-template>
