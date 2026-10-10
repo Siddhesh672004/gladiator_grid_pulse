@@ -1,0 +1,89 @@
+<div class="page">
+  <app-pagehead title="My Race Registrations"
+                subtitle="A new booking waits for an admin. This list refreshes on its own every 4 seconds.">
+    <a class="btn btn-main btn-accent go" routerLink="/user/view/tracks">Book a Session<app-icon name="arrow_forward"></app-icon></a>
+  </app-pagehead>
+
+  <div class="toolbar">
+    <app-searchbox label="Search by track name" [(text)]="searchText" (textChange)="page = 1"></app-searchbox>
+    <span class="muted mono" *ngIf="!isLoading">{{ filteredBookings.length }} booking{{ filteredBookings.length === 1 ? '' : 's' }}</span>
+  </div>
+
+  <div class="server-error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+  <app-loader *ngIf="isLoading" label="Loading registrations"></app-loader>
+
+  <app-empty *ngIf="!isLoading && filteredBookings.length === 0"
+             [title]="bookings.length === 0 ? 'No bookings yet' : 'No booking matches your search'"
+             [text]="bookings.length === 0 ? 'Pick a track and take your first slot on the grid.' : 'Try another track name.'">
+    <a class="btn btn-main go" routerLink="/user/view/tracks" *ngIf="bookings.length === 0">Book a Session<app-icon name="arrow_forward"></app-icon></a>
+  </app-empty>
+
+  <!-- paginator stays after the table, same *ngIf -->
+  <ng-container *ngIf="filteredBookings.length > 0">
+    <div class="table-wrap">
+      <table class="gp-table">
+        <thead>
+          <tr>
+            <th>Track / session</th>
+            <th>Date / time</th>
+            <th>Car #</th>
+            <th>Status</th>
+            <th>Payment</th>
+            <th>Race Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let booking of pagedBookings">
+            <td><strong>{{ booking.session.trackName }}</strong><small>{{ label(booking.session) }}</small></td>
+            <td data-label="Date / time" class="mono">{{ booking.session.sessionDate }}<small class="mono">{{ time(booking.session) }}</small></td>
+            <td data-label="Car #" class="mono">#{{ booking.carNumber }}</td>
+            <td data-label="Status"><app-flag [status]="booking.status"></app-flag></td>
+            <td data-label="Payment"><span *ngIf="booking.paymentStatus" class="pay-badge" [ngClass]="booking.paymentStatus">{{ payment(booking) }}</span></td>
+            <td data-label="Race Status">{{ raceStatus(booking) }}</td>
+            <td class="actions">
+              <button class="btn btn-light btn-small" (click)="selected = booking">Show More</button>
+              <button class="btn btn-danger btn-small" *ngIf="canCancel(booking)" (click)="bookingToCancel = booking">{{ cancelLabel(booking) }}</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <app-paginator [total]="filteredBookings.length" [page]="page" [pageSize]="pageSize" (pageChange)="page = $event"></app-paginator>
+  </ng-container>
+</div>
+
+<!-- details popup -->
+<ng-template [appPopup]="selected" [closeOutside]="true" (closed)="selected = null">
+  <div class="modal-box details booking-details" *ngIf="selected">
+    <button class="modal-close" (click)="selected = null" aria-label="Close">X</button>
+    <span class="tag">Registration Details</span>
+    <h3 class="display details-title">{{ selected.session.trackName }}</h3>
+    <div class="facts">
+      <span class="fact-name">Session</span><span class="fact-value">{{ label(selected.session) }}</span>
+      <span class="fact-name">Date</span><span class="fact-value mono">{{ selected.session.sessionDate }}</span>
+      <span class="fact-name">Time Slot</span><span class="fact-value mono">{{ time(selected.session) }}</span>
+      <span class="fact-name">Car</span><span class="fact-value">#{{ selected.carNumber }} · {{ selected.carCategory }}</span>
+      <span class="fact-name">Driver License #</span><span class="fact-value mono">{{ selected.driverLicenseNumber }}</span>
+      <span class="fact-name">Status</span><span class="fact-value"><app-flag [status]="selected.status"></app-flag></span>
+      <ng-container *ngIf="selected.adminNote"><span class="fact-name">Note from GridPulse</span><span class="fact-value">{{ selected.adminNote }}</span></ng-container>
+      <span class="fact-name">Total Price</span><span class="fact-value mono">₹{{ selected.totalPrice }}</span>
+      <ng-container *ngIf="selected.paymentStatus"><span class="fact-name">Payment</span><span class="fact-value">{{ payment(selected) }}</span></ng-container>
+      <ng-container *ngIf="selected.gridPosition"><span class="fact-name">Starting Grid</span><span class="fact-value mono">P{{ selected.gridPosition }}</span></ng-container>
+      <span class="fact-name">Race</span><span class="fact-value">{{ raceStatus(selected) }}</span>
+      <ng-container *ngIf="selected.comments"><span class="fact-name">Comments</span><span class="fact-value">{{ selected.comments }}</span></ng-container>
+    </div>
+  </div>
+</ng-template>
+
+<!-- cancel popup -->
+<ng-template [appPopup]="bookingToCancel">
+  <div class="modal-box wide-confirm" *ngIf="bookingToCancel">
+    <p>Are you sure you want to {{ cancelLabel(bookingToCancel) | lowercase }} this registration?
+      {{ cancelWarning(bookingToCancel) }}</p>
+    <div class="modal-actions">
+      <button class="btn btn-danger" (click)="cancelBooking()">Yes, {{ cancelLabel(bookingToCancel) }}</button>
+      <button class="btn btn-grey" (click)="bookingToCancel = null">No</button>
+    </div>
+  </div>
+</ng-template>
