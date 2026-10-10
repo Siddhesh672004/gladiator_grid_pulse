@@ -1,0 +1,73 @@
+<div class="page home">
+
+  <section class="panel welcome">
+    <div>
+      <p class="tag">Driver paddock</p>
+      <h1 class="display">Welcome back{{ username ? ', ' + username : '' }}</h1>
+      <p>Pick a session, book your car and follow the timing board live.</p>
+      <div class="welcome-actions">
+        <a class="btn btn-main btn-accent btn-big go" routerLink="/user/view/tracks">Book a Session<app-icon name="arrow_forward"></app-icon></a>
+        <a class="btn btn-main btn-outline btn-big go" routerLink="/user/live-timing">Live Timing<app-icon name="arrow_forward"></app-icon></a>
+      </div>
+    </div>
+
+    <!-- the next session this driver has a place in -->
+    <a class="next-card cut" *ngIf="nextBooking as booking" routerLink="/user/view/registrations">
+      <span class="tag">Your next session</span>
+      <strong>{{ booking.session.trackName }}</strong>
+      <span class="mono">{{ booking.session.sessionDate }} · {{ time(booking) }}</span>
+      <span class="next-foot">
+        <app-flag [status]="booking.status"></app-flag>
+        <span class="mono">Car #{{ booking.carNumber }}</span>
+      </span>
+    </a>
+    <div class="next-card cut" *ngIf="!nextBooking">
+      <span class="tag">Your next session</span>
+      <strong>Nothing booked yet</strong>
+      <span>Pick a track and take your first slot on the grid.</span>
+    </div>
+  </section>
+
+  <section class="kpi-row" aria-label="Overview">
+    <a class="kpi" routerLink="/user/view/registrations">
+      <span>My registrations</span><b>{{ bookingCount }}</b><small>cars you booked</small>
+    </a>
+    <a class="kpi" routerLink="/user/view/registrations">
+      <span>Approved</span><b>{{ approvedCount }}</b><small>you have a seat</small>
+    </a>
+    <a class="kpi" routerLink="/user/view/feedback">
+      <span>My feedback</span><b>{{ feedbackCount }}</b><small>sessions you reviewed</small>
+    </a>
+    <a class="kpi" routerLink="/user/view/tracks">
+      <span>Tracks available</span><b>{{ trackCount }}</b><small>ready to book</small>
+    </a>
+  </section>
+
+  <div class="two-col">
+    <section class="panel">
+      <h2 class="display sec-title"><span class="slot"></span>Quick actions</h2>
+      <a class="action" *ngFor="let action of actions; let i = index" [routerLink]="action.link">
+        <span class="mono">{{ i + 1 | number:'2.0-0' }}</span>
+        <span class="action-body"><strong>{{ action.title }}</strong><small>{{ action.text }}</small></span>
+        <app-icon name="arrow_forward"></app-icon>
+      </a>
+    </section>
+
+    <aside class="side">
+      <section class="panel">
+        <h2 class="sub-title">A race day in five lights</h2>
+        <ol class="light-steps">
+          <li *ngFor="let step of raceDay; let i = index"><app-startlights [lit]="i + 1"></app-startlights>{{ step }}</li>
+        </ol>
+        <a routerLink="/how-it-works">See how everything works</a>
+      </section>
+
+      <section class="panel contact">
+        <h2 class="sub-title">Contact Us</h2>
+        <p>Phone: 123-456-7890</p>
+        <p>Email: support&#64;gridpulse.com</p>
+      </section>
+    </aside>
+  </div>
+
+</div>
