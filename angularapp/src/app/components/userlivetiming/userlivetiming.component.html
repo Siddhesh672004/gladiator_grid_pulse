@@ -1,0 +1,90 @@
+<div class="page">
+  <app-pagehead title="Live Timing" subtitle="Pick a track and a date, then a session that is live or still to come."></app-pagehead>
+
+  <div class="panel picker">
+    <div class="picker-fields">
+      <div class="field">
+        <label for="liveTrack">Track</label>
+        <div class="field-box">
+          <select id="liveTrack" [(ngModel)]="selectedTrackId" (ngModelChange)="onPickerChange()">
+            <option [ngValue]="null">-- Select Track --</option>
+            <option *ngFor="let track of tracks" [ngValue]="track.trackId">{{ track.trackName }} ({{ track.location }})</option>
+          </select>
+        </div>
+      </div>
+      <div class="field" [class.invalid]="dateError !== ''">
+        <label for="liveDate">Date</label>
+        <div class="field-box">
+          <input #dateBox id="liveDate" type="date" max="9999-12-31" [(ngModel)]="raceDate" (ngModelChange)="onDateChange(dateBox)">
+        </div>
+        <div class="error-text" *ngIf="dateError">{{ dateError }}</div>
+      </div>
+    </div>
+
+    <div class="server-error" *ngIf="pickerError" role="alert">{{ pickerError }}</div>
+
+    <ng-container *ngIf="selectedTrackId && !selectedSession && !dateError && !pickerError">
+      <p class="muted picker-note" *ngIf="loadingSessions">Loading sessions...</p>
+      <p class="muted picker-note" *ngIf="!loadingSessions && sessions.length === 0">No running or upcoming sessions for this track on this date.</p>
+      <div class="session-list" *ngIf="sessions.length > 0">
+        <button type="button" class="session-chip" *ngFor="let session of sessions" (click)="selectSession(session)">
+          <strong class="mono">{{ time(session) }}</strong>
+          {{ label(session) }} · {{ session.approvedCars }} car{{ session.approvedCars === 1 ? '' : 's' }}
+          <app-flag class="chip-flag" [status]="session.status"></app-flag>
+        </button>
+      </div>
+    </ng-container>
+  </div>
+
+  <app-empty *ngIf="!selectedTrackId" title="No track picked yet"
+             text="The timing board shows up here: position, laps and last lap of every car."></app-empty>
+
+  <section class="board" *ngIf="selectedSession">
+    <div class="board-head">
+      <div>
+        <h2 class="board-title">{{ selectedSession.trackName }}</h2>
+        <p class="board-sub">
+          <span class="live-dot" title="live, refreshes every 4 seconds"></span>
+          <span class="board-meta">{{ selectedSession.sessionDate }}</span>
+          <span class="board-meta">{{ time(selectedSession) }}</span>
+          <span class="board-meta">{{ label(selectedSession) }}</span>
+          <span class="board-meta">{{ standings.length }} car{{ standings.length === 1 ? '' : 's' }}</span>
+        </p>
+      </div>
+      <div class="board-actions">
+        <button class="btn btn-grey" (click)="onPickerChange()">Change Session</button>
+      </div>
+    </div>
+
+    <p class="board-note board-error" *ngIf="boardError">{{ boardError }}</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Pos</th>
+            <th>Car #</th>
+            <th class="col-left">Driver</th>
+            <th>Category</th>
+            <th>Laps</th>
+            <th>Last Lap ({{ timeZoneLabel }})</th>
+            <th class="col-left">State</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="standings.length === 0"><td colspan="7" class="empty">No approved cars in this session yet.</td></tr>
+          <tr *ngFor="let row of standings; let i = index" [class.leader]="isLeader(row, i)" [ngClass]="'state-' + stateOf(row)">
+            <td data-label="Pos" class="mono">{{ positionLabel(row, i) }}</td>
+            <td data-label="Car" class="mono">{{ row.carNumber }}</td>
+            <td data-label="Driver" class="col-left">{{ row.user.username }}</td>
+            <td data-label="Category">{{ row.carCategory }}</td>
+            <td data-label="Laps" class="mono">{{ row.lapCount }}</td>
+            <td data-label="Last lap" class="mono">{{ lastLapLabel(row) }}</td>
+            <td data-label="State" class="col-left"><app-flag [status]="stateOf(row)"></app-flag></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="board-note" *ngIf="lastUpdated">Auto-refreshing every 4 seconds · last update {{ lastUpdatedLabel }} {{ timeZoneLabel }}</p>
+  </section>
+</div>
