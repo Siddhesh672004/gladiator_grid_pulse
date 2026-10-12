@@ -1,0 +1,115 @@
+<div class="page">
+  <app-pagehead title="Competition Control" subtitle="One button per step: start qualifying, finish it, start the race, finish it.">
+    <button class="btn btn-main btn-outline" type="button" (click)="goBack()"><app-icon name="arrow_back"></app-icon>Back to Sessions</button>
+  </app-pagehead>
+
+  <app-loader *ngIf="isLoading" label="Loading competition"></app-loader>
+  <div class="server-error" *ngIf="!competition && actionError" role="alert">{{ actionError }}</div>
+
+  <ng-container *ngIf="competition">
+    <div class="panel competition">
+      <div>
+        <span class="tag">{{ competition.trackName }} · {{ competition.trackCategory }}</span>
+        <h2 class="display competition-name">{{ competition.competitionName }}</h2>
+        <div class="facts">
+          <span class="fact-name">Date</span><span class="fact-value mono">{{ competition.competitionDate }}</span>
+          <span class="fact-name">Qualifying</span>
+          <span class="fact-value mono">{{ time(competition.qualifyingSession) }} · {{ competition.qualifyingLaps }} lap{{ competition.qualifyingLaps === 1 ? '' : 's' }}</span>
+          <span class="fact-name">Race</span>
+          <span class="fact-value mono">{{ time(competition.raceSession) }} · {{ competition.raceLaps }} lap{{ competition.raceLaps === 1 ? '' : 's' }}</span>
+          <span class="fact-name">Grid</span><span class="fact-value mono">Max {{ competition.maxCars }} cars</span>
+          <span class="fact-name">Entry fee</span><span class="fact-value mono">₹{{ competition.qualifyingSession.price }}</span>
+        </div>
+      </div>
+
+      <!-- five start lights = the five phases, one more is lit after every step -->
+      <div class="phase-box">
+        <p class="server-error" *ngIf="isCancelled">This competition was cancelled.</p>
+        <ng-container *ngIf="!isCancelled">
+          <app-startlights [lit]="lightsOn"></app-startlights>
+          <ol class="steps">
+            <li *ngFor="let step of steps; let i = index" class="step" [class.done]="isDone(i)" [class.current]="isCurrent(i)">
+              {{ step.label }}
+            </li>
+          </ol>
+        </ng-container>
+
+        <div class="step-actions">
+          <button id="nextStep" class="btn btn-accent" *ngIf="nextStepLabel" [disabled]="stepBusy" (click)="runNextStep()">{{ nextStepLabel }}</button>
+          <button class="btn btn-danger" *ngIf="canCancel" (click)="showCancelPopup = true">Cancel Competition</button>
+        </div>
+        <div class="server-error" *ngIf="actionError" role="alert">{{ actionError }}</div>
+      </div>
+    </div>
+
+    <section class="board" *ngIf="selectedSession">
+      <div class="board-head">
+        <div>
+          <h2 class="board-title">{{ boardTitle }}</h2>
+          <p class="board-sub">
+            <span class="live-dot" title="live, refreshes every 4 seconds"></span>
+            <span class="board-meta">{{ time(selectedSession) }}</span>
+            <span class="board-meta">{{ selectedSession.status }}</span>
+            <span class="board-meta">{{ lapLimit }} lap{{ lapLimit === 1 ? '' : 's' }}</span>
+            <span class="board-meta">{{ standings.length }} car{{ standings.length === 1 ? '' : 's' }}</span>
+          </p>
+        </div>
+        <div class="board-actions">
+          <button class="btn" [class.btn-accent]="!viewingRace" [class.btn-grey]="viewingRace" (click)="showQualifying()">Qualifying</button>
+          <button class="btn" [class.btn-accent]="viewingRace" [class.btn-grey]="!viewingRace" [disabled]="!gridExists" (click)="showRace()">Race</button>
+        </div>
+      </div>
+
+      <p class="board-note board-error" *ngIf="boardError">{{ boardError }}</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Pos</th>
+              <th *ngIf="viewingRace">Grid</th>
+              <th>Car #</th>
+              <th class="col-left">Driver</th>
+              <th>Category</th>
+              <th>Laps</th>
+              <th>Last Lap ({{ timeZoneLabel }})</th>
+              <th class="col-left">State</th>
+              <th class="col-actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="standings.length === 0"><td colspan="9" class="empty">{{ isCancelled ? 'This competition was cancelled.' : 'No approved cars yet. Approve bookings on the Registrations page.' }}</td></tr>
+            <tr *ngFor="let row of standings; let i = index" [class.leader]="isLeader(row, i)" [ngClass]="'state-' + stateOf(row)">
+              <td data-label="Pos" class="mono">{{ positionLabel(row, i) }}</td>
+              <td data-label="Grid" class="mono" *ngIf="viewingRace">{{ row.gridPosition ? 'P' + row.gridPosition : '-' }}</td>
+              <td data-label="Car" class="mono">{{ row.carNumber }}</td>
+              <td data-label="Driver" class="col-left">{{ row.user.username }}</td>
+              <td data-label="Category">{{ row.carCategory }}</td>
+              <td data-label="Laps" class="mono">{{ row.lapCount }} / {{ lapLimit }}</td>
+              <td data-label="Last lap" class="mono">{{ lastLapLabel(row) }}</td>
+              <td data-label="State" class="col-left"><app-flag [status]="stateOf(row)"></app-flag></td>
+              <td class="row-actions col-actions" [attr.aria-busy]="busyId === row.raceBookingId">
+                <ng-container *ngIf="showsRaceActions(row)">
+                  <button class="btn btn-small" [disabled]="!canRace(row)" (click)="addLap(row)">+1 Lap</button>
+                  <button class="btn btn-small btn-retire" [disabled]="!canRace(row)" (click)="retire(row)">Retire</button>
+                </ng-container>
+                <span class="no-actions" *ngIf="!showsRaceActions(row)">-</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="board-note" *ngIf="lastUpdated">Auto-refreshing every 4 seconds · last update {{ lastUpdatedLabel }} {{ timeZoneLabel }}</p>
+    </section>
+  </ng-container>
+</div>
+
+<ng-template [appPopup]="showCancelPopup">
+  <div class="modal-box" *ngIf="showCancelPopup">
+    <p>Cancel this competition? Both sessions are cancelled, every booking is rejected, paid entry fees are refunded and the drivers get an email.</p>
+    <div class="modal-actions">
+      <button class="btn btn-danger" (click)="cancelCompetition()">Yes, Cancel</button>
+      <button class="btn btn-grey" (click)="showCancelPopup = false">No</button>
+    </div>
+  </div>
+</ng-template>
