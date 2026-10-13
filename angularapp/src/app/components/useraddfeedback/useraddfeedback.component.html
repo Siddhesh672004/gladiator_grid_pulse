@@ -1,0 +1,74 @@
+<div class="page">
+  <app-pagehead title="Add Feedback" subtitle="Rate a session you drove in. One feedback per session."></app-pagehead>
+
+  <div class="two-col">
+    <form class="panel" [formGroup]="feedbackForm" (ngSubmit)="submit()" novalidate>
+      <div class="server-error" *ngIf="loadError" role="alert">{{ loadError }}</div>
+
+      <app-field label="Session" inputId="sessionId" [options]="sessionOptions" [control]="feedbackForm.get('sessionId')"></app-field>
+      <p class="muted no-session" *ngIf="!isLoading && !loadError && sessions.length === 0">
+        You have no completed session to review yet. Feedback opens once a session you drove in is finished.
+      </p>
+
+      <div class="field">
+        <span class="star-label">Rating *</span>
+        <div class="star-row">
+          <button type="button" class="star" *ngFor="let star of stars" [id]="'star' + star"
+                  [class.filled]="star <= currentRating" (click)="setRating(star)"
+                  [attr.aria-label]="star + ' star' + (star === 1 ? '' : 's')">★</button>
+        </div>
+        <app-fielderror [control]="feedbackForm.get('rating')" label="Rating"></app-fielderror>
+      </div>
+
+      <app-field class="text-box" label="Feedback" inputId="feedbackText" [rows]="8" [maxlength]="textMax" [hint]="textCount"
+                 [control]="feedbackForm.get('feedbackText')"></app-field>
+
+      <div class="ai-row">
+        <button class="btn btn-main btn-outline" type="button" id="improve" [disabled]="isImproving" (click)="improve()">
+          <app-icon name="auto_awesome"></app-icon>
+          {{ isImproving ? 'Thinking...' : 'Improve with AI' }}
+        </button>
+        <span class="muted ai-note">Your text is sent to an AI service to label it and to suggest clearer wording.</span>
+      </div>
+      <p class="muted" *ngIf="aiMessage">{{ aiMessage }}</p>
+
+      <div *ngIf="suggestions.length > 0">
+        <p class="suggestion-title">Suggestions (click one to use it):</p>
+        <button type="button" class="suggestion" *ngFor="let suggestion of suggestions" (click)="useSuggestion(suggestion)">{{ suggestion }}</button>
+      </div>
+
+      <div class="server-error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+
+      <button class="btn btn-main btn-big" type="submit" [disabled]="isSaving">{{ isSaving ? 'Sending...' : 'Submit' }}</button>
+    </form>
+
+    <aside class="side">
+      <!-- the feedback as it will be saved -->
+      <section class="panel preview">
+        <span class="tag">Preview</span>
+        <p class="stars preview-stars" aria-hidden="true">
+          <span *ngFor="let star of stars" [class.dim]="star > currentRating">★</span>
+        </p>
+        <p class="preview-text">{{ feedbackForm.get('feedbackText')?.value || 'Your text shows up here while you type.' }}</p>
+      </section>
+
+      <section class="panel">
+        <h2 class="sub-title">Good to know</h2>
+        <ul class="points">
+          <li><span class="slot"></span>Only completed sessions where your booking was approved are listed.</li>
+          <li><span class="slot"></span>One feedback per session.</li>
+          <li><span class="slot"></span>A rating of 1 to 5 stars is needed.</li>
+          <li><span class="slot"></span>The text is 10 to 1000 characters long.</li>
+          <li><span class="slot"></span>Improve with AI suggests up to three clearer versions. You decide what is sent.</li>
+        </ul>
+      </section>
+    </aside>
+  </div>
+</div>
+
+<ng-template [appPopup]="showModal">
+  <div class="modal-box" *ngIf="showModal">
+    <p>Successfully Added!</p>
+    <button class="btn btn-main" (click)="showModal = false">Ok</button>
+  </div>
+</ng-template>
