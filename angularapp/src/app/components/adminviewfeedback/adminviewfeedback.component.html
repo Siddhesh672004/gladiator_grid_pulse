@@ -1,0 +1,84 @@
+<div class="page wide-page">
+  <app-pagehead title="Feedback Details" subtitle="Every feedback with its AI label. Drivers never see the label.">
+    <button class="btn btn-main btn-accent" id="summarise" [disabled]="isSummarising" (click)="summarise()">
+      <app-icon name="auto_awesome"></app-icon>
+      {{ isSummarising ? 'Summarising...' : 'Summarise with AI' }}
+    </button>
+  </app-pagehead>
+
+  <section class="kpi-row six" aria-label="Counts">
+    <div class="kpi"><span>Total</span><b>{{ feedbacks.length }}</b></div>
+    <div class="kpi" *ngFor="let sentiment of sentiments"><span>{{ label(sentiment) }}</span><b>{{ countOf(sentiment) }}</b></div>
+    <div class="kpi"><span>Needs attention</span><b>{{ urgentCount }}</b></div>
+  </section>
+
+  <p class="muted" id="aiInfo" *ngIf="infoMessage">{{ infoMessage }}</p>
+  <div class="panel summary-box" *ngIf="summaryLines.length > 0">
+    <span class="tag">AI summary of the latest feedback</span>
+    <p *ngFor="let line of summaryLines">{{ line }}</p>
+  </div>
+
+  <div class="toolbar">
+    <app-searchbox label="Search by driver, track or text" [(text)]="searchText" (textChange)="page = 1"></app-searchbox>
+    <app-filterbox label="Sentiment" [options]="sentimentOptions" [(value)]="sentimentFilter" (valueChange)="page = 1"></app-filterbox>
+    <app-filterbox label="Rating" [options]="ratingOptions" [(value)]="ratingFilter" (valueChange)="page = 1"></app-filterbox>
+    <label class="check-filter"><input type="checkbox" id="urgentOnly" [(ngModel)]="urgentOnly" (ngModelChange)="page = 1"> Needs attention only</label>
+  </div>
+
+  <div class="server-error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+  <app-loader *ngIf="isLoading" label="Loading feedback"></app-loader>
+  <app-empty *ngIf="!isLoading && filteredFeedbacks.length === 0"
+             [title]="feedbacks.length === 0 ? 'No feedback yet' : 'No feedback matches the filters'"
+             [text]="feedbacks.length === 0 ? 'Drivers can rate a session once it is completed.' : 'Try another word or filter.'"></app-empty>
+
+  <!-- paginator stays after the table, same *ngIf -->
+  <ng-container *ngIf="filteredFeedbacks.length > 0">
+    <div class="table-wrap">
+      <table class="gp-table">
+        <thead>
+          <tr>
+            <th>User Name</th>
+            <th>Track / session</th>
+            <th>Feedback</th>
+            <th>Rating</th>
+            <th>Sentiment</th>
+            <th>Posted Date</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let feedback of pagedFeedbacks">
+            <td><strong>{{ feedback.user?.username }}</strong></td>
+            <td data-label="Track / session"><strong>{{ feedback.session?.trackName || '-' }}</strong><small>{{ sessionText(feedback.session) }}</small></td>
+            <td data-label="Feedback" class="text-cell">{{ feedback.feedbackText }}</td>
+            <td data-label="Rating" class="stars-cell">{{ stars(feedback.rating) }}</td>
+            <td data-label="Sentiment">
+              <app-flag [status]="sentimentOf(feedback)" [label]="label(sentimentOf(feedback))"></app-flag>
+              <span class="pay-badge FAILED urgent" *ngIf="feedback.urgent">Needs attention</span>
+            </td>
+            <td data-label="Posted Date" class="mono">{{ feedback.date | date:'dd/MM/yyyy' }}</td>
+            <td class="actions">
+              <!-- Show Profile stays the FIRST button of the row -->
+              <button class="btn btn-light btn-small" (click)="showProfile(feedback)">Show Profile</button>
+              <button class="btn btn-small" *ngIf="canAnalyse(feedback)" [disabled]="busyId === feedback.feedbackId"
+                      (click)="analyse(feedback)">Analyse</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <app-paginator [total]="filteredFeedbacks.length" [page]="page" [pageSize]="pageSize" (pageChange)="page = $event"></app-paginator>
+  </ng-container>
+</div>
+
+<ng-template [appPopup]="profile" [closeOutside]="true" (closed)="profile = null">
+  <div class="modal-box details" *ngIf="profile">
+    <button class="modal-close" (click)="profile = null" aria-label="Close">X</button>
+    <span class="tag">User Details</span>
+    <h3 class="display profile-name">{{ profile.username }}</h3>
+    <div class="facts">
+      <span class="fact-name">Email</span><span class="fact-value">{{ profile.email }}</span>
+      <span class="fact-name">Mobile Number</span><span class="fact-value mono">{{ profile.mobileNumber }}</span>
+    </div>
+  </div>
+</ng-template>
