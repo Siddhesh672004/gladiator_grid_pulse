@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -15,8 +16,10 @@ import lombok.extern.slf4j.Slf4j;
 
 // every 30 s: REFUND_PENDING -> Razorpay refund -> REFUNDED / REFUND_FAILED, and old unpaid orders are checked
 // the reject click only writes REFUND_PENDING, this job does the slow part
+// gridpulse.jobs.refund.enabled=false switches it off (more instances: only one may refund)
 @Slf4j
 @Component
+@ConditionalOnProperty(name = "gridpulse.jobs.refund.enabled", havingValue = "true", matchIfMissing = true)
 @RequiredArgsConstructor
 public class RefundJob {
 

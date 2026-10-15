@@ -4,6 +4,19 @@ GridPulse - how to run
 Needs: Java 17+, Node 20, Docker Desktop (or a local MySQL 8, see "Manual MySQL").
 
 
+0. Secrets
+----------
+   cp springapp/secrets.properties.example springapp/secrets.properties
+   fill in the keys you have (empty = that feature is off). never push this file.
+   an environment variable with the same name wins over the file.
+
+   other settings (env vars, all optional):
+   SERVER_PORT                     backend port, default 8080
+   DB_HOST / DB_PORT               mysql, default localhost / 3306 (ignored when DB_URL is set)
+   JWT_SECRET                      64+ characters; empty = a key file in ~/.gridpulse (one instance only)
+   GRIDPULSE_JOBS_REFUND_ENABLED   false = no refund job here (run it on one instance only)
+
+
 1. Infra with Docker (MySQL + Redis + Kafka + Kafka UI)
 -------------------------------------------------------
    cp .env.example .env            (MYSQL_ROOT_PASSWORD, MYSQL_PORT)

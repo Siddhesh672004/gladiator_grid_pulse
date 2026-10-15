@@ -41,7 +41,13 @@ public class JwtUtils {
         signingKey = Optional.ofNullable(jwtProperties.secret())
                 .filter(secret -> !secret.isBlank())
                 .map(this::keyFromSecret)
-                .orElseGet(() -> loadOrCreateKey(Path.of(jwtProperties.secretFile())));
+                .orElseGet(this::keyFromFile);
+    }
+
+    private byte[] keyFromFile() {
+        log.warn("JWT key from {} - set JWT_SECRET: a second instance or service will reject these tokens",
+                jwtProperties.secretFile());
+        return loadOrCreateKey(Path.of(jwtProperties.secretFile()));
     }
 
     private byte[] keyFromSecret(String secret) {
