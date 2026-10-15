@@ -43,6 +43,8 @@
             <td data-label="Race Status">{{ raceStatus(booking) }}</td>
             <td class="actions">
               <button class="btn btn-light btn-small" (click)="selected = booking">Show More</button>
+              <button class="btn btn-green btn-small" *ngIf="canDownloadTicket(booking)" [disabled]="downloadingId === booking.raceBookingId"
+                      (click)="downloadTicket(booking)">{{ downloadingId === booking.raceBookingId ? 'Downloading...' : 'Download ticket' }}</button>
               <button class="btn btn-danger btn-small" *ngIf="canCancel(booking)" (click)="bookingToCancel = booking">{{ cancelLabel(booking) }}</button>
             </td>
           </tr>

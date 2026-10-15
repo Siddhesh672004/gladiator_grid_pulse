@@ -17,6 +17,7 @@ import { SuperadminmanageadminsComponent } from '../components/superadminmanagea
 import { AdminviewpaymentsComponent } from '../components/adminviewpayments/adminviewpayments.component';
 import { AdmindashboardComponent } from '../components/admindashboard/admindashboard.component';
 import { AdminmanageusersComponent } from '../components/adminmanageusers/adminmanageusers.component';
+import { AdmincheckticketComponent } from '../components/admincheckticket/admincheckticket.component';
 
 // lazy loaded admin pages, the component files stay in app/components
 @NgModule({
@@ -34,7 +35,8 @@ import { AdminmanageusersComponent } from '../components/adminmanageusers/adminm
     SuperadminmanageadminsComponent,
     AdminviewpaymentsComponent,
     AdmindashboardComponent,
-    AdminmanageusersComponent
+    AdminmanageusersComponent,
+    AdmincheckticketComponent
   ],
   imports: [
     CommonModule,

@@ -7,9 +7,10 @@ import { UserStorageService } from '../../services/user-storage.service';
 import { BOOKING_STATUS, COMPETITION_PHASE, LIVE_REFRESH_MS, ROLES, SESSION_STATUS } from '../../constants';
 import { paymentLabel } from '../../models/payment.model';
 import { pageOf } from '../../shared/paging';
+import { blobErrorMessage, fileNameOf, saveFile } from '../../shared/download';
 
 // the driver's own bookings, reloaded every 4 s -> RaceService
-// cancel while Pending = full refund, cancel an Approved one = no refund
+// cancel while Pending = full refund, cancel an Approved one = no refund. an Approved one has its e-ticket (pdf with qr)
 const LOAD_ERROR = 'Unable to load your registrations';
 
 @Component({
@@ -26,6 +27,7 @@ export class UserviewmyregistrationsComponent implements OnInit, OnDestroy {
   errorMessage: string = '';
   selected: RaceBooking | null = null;
   bookingToCancel: RaceBooking | null = null;
+  downloadingId: number | null = null;
 
   private ownerId: number | null = null;
   private refreshTimer: number = 0;
@@ -42,6 +44,31 @@ export class UserviewmyregistrationsComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.pageClosed = true;
     this.stopRefresh();
+  }
+
+  canDownloadTicket(booking: RaceBooking): boolean {
+    return booking.status === BOOKING_STATUS.APPROVED;
+  }
+
+  downloadTicket(booking: RaceBooking): void {
+    const id = booking.raceBookingId;
+    if (!id || this.downloadingId !== null) {
+      return;
+    }
+    this.errorMessage = '';
+    this.downloadingId = id;
+    this.raceService.downloadTicket(id).subscribe({
+      next: (response) => {
+        this.downloadingId = null;
+        if (response.body) {
+          saveFile(response.body, fileNameOf(response.headers.get('Content-Disposition'), `gridpulse-ticket-${id}.pdf`));
+        }
+      },
+      error: async (err) => {
+        this.downloadingId = null;
+        this.errorMessage = await blobErrorMessage(err, 'Unable to download the ticket');
+      }
+    });
   }
 
   raceStatus(booking: RaceBooking): string {

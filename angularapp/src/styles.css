@@ -3042,6 +3042,38 @@ app-adminaddsession .slot-facts {
   }
 }
 
+/* ==== check ticket (admin) ==== */
+app-admincheckticket .check-form {
+  margin-bottom: 18px;
+}
+
+app-admincheckticket .check-row {
+  display: flex;
+  gap: 10px;
+}
+
+app-admincheckticket .ticket-result {
+  border-left: 6px solid var(--gp-border);
+}
+
+app-admincheckticket .ticket-result.valid {
+  border-left-color: var(--gp-green);
+  background: var(--gp-green-soft);
+}
+
+app-admincheckticket .ticket-result.invalid {
+  border-left-color: var(--gp-red);
+  background: var(--gp-red-soft);
+}
+
+app-admincheckticket .ticket-result.valid .sub-title {
+  color: var(--gp-green-dark);
+}
+
+app-admincheckticket .ticket-result.invalid .sub-title {
+  color: var(--gp-red-dark);
+}
+
 /* ==== manage users ==== */
 app-adminmanageusers .search-form {
   display: flex;

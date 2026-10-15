@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { RaceTrack } from '../models/race-track.model';
 import { BookingStatusRequest, CarCategory, RaceBooking } from '../models/race-booking.model';
@@ -52,6 +52,12 @@ export class RaceService {
 
   getAllRaceBookings(): Observable<RaceBooking[]> {
     return this.http.get<RaceBooking[]>(this.apiUrl + API_ENDPOINTS.RACE_BOOKING);
+  }
+
+  // the e-ticket pdf of an Approved booking; the whole response, so the file name (Content-Disposition) can be read
+  downloadTicket(raceBookingId: number): Observable<HttpResponse<Blob>> {
+    return this.http.get(this.apiUrl + API_ENDPOINTS.RACE_BOOKING_TICKET(raceBookingId),
+      { observe: 'response', responseType: 'blob' });
   }
 
   // admin list, page counts from 0

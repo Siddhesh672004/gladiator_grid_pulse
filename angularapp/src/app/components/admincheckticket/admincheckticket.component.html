@@ -1,0 +1,27 @@
+<div class="page">
+  <app-pagehead title="Check Ticket" subtitle="Type or scan the code under the QR of a driver's e-ticket (it looks like GP-12-3fa9...)."></app-pagehead>
+
+  <form class="panel check-form" (ngSubmit)="check()" novalidate>
+    <div class="field">
+      <label for="ticketCode">Ticket code</label>
+      <div class="check-row">
+        <input id="ticketCode" name="code" class="form-control mono" [(ngModel)]="code" (ngModelChange)="errorMessage = ''"
+               maxlength="60" autocomplete="off" placeholder="GP-...">
+        <button class="btn btn-main" type="submit" [disabled]="isChecking">{{ isChecking ? 'Checking...' : 'Check' }}</button>
+      </div>
+    </div>
+    <div class="server-error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+  </form>
+
+  <section class="panel ticket-result" *ngIf="result" [class.valid]="result.valid" [class.invalid]="!result.valid" role="status">
+    <h2 class="sub-title">{{ result.valid ? 'Valid ticket' : 'Not valid' }}</h2>
+    <p>{{ result.message }}</p>
+    <div class="facts" *ngIf="result.bookingId">
+      <span class="fact-name">Driver</span><span class="fact-value">{{ result.driverName }}</span>
+      <span class="fact-name">Car</span><span class="fact-value mono">#{{ result.carNumber }}</span>
+      <span class="fact-name">Track</span><span class="fact-value">{{ result.trackName }}</span>
+      <span class="fact-name">Date</span><span class="fact-value mono">{{ result.sessionDate }} {{ result.startTime }}</span>
+      <span class="fact-name">Booking</span><span class="fact-value mono">{{ result.bookingId }} · {{ result.bookingStatus }}</span>
+    </div>
+  </section>
+</div>

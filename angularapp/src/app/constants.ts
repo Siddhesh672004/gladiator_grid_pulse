@@ -28,6 +28,8 @@ export const API_ENDPOINTS = {
   COMPETITION_RETIRE: (raceBookingId: number) => `/api/competition-control/retire/${raceBookingId}`,
   RACE_BOOKING: '/api/race-booking',
   RACE_BOOKING_PAGE: '/api/race-booking/page',
+  RACE_BOOKING_TICKET: (raceBookingId: number) => `/api/race-booking/${raceBookingId}/ticket`,
+  TICKET_VERIFY: (code: string) => `/api/tickets/verify/${encodeURIComponent(code)}`,
   RACE_BOOKING_BY_USER: '/api/race-booking/user',
   RACE_BOOKING_CAR_CATEGORIES: '/api/race-booking/car-categories',
   PAYMENT_ORDER: '/api/payments/order',

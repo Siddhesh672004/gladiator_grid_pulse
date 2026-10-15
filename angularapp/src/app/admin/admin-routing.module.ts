@@ -13,6 +13,7 @@ import { SuperadminmanageadminsComponent } from '../components/superadminmanagea
 import { AdminviewpaymentsComponent } from '../components/adminviewpayments/adminviewpayments.component';
 import { AdmindashboardComponent } from '../components/admindashboard/admindashboard.component';
 import { AdminmanageusersComponent } from '../components/adminmanageusers/adminmanageusers.component';
+import { AdmincheckticketComponent } from '../components/admincheckticket/admincheckticket.component';
 import { ROLES } from '../constants';
 
 // /admin/** (the guard and the Admin role check are on the parent route in app.routes.ts)
@@ -28,6 +29,7 @@ const routes: Routes = [
   { path: 'view/sessions', component: AdminviewsessionsComponent },
   { path: 'competition/:id', component: AdmincompetitioncontrolComponent },
   { path: 'view/registrations', component: AdminviewregistrationsComponent },
+  { path: 'check-ticket', component: AdmincheckticketComponent },
   { path: 'view/feedback', component: AdminviewfeedbackComponent },
   { path: 'view/payments', component: AdminviewpaymentsComponent },
   { path: 'race-control', component: AdminracecontrolComponent },
