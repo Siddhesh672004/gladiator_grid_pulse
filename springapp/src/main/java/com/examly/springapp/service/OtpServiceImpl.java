@@ -14,12 +14,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.examly.springapp.config.properties.OtpProperties;
-import com.examly.springapp.event.OtpRequested;
 import com.examly.springapp.exceptions.OtpException;
 import com.examly.springapp.model.OtpCode;
 import com.examly.springapp.model.OtpPurpose;
 import com.examly.springapp.model.User;
 import com.examly.springapp.repository.OtpCodeRepo;
+import com.gridpulse.common.event.OtpRequested;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +41,7 @@ public class OtpServiceImpl implements OtpService {
     private final ApplicationEventPublisher eventPublisher;
     private final OtpProperties otpProperties;
 
-    // the email goes out after the commit (event/EmailEventListener), a gmail problem only reaches the log
+    // the code goes to kafka with this transaction (messaging/DomainEventOutboxListener), notification-service emails it
     @Override
     @Transactional
     public int createAndSend(User user, OtpPurpose purpose) {

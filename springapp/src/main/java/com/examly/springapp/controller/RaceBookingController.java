@@ -2,6 +2,9 @@ package com.examly.springapp.controller;
 
 import java.util.List;
 
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +23,7 @@ import com.examly.springapp.security.annotation.AdminOnly;
 import com.examly.springapp.security.annotation.LoggedIn;
 import com.examly.springapp.security.annotation.UserOnly;
 import com.examly.springapp.service.RaceBookingService;
+import com.examly.springapp.service.TicketService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +35,7 @@ import lombok.RequiredArgsConstructor;
 public class RaceBookingController {
 
     private final RaceBookingService raceBookingService;
+    private final TicketService ticketService;
 
     @LoggedIn
     @GetMapping("/car-categories")
@@ -65,6 +70,18 @@ public class RaceBookingController {
     @GetMapping("/{id}")
     public ResponseEntity<RaceBookingResponse> getRaceBookingById(@PathVariable Long id) {
         return ResponseEntity.ok(raceBookingService.getRaceBookingById(id));
+    }
+
+    // the e-ticket pdf (qr code inside): the driver's own booking or any for an admin, Approved only (else 400)
+    @LoggedIn
+    @GetMapping("/{id}/ticket")
+    public ResponseEntity<byte[]> getTicket(@PathVariable Long id) {
+        byte[] pdf = ticketService.ticketPdf(id);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        ContentDisposition.attachment().filename("gridpulse-ticket-" + id + ".pdf").build().toString())
+                .body(pdf);
     }
 
     // approve / reject; 400 without a reason for a reject, 409 when the session is full

@@ -1,6 +1,7 @@
 package com.examly.springapp.config;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -21,6 +22,8 @@ public class CrosConfig implements WebMvcConfigurer {
                 .allowedOriginPatterns(corsProperties.allowedOrigins().toArray(String[]::new))
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
+                // angular reads the file name of a download (the e-ticket) from this header
+                .exposedHeaders(HttpHeaders.CONTENT_DISPOSITION)
                 .maxAge(3600);
     }
 }

@@ -1,9 +1,5 @@
 package com.examly.springapp.support;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -13,13 +9,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -27,7 +23,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.testcontainers.containers.MySQLContainer;
 
-import com.examly.springapp.config.properties.EmailProperties;
 import com.examly.springapp.dto.request.BookingStatusRequest;
 import com.examly.springapp.dto.request.PaymentConfirmRequest;
 import com.examly.springapp.dto.request.RaceBookingRequest;
@@ -37,14 +32,17 @@ import com.examly.springapp.model.User;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gridpulse.common.event.EventReader;
+import com.gridpulse.common.outbox.OutboxRepository;
 
 // the real app on a random port against a throw-away mysql in docker
-// razorpay is faked, no mail / ai / cloudinary call leaves the machine, the refund job is off
+// razorpay is faked, no ai / cloudinary call leaves the machine, the refund job is off
+// events stay in the outbox table (relay off, no kafka needed): the tests read them there
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
-        "MAIL_TO_FILE=true",
-        "spring.mail.username=",
-        "spring.mail.password=",
         "jwt.secret=" + IntegrationTest.JWT_SECRET,
+        "gridpulse.ticket-secret=" + IntegrationTest.TICKET_SECRET,
+        "gridpulse.outbox.relay.enabled=false",
+        "spring.kafka.admin.auto-create=false",
         "gemini.api-key=",
         "gemini.api-key2=",
         "gemini.api-key3=",
@@ -64,6 +62,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public abstract class IntegrationTest {
 
     static final String JWT_SECRET = "gridpulse-integration-tests-fixed-jwt-secret-0123456789abcdefghij";
+    protected static final String TICKET_SECRET = "gridpulse-integration-tests-ticket-secret-0123456789";
 
     // one container for every test class (same spring context), docker removes it when the jvm stops
     @ServiceConnection
@@ -83,7 +82,10 @@ public abstract class IntegrationTest {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private EmailProperties emailProperties;
+    private OutboxRepository outboxRepository;
+
+    @Autowired
+    private EventReader eventReader;
 
     protected ResponseEntity<String> get(String url, String token) {
         return call(HttpMethod.GET, url, token, null);
@@ -145,25 +147,19 @@ public abstract class IntegrationTest {
         return new RaceBookingRequest(session.getSessionId(), carNumber, "GT3", null, true);
     }
 
-    // texts of the test-mode email files sent to this address
-    protected List<String> mailsTo(String email) throws IOException {
-        Path folder = Path.of(emailProperties.fileDir());
-        if (!Files.isDirectory(folder)) {
-            return List.of();
-        }
-        try (Stream<Path> files = Files.list(folder)) {
-            return files.filter(file -> file.getFileName().toString().endsWith("_" + email + ".txt"))
-                    .map(IntegrationTest::read)
-                    .toList();
-        }
+    // the payloads of the outbox rows of one event type, oldest first
+    protected <T> List<T> outboxEvents(Class<T> type) {
+        return outboxRepository.findAll(Sort.by("id")).stream()
+                .filter(row -> row.getType().equals(type.getSimpleName()))
+                .map(row -> eventReader.payload(eventReader.read(row.getPayload()), type))
+                .toList();
     }
 
-    private static String read(Path file) {
-        try {
-            return Files.readString(file);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+    // a file download (the e-ticket pdf)
+    protected ResponseEntity<byte[]> download(String url, String token) {
+        HttpHeaders headers = new HttpHeaders();
+        Optional.ofNullable(token).ifPresent(headers::setBearerAuth);
+        return rest.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), byte[].class);
     }
 
     // every call waits at the gate, then all go at once; answers come back in the same order

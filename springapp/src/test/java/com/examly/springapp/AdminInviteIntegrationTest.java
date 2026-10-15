@@ -1,12 +1,8 @@
 package com.examly.springapp;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 
-import java.time.Duration;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,8 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 
 import com.examly.springapp.support.IntegrationTest;
+import com.gridpulse.common.event.AdminInvited;
 
-// new admin: invite email with a one-time link -> chooses the password -> logs in
+// new admin: invite event with a one-time link (notification-service emails it) -> chooses the password -> logs in
 class AdminInviteIntegrationTest extends IntegrationTest {
 
     private static final Pattern TOKEN = Pattern.compile("/set-password\\?email=\\S+&token=([A-Za-z0-9_-]+)");
@@ -30,15 +27,14 @@ class AdminInviteIntegrationTest extends IntegrationTest {
                 Map.of("username", "Invited Admin", "email", email));
         assertThat(status(added)).isEqualTo(201);
 
-        AtomicReference<String> mail = new AtomicReference<>();
-        await().atMost(Duration.ofSeconds(5)).untilAsserted(() -> {
-            List<String> mails = mailsTo(email);
-            assertThat(mails).hasSize(1);
-            mail.set(mails.get(0));
-        });
-        Matcher link = TOKEN.matcher(mail.get());
+        AdminInvited invite = outboxEvents(AdminInvited.class).stream()
+                .filter(event -> event.email().equals(email))
+                .findFirst()
+                .orElseThrow();
+        assertThat(invite.link()).startsWith("http://localhost:8081/set-password?email=");
+        assertThat(invite.hours()).isEqualTo(48);
+        Matcher link = TOKEN.matcher(invite.link());
         assertThat(link.find()).isTrue();
-        assertThat(mail.get()).doesNotContainIgnoringCase("password   :");
         String token = link.group(1);
 
         // no password chosen yet: nobody can log in

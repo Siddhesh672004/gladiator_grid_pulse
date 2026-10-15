@@ -4,16 +4,15 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.springframework.boot.autoconfigure.mail.MailProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 import com.examly.springapp.config.properties.CloudinaryProperties;
 import com.examly.springapp.config.properties.CorsProperties;
-import com.examly.springapp.config.properties.EmailProperties;
 import com.examly.springapp.config.properties.JwtProperties;
 import com.examly.springapp.config.properties.RazorpayProperties;
 import com.examly.springapp.config.properties.SuperAdminProperties;
+import com.examly.springapp.config.properties.TicketProperties;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -28,11 +27,10 @@ public class ProdSettingsCheck {
 
     private final JwtProperties jwtProperties;
     private final CorsProperties corsProperties;
-    private final EmailProperties emailProperties;
-    private final MailProperties mailProperties;
     private final SuperAdminProperties superAdminProperties;
     private final CloudinaryProperties cloudinaryProperties;
     private final RazorpayProperties razorpayProperties;
+    private final TicketProperties ticketProperties;
 
     @PostConstruct
     public void check() {
@@ -42,7 +40,7 @@ public class ProdSettingsCheck {
                 .map(Map.Entry::getKey)
                 .findFirst()
                 .ifPresent(this::fail);
-        log.info("prod settings checked: jwt, cors, mail, super admin, cloudinary and razorpay are set");
+        log.info("prod settings checked: jwt, cors, ticket secret, super admin, cloudinary and razorpay are set");
     }
 
     // what to set -> is it missing, kept in the order they are reported
@@ -51,9 +49,9 @@ public class ProdSettingsCheck {
         missing.put("set JWT_SECRET (at least 32 characters)",
                 isMissing(jwtProperties.secret()) || jwtProperties.secret().length() < 32);
         missing.put("set CORS_ALLOWED_ORIGINS to your website, e.g. https://gridpulse.example.com", corsMissing());
-        missing.put("set MAIL_USERNAME and MAIL_PASSWORD (gmail + app password) - prod always sends real emails",
-                emailProperties.toFile()
-                        || isMissing(mailProperties.getUsername()) || isMissing(mailProperties.getPassword()));
+        // the e-ticket codes must not be made with the known dev secret
+        missing.put("set TICKET_SECRET (at least 32 characters)",
+                isMissing(ticketProperties.ticketSecret()) || ticketProperties.ticketSecret().length() < 32);
         missing.put("set SUPER_ADMIN_EMAIL and SUPER_ADMIN_PASSWORD",
                 isMissing(superAdminProperties.email()) || isMissing(superAdminProperties.password()));
         // no cloudinary = no track can be added (pictures are required)

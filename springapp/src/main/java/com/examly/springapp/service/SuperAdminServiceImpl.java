@@ -16,7 +16,6 @@ import com.examly.springapp.config.properties.OtpProperties;
 import com.examly.springapp.dto.request.AddAdminRequest;
 import com.examly.springapp.dto.response.AdminResponse;
 import com.examly.springapp.dto.response.MessageResponse;
-import com.examly.springapp.event.AdminInvited;
 import com.examly.springapp.exceptions.OtpException;
 import com.examly.springapp.exceptions.ResourceNotFoundException;
 import com.examly.springapp.mapper.UserMapper;
@@ -25,6 +24,7 @@ import com.examly.springapp.model.Role;
 import com.examly.springapp.model.User;
 import com.examly.springapp.repository.OtpCodeRepo;
 import com.examly.springapp.repository.UserRepo;
+import com.gridpulse.common.event.AdminInvited;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -75,7 +75,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         return new MessageResponse("A new invite link was sent to " + admin.getEmail());
     }
 
-    // the email goes out after the commit (event/EmailEventListener)
+    // the invite goes to kafka with this transaction (messaging/DomainEventOutboxListener), notification-service emails it
     private void invite(User admin) {
         String token = otpService.createInvite(admin);
         String link = frontendProperties.link("/set-password?email="

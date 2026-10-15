@@ -19,6 +19,8 @@ Needs: Java 17+, Node 20, Docker Desktop (or a local MySQL 8, see "Manual MySQL"
                                    (the admin invite email links to FRONTEND_URL/set-password)
    REDIS_HOST / REDIS_PORT         redis for the cache, default localhost / 6379
    CACHE_TYPE                      none = run without redis (no cache); default redis
+   KAFKA_BOOTSTRAP                 kafka for the events (emails), default localhost:9092
+   TICKET_SECRET                   signs the e-ticket QR codes (secrets.properties); empty = dev secret + warning
 
 
 1. Infra with Docker (MySQL + Redis + Kafka + Kafka UI)

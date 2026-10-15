@@ -37,6 +37,12 @@
 
 	<dependencies>
 
+		<!-- events, outbox (kafka), e-ticket: shared with the other services -->
+		<dependency>
+			<groupId>com.gridpulse</groupId>
+			<artifactId>common</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -57,10 +63,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
 		<!-- cache in redis (tracks, competitions, leaderboard) -->
 		<dependency>
@@ -157,6 +159,11 @@
 		<dependency>
 			<groupId>org.awaitility</groupId>
 			<artifactId>awaitility</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>kafka</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

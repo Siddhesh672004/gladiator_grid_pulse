@@ -21,7 +21,6 @@ import com.examly.springapp.dto.request.RaceBookingRequest;
 import com.examly.springapp.dto.response.CarCategoryResponse;
 import com.examly.springapp.dto.response.PageResponse;
 import com.examly.springapp.dto.response.RaceBookingResponse;
-import com.examly.springapp.event.BookingDecided;
 import com.examly.springapp.exceptions.BookingException;
 import com.examly.springapp.exceptions.ConflictException;
 import com.examly.springapp.exceptions.DuplicateCarNumberException;
@@ -36,6 +35,7 @@ import com.examly.springapp.model.User;
 import com.examly.springapp.repository.RaceBookingRepo;
 import com.examly.springapp.repository.RaceSessionRepo;
 import com.examly.springapp.repository.SessionCars;
+import com.gridpulse.common.event.BookingDecided;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -83,6 +83,7 @@ public class RaceBookingServiceImpl implements RaceBookingService {
     private final ApplicationEventPublisher eventPublisher;
     private final CloudinaryService cloudinaryService;
     private final PaymentRecordService paymentRecordService;
+    private final TicketService ticketService;
 
     @Override
     public List<RaceBookingResponse> getAllRaceBookings() {
@@ -446,14 +447,19 @@ public class RaceBookingServiceImpl implements RaceBookingService {
                 .ifPresent(this::sendStatusEmail);
     }
 
-    // the email goes out after the commit (event/EmailEventListener), a rollback sends nothing
+    // goes to kafka with this transaction (messaging/DomainEventOutboxListener), a rollback sends nothing
+    // an approved booking carries its e-ticket code, notification-service attaches the pdf + calendar file
     private void sendStatusEmail(RaceBooking booking) {
         User driver = booking.getUser();
         RaceSession session = booking.getSession();
+        String ticketCode = BookingStatus.APPROVED.equals(booking.getStatus())
+                ? ticketService.codeFor(booking.getRaceBookingId())
+                : null;
         eventPublisher.publishEvent(new BookingDecided(booking.getRaceBookingId(), driver.getEmail(),
                 driver.getUsername(), session.getTrack().getTrackName(), session.getTrack().getLocation(),
                 session.getSessionDate(), session.getStartTime(), session.getEndTime(), booking.getCarNumber(),
-                booking.getCarCategory(), booking.getStatus(), booking.getAdminNote(), refundAmount(booking)));
+                booking.getCarCategory(), booking.getStatus(), booking.getAdminNote(), refundAmount(booking),
+                ticketCode));
     }
 
     // only money that is on its way back shows in the email

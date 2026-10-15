@@ -53,8 +53,8 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.BAD_REQUEST, e.getMessage(), request);
     }
 
-    // 503: gmail could not send, or cloudinary / razorpay failed
-    @ExceptionHandler({ EmailSendException.class, GatewayException.class })
+    // 503: cloudinary / razorpay failed
+    @ExceptionHandler(GatewayException.class)
     public ResponseEntity<ErrorResponse> handleUnavailable(GridPulseException e, HttpServletRequest request) {
         return build(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage(), request);
     }
