@@ -1,0 +1,73 @@
+<div class="page">
+  <app-pagehead title="Admins" subtitle="Only the super admin sees this page. A new admin gets an invite email with the first password."></app-pagehead>
+
+  <!-- the list on the left, the Add Admin form stays next to it -->
+  <div class="two-col">
+    <div class="main">
+      <app-loader *ngIf="isLoading" label="Loading admins"></app-loader>
+      <app-empty *ngIf="!isLoading && admins.length === 0" title="No admins yet" text="Add the first admin with the form."></app-empty>
+
+      <!-- paginator stays after the table, same *ngIf -->
+      <ng-container *ngIf="admins.length > 0">
+        <div class="table-wrap">
+          <table class="gp-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Mobile Number</th>
+                <th>Added On</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let admin of pagedAdmins">
+                <td><strong>{{ admin.username }}</strong><small>{{ admin.email }}</small></td>
+                <td data-label="Mobile Number" class="mono">{{ admin.mobileNumber || '-' }}</td>
+                <td data-label="Added On" class="mono">{{ admin.createdAt ? (admin.createdAt | date:'dd/MM/yyyy') : '-' }}</td>
+                <td data-label="Status"><app-flag [status]="admin.enabled ? 'Active' : 'Inactive'" [label]="admin.enabled ? 'Active' : 'Disabled'"></app-flag></td>
+                <td class="actions">
+                  <button class="btn btn-small" [class.btn-green]="!admin.enabled" [class.btn-grey]="admin.enabled"
+                          [disabled]="busyId === admin.userId" (click)="toggle(admin)">{{ admin.enabled ? 'Disable' : 'Enable' }}</button>
+                  <button class="btn btn-small btn-danger" [disabled]="busyId === admin.userId"
+                          (click)="adminToDelete = admin">Delete</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <app-paginator [total]="admins.length" [page]="page" [pageSize]="pageSize" (pageChange)="page = $event"></app-paginator>
+      </ng-container>
+    </div>
+
+    <aside class="side">
+      <!-- typing in a box takes the last answer of the server away -->
+      <form class="panel" [formGroup]="adminForm" (ngSubmit)="addAdmin()" (input)="errorMessage = ''" novalidate>
+        <h2 class="sub-title">Add Admin</h2>
+        <app-field label="Username" inputId="adminUsername" hint="Letters and spaces" [maxlength]="50"
+                   [control]="adminForm.get('username')"></app-field>
+        <app-field label="Email" type="email" inputId="adminEmail" [maxlength]="100" [control]="adminForm.get('email')"></app-field>
+        <app-field label="Initial Password" name="Initial password" type="password" inputId="adminPassword" autocomplete="new-password"
+                   [maxlength]="64" hint="Sent to the admin by email" [control]="adminForm.get('initialPassword')"></app-field>
+        <app-field label="Mobile Number" name="Mobile number" type="tel" inputId="adminMobile" hint="Optional, 10 digits" [optional]="true"
+                   [digits]="true" [maxlength]="10" [control]="adminForm.get('mobileNumber')"></app-field>
+
+        <div class="form-foot">
+          <div class="server-error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+          <div class="success-text" *ngIf="successMessage" role="status">{{ successMessage }}</div>
+          <button class="btn btn-main btn-big btn-block" type="submit" [disabled]="isSaving">{{ isSaving ? 'Adding...' : 'Add Admin' }}</button>
+        </div>
+      </form>
+    </aside>
+  </div>
+</div>
+
+<ng-template [appPopup]="adminToDelete">
+  <div class="modal-box" *ngIf="adminToDelete">
+    <p>Delete the admin {{ adminToDelete.email }}? The account is removed for good and its email can be used again.</p>
+    <div class="modal-actions">
+      <button class="btn btn-danger" (click)="deleteAdmin()">Yes, Delete</button>
+      <button class="btn btn-grey" (click)="adminToDelete = null">Cancel</button>
+    </div>
+  </div>
+</ng-template>
