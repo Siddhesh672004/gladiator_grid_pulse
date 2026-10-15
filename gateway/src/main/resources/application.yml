@@ -73,6 +73,24 @@ spring:
                     retries: 1
                     methods: GET
 
+gridpulse:
+  # true only behind a proxy we run ourselves: then X-Forwarded-For tells the visitor's address
+  trust-proxy: ${GRIDPULSE_TRUST_PROXY:false}
+  # the core's JWT_SECRET: a logged-in user gets their own buckets
+  jwt-secret: ${JWT_SECRET:}
+  # tried from the top, the first match counts. key IP = per address, CLIENT = per user (else per address)
+  # capacity 0 = no limit. an empty bucket -> 429 + Retry-After
+  rate-limit:
+    rules:
+      - { method: POST, paths: [/api/login, /api/admin/login], capacity: 5, period: 1m, key: IP }
+      - { method: POST, paths: [/api/register/send-code, /api/password/forgot, /api/password/set-initial], capacity: 3, period: 10m, key: IP }
+      - { method: POST, paths: [/api/register, /api/password/reset], capacity: 10, period: 10m, key: IP }
+      - { method: POST, paths: [/api/chat], capacity: 20, period: 1m, key: CLIENT }
+      - { method: POST, paths: ["/api/ai/copilot/**"], capacity: 20, period: 1m, key: CLIENT }
+      - { method: POST, paths: [/api/payments/order], capacity: 10, period: 1m, key: CLIENT }
+      - { paths: ["/api/live/**"], capacity: 0 }
+      - { paths: ["/api/**"], capacity: 120, period: 1m, key: CLIENT }
+
 management:
   endpoints:
     web:
