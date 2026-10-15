@@ -10,9 +10,12 @@ Ports:
    8084   notification-service    sends every email (sign-up code, invite, booking decision + e-ticket)
    8085   payment-service         razorpay orders + confirm (saves the booking through the core), refunds
    3306 mysql · 6379 redis · 9092 kafka · 8090 kafka ui
-The core writes events into its outbox table; Kafka carries them to notification-service and to every core
-instance (live boards). No Kafka = no emails yet (the events wait), and a live board only updates on the
-instance where the change was made.
+The core writes events into its outbox table; Kafka carries them to notification-service, payment-service and to
+every core instance (live boards). No Kafka = no emails and no refunds yet (the events wait), and a live board only
+updates on the instance where the change was made.
+Paying: payment-service checks the booking with the core (/internal/bookings, INTERNAL_API_KEY), makes the Razorpay
+order, and after the payment asks the core to save the booking. Core not answering = "being confirmed" (202), its
+job finishes it within a minute or two. A rejected / cancelled paid booking is refunded by payment-service.
 
 
 0. Secrets
@@ -57,7 +60,7 @@ instance where the change was made.
    MySQL     localhost:3306  (schemas appdb, payment_db, ai_db, notification_db)
    Redis     localhost:6379
    Kafka     localhost:9092 for apps on this machine, kafka:29092 for containers
-   Kafka UI  http://localhost:8090  (topics gridpulse.account / booking / race / feedback + the retry topics)
+   Kafka UI  http://localhost:8090  (topics gridpulse.account / booking / payment / race / feedback + the retry topics)
 
    stop:            docker compose down
    stop + wipe db:  docker compose down -v
