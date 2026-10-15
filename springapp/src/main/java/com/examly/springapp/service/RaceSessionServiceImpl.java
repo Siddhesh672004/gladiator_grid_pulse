@@ -71,10 +71,14 @@ public class RaceSessionServiceImpl implements RaceSessionService {
         checkChangedTimes(session, request);
         checkSlotOnTrack(track, request.sessionDate(), request.startTime(), request.endTime(), sessionId);
         checkMaxCarsNotBelowApproved(session, request.maxCars());
+        boolean moreSeats = request.maxCars() > session.getMaxCars();
 
         sessionMapper.updateEntity(session, request, track);
         RaceSession saved = raceSessionRepo.save(session);
         log.info("Session {} updated", sessionId);
+        Optional.of(saved)
+                .filter(grown -> moreSeats)
+                .ifPresent(grown -> raceBookingService.promoteFromWaitlist(sessionId));
         return toResponse(saved);
     }
 

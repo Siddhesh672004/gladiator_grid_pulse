@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 
 import com.gridpulse.common.event.AdminInvited;
 import com.gridpulse.common.event.BookingDecided;
+import com.gridpulse.common.event.BookingPromoted;
+import com.gridpulse.common.event.BookingWaitlisted;
 import com.gridpulse.common.event.EventEnvelope;
 import com.gridpulse.common.event.EventReader;
 import com.gridpulse.common.event.OtpRequested;
@@ -29,7 +31,9 @@ import com.gridpulse.notification.email.BookingStatusEmail;
 import com.gridpulse.notification.email.EmailMessage;
 import com.gridpulse.notification.email.OtpEmail;
 import com.gridpulse.notification.email.PasswordResetEmail;
+import com.gridpulse.notification.email.PromotedEmail;
 import com.gridpulse.notification.email.RefundDoneEmail;
+import com.gridpulse.notification.email.WaitlistEmail;
 import com.gridpulse.notification.ics.IcsBuilder;
 import com.gridpulse.notification.service.EmailService;
 
@@ -70,6 +74,8 @@ public class NotificationListener {
         EventEnvelope event = eventReader.read(message);
         switch (event.type()) {
             case "BookingDecided" -> once(event, () -> sendDecision(eventReader.payload(event, BookingDecided.class)));
+            case "BookingWaitlisted" -> once(event, () -> sendWaitlisted(eventReader.payload(event, BookingWaitlisted.class)));
+            case "BookingPromoted" -> once(event, () -> sendPromoted(eventReader.payload(event, BookingPromoted.class)));
             default -> log.debug("Event type {} is not for notification-service, skipped", event.type());
         }
     }
@@ -128,6 +134,17 @@ public class NotificationListener {
         emailService.send(booking.driverEmail(), new BookingStatusEmail(booking.driverName(), booking.trackName(),
                 booking.sessionDate(), booking.startTime(), booking.endTime(), booking.carNumber(), booking.status(),
                 booking.note(), booking.refundAmount()), ticketFiles(booking));
+    }
+
+    private void sendWaitlisted(BookingWaitlisted booking) {
+        emailService.send(booking.driverEmail(), new WaitlistEmail(booking.driverName(), booking.trackName(),
+                booking.sessionDate(), booking.startTime(), booking.endTime(), booking.carNumber(), booking.note()),
+                List.of());
+    }
+
+    private void sendPromoted(BookingPromoted booking) {
+        emailService.send(booking.driverEmail(), new PromotedEmail(booking.driverName(), booking.trackName(),
+                booking.sessionDate(), booking.startTime(), booking.endTime(), booking.carNumber()), List.of());
     }
 
     private void sendRefundDone(PaymentStatusChanged refund) {

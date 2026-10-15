@@ -36,7 +36,7 @@
             <td data-label="Track / session"><strong>{{ booking.session.trackName }}</strong><small>{{ label(booking.session) }}</small></td>
             <td data-label="Car" class="mono">#{{ booking.carNumber }}<small>{{ booking.carCategory }}</small></td>
             <td data-label="Date / time" class="mono nowrap">{{ booking.session.sessionDate }}<small class="mono">{{ time(booking.session) }}</small></td>
-            <td data-label="Status"><app-flag [status]="booking.status"></app-flag></td>
+            <td data-label="Status"><app-flag [status]="booking.status" [label]="statusText(booking)"></app-flag></td>
             <td data-label="Payment"><span *ngIf="booking.paymentStatus" class="pay-badge" [ngClass]="booking.paymentStatus">{{ payment(booking) }}</span></td>
             <td data-label="Race Control">{{ raceStatus(booking) }}</td>
             <td class="actions">
@@ -71,7 +71,7 @@
       <span class="fact-name">Time Slot</span><span class="fact-value mono">{{ time(selected.session) }}</span>
       <span class="fact-name">Car</span><span class="fact-value">#{{ selected.carNumber }} · {{ selected.carCategory }}</span>
       <span class="fact-name">Driver License #</span><span class="fact-value mono">{{ selected.driverLicenseNumber }}</span>
-      <span class="fact-name">Status</span><span class="fact-value"><app-flag [status]="selected.status"></app-flag></span>
+      <span class="fact-name">Status</span><span class="fact-value"><app-flag [status]="selected.status" [label]="statusText(selected)"></app-flag></span>
       <ng-container *ngIf="selected.adminNote"><span class="fact-name">Admin Note</span><span class="fact-value">{{ selected.adminNote }}</span></ng-container>
       <span class="fact-name">Total Price</span><span class="fact-value mono">₹{{ selected.totalPrice }}</span>
       <ng-container *ngIf="selected.paymentStatus"><span class="fact-name">Payment</span><span class="fact-value">{{ payment(selected) }}</span></ng-container>

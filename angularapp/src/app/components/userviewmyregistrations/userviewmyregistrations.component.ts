@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { RaceBooking, raceStatusText } from '../../models/race-booking.model';
+import { RaceBooking, raceStatusText, statusLabel } from '../../models/race-booking.model';
 import { RaceSession, sessionLabel, sessionTime } from '../../models/session.model';
 import { RaceService } from '../../services/race.service';
 import { UserStorageService } from '../../services/user-storage.service';
@@ -73,6 +73,10 @@ export class UserviewmyregistrationsComponent implements OnInit, OnDestroy {
 
   raceStatus(booking: RaceBooking): string {
     return raceStatusText(booking);
+  }
+
+  statusText(booking: RaceBooking): string {
+    return statusLabel(booking);
   }
 
   label(session: RaceSession): string {

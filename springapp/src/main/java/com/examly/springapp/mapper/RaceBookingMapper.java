@@ -26,6 +26,10 @@ public class RaceBookingMapper {
     }
 
     public RaceBookingResponse toResponse(RaceBooking booking) {
+        return toResponse(booking, null);
+    }
+
+    public RaceBookingResponse toResponse(RaceBooking booking, Integer waitlistPosition) {
         return new RaceBookingResponse(
                 booking.getRaceBookingId(),
                 userMapper.toResponse(booking.getUser()),
@@ -44,7 +48,8 @@ public class RaceBookingMapper {
                 booking.getFinalPosition(),
                 booking.getGridPosition(),
                 // the booking's own copy; a free race place of a competition has no payment
-                booking.getPaymentStatus());
+                booking.getPaymentStatus(),
+                waitlistPosition);
     }
 
     // public board: only the driver's name, nothing private

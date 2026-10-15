@@ -99,7 +99,7 @@ export const ADMIN_ROLES = [ROLES.ADMIN, ROLES.SUPER_ADMIN];
 // allowed values, same lists the backend checks
 export const TRACK_CATEGORIES = ['Circuit', 'Karting', 'Rally', 'Drag Strip'];
 export const CAR_CATEGORIES = ['GT3', 'Formula', 'Karting', 'Rally', 'Stock'];
-export const BOOKING_STATUSES = ['Pending', 'Approved', 'Rejected'];
+export const BOOKING_STATUSES = ['Pending', 'Approved', 'Rejected', 'Waitlisted'];
 export const SENTIMENTS = ['POSITIVE', 'NEUTRAL', 'NEGATIVE', 'NOT_ANALYSED'];
 
 // same words as the backend enums
@@ -132,11 +132,14 @@ export const COMPETITION_STATUS = {
 export const BOOKING_STATUS = {
   PENDING: 'Pending',
   APPROVED: 'Approved',
-  REJECTED: 'Rejected'
+  REJECTED: 'Rejected',
+  WAITLISTED: 'Waitlisted'
 };
 
-export const BOOKING_TERMS = 'You pay when you book. If GridPulse rejects your booking, or you cancel it while it is '
-  + 'still Pending, the full amount is refunded. You may also cancel an approved booking, but then the amount is not refunded.';
+export const BOOKING_TERMS = 'You pay when you book. A full session puts your booking on its waitlist: it moves up when a seat '
+  + 'opens, and if none opens before the start the full amount is refunded. If GridPulse rejects your booking, or you cancel '
+  + 'it while it is still Pending or on the waitlist, the full amount is refunded. You may also cancel an approved booking, '
+  + 'but then the amount is not refunded.';
 
 export const LIVE_REFRESH_MS = 4000;
 

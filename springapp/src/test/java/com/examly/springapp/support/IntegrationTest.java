@@ -104,6 +104,10 @@ public abstract class IntegrationTest {
         return call(HttpMethod.PUT, url, token, body);
     }
 
+    protected ResponseEntity<String> delete(String url, String token) {
+        return call(HttpMethod.DELETE, url, token, null);
+    }
+
     // what payment-service sends: the internal key + the driver's own token
     protected ResponseEntity<String> postInternal(String url, String token, Object body) {
         HttpHeaders headers = headers(token);

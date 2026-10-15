@@ -6,7 +6,9 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 import com.gridpulse.common.event.AdminInvited;
 import com.gridpulse.common.event.BookingDecided;
+import com.gridpulse.common.event.BookingPromoted;
 import com.gridpulse.common.event.BookingRefundRequested;
+import com.gridpulse.common.event.BookingWaitlisted;
 import com.gridpulse.common.event.OtpRequested;
 import com.gridpulse.common.event.Topics;
 import com.gridpulse.common.outbox.EventPublisher;
@@ -33,6 +35,16 @@ public class DomainEventOutboxListener {
 
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void onBookingDecided(BookingDecided event) {
+        eventPublisher.publish(Topics.BOOKING, String.valueOf(event.bookingId()), event);
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+    public void onBookingWaitlisted(BookingWaitlisted event) {
+        eventPublisher.publish(Topics.BOOKING, String.valueOf(event.bookingId()), event);
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+    public void onBookingPromoted(BookingPromoted event) {
         eventPublisher.publish(Topics.BOOKING, String.valueOf(event.bookingId()), event);
     }
 

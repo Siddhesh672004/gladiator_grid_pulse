@@ -126,7 +126,8 @@ instance where the change was made.
    core tests: two paid bookings for the same car number at once, one order sent twice, two admins approving
    the last seat at once, 401 / 403 rules, competition start guard, booking event + e-ticket, admin list pages
    (paging + query count), admin invite link, circuit breaker, driver stats + leaderboard, outbox relay -> kafka,
-   internal key rules, payment status events applied once.
+   internal key rules, payment status events applied once, waitlist (full -> waitlisted -> a seat opens -> moved
+   up -> the session starts -> the rest refunded).
    payment-service tests: booked -> PAID, refused -> refund + same error, core too slow -> 202 -> the job finds
    the booking, core down + no booking -> refund, a refund asked twice changes once.
    one class only:  ./mvnw -pl springapp test -Dtest=StatsIntegrationTest

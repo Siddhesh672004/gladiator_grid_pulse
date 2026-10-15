@@ -28,13 +28,14 @@
         <div class="server-error" *ngIf="sessionsError" role="alert">{{ sessionsError }}</div>
         <div class="session-list" *ngIf="sessions.length > 0">
           <button type="button" class="session-chip" *ngFor="let session of sessions"
-                  [class.selected]="selectedSession === session" [disabled]="isFull(session)" (click)="selectSession(session)">
+                  [class.selected]="selectedSession === session" (click)="selectSession(session)">
             <strong class="mono">{{ time(session) }}</strong>
             {{ label(session) }} · <span class="mono">₹{{ session.price }}</span>
             <span class="seat-line">{{ session.approvedCars }} of {{ session.maxCars }} seats taken</span>
             <span class="join-label">{{ chipText(session) }}</span>
           </button>
         </div>
+        <p class="muted" *ngIf="selectedSession && isFull(selectedSession)">Session full — you'll join the waitlist (refunded if no seat opens)</p>
         <div class="error-text" *ngIf="submitted && !selectedSession">Please pick a session</div>
       </section>
 
@@ -107,14 +108,8 @@
 
 <ng-template [appPopup]="showModal">
   <div class="modal-box" *ngIf="showModal">
-    <ng-container *ngIf="!pendingMessage; else stillConfirming">
-      <p>Payment received and race registration submitted successfully!</p>
-      <p class="modal-hint">Your booking now waits for the admin's approval. If it is rejected, the amount is refunded.</p>
-    </ng-container>
-    <ng-template #stillConfirming>
-      <p>{{ pendingMessage }}</p>
-      <p class="modal-hint">If the booking can't be saved, the amount is refunded.</p>
-    </ng-template>
+    <p>{{ modalText }}</p>
+    <p class="modal-hint">{{ modalHint }}</p>
     <button class="btn btn-main" (click)="closeModal()">Ok</button>
   </div>
 </ng-template>

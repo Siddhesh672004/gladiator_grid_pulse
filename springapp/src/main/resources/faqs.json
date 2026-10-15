@@ -87,7 +87,7 @@
     "id": 15,
     "category": "Bookings",
     "question": "Can several drivers share the same session?",
-    "answer": "Yes. A session has a maximum number of cars. Any number of drivers can register and wait as Pending. The admin approves cars until the session is full, and everybody who is still waiting is then rejected automatically with the note 'Session is full'."
+    "answer": "Yes. A session has a maximum number of cars. Any number of drivers can register and wait as Pending. The admin approves cars until the session is full; everybody still waiting then goes on the waitlist (no refund yet), and a booking made for a full session joins the waitlist too. When a seat opens (an approved car cancels, or the admin adds seats) the oldest waitlisted booking moves up to Pending. Whoever is still on the waitlist when the session starts is rejected and refunded in full."
   },
   {
     "id": 16,
@@ -99,19 +99,19 @@
     "id": 17,
     "category": "Bookings",
     "question": "What time can I book a session for?",
-    "answer": "You book one of the sessions the admin has scheduled - you cannot choose your own time. Pick a date on the registration page to see that day's sessions with their time, price and free seats. A session can be booked until it starts."
+    "answer": "You book one of the sessions the admin has scheduled - you cannot choose your own time. Pick a date on the registration page to see that day's sessions with their time, price and free seats. A session can be booked until it starts; a full session can still be booked, the booking then joins its waitlist."
   },
   {
     "id": 18,
     "category": "Bookings",
-    "question": "What does Pending, Approved or Rejected mean on my registration?",
-    "answer": "Every new registration starts as Pending. Race control (the Admin) then approves or rejects it and you get an email about it. A rejection always comes with the reason the admin wrote: it is in the email and under 'Show More' on 'My Registrations'."
+    "question": "What does Pending, Approved, Rejected or Waitlisted mean on my registration?",
+    "answer": "Every new registration starts as Pending. Race control (the Admin) then approves or rejects it and you get an email about it. Waitlisted #n means the session is full and you are number n in the queue: you move up to Pending by yourself when a seat opens, and if none opens before the start you are refunded in full. A rejection always comes with the reason the admin wrote: it is in the email and under 'Show More' on 'My Registrations'."
   },
   {
     "id": 19,
     "category": "Bookings",
     "question": "How do I cancel my registration?",
-    "answer": "Open 'Tracks' > 'My Registrations' and click 'Cancel' on your booking. A Pending booking is refunded in full. An Approved booking can be cancelled while the session has not started, but the amount is not refunded. A Rejected booking can be taken off your list with 'Remove'."
+    "answer": "Open 'Tracks' > 'My Registrations' and click 'Cancel' on your booking. A Pending or Waitlisted booking is refunded in full. An Approved booking can be cancelled while the session has not started, but the amount is not refunded. A Rejected booking can be taken off your list with 'Remove'."
   },
   {
     "id": 20,
@@ -201,7 +201,7 @@
     "id": 34,
     "category": "Bookings",
     "question": "What are the terms and conditions of a booking?",
-    "answer": "You accept them with the checkbox on the registration form: you pay when you book. If GridPulse rejects your booking, or you cancel it while it is still Pending, the full amount is refunded. You may also cancel an approved booking, but then the amount is not refunded."
+    "answer": "You accept them with the checkbox on the registration form: you pay when you book. A full session puts your booking on its waitlist: it moves up when a seat opens, and if none opens before the start the full amount is refunded. If GridPulse rejects your booking, or you cancel it while it is still Pending or on the waitlist, the full amount is refunded. You may also cancel an approved booking, but then the amount is not refunded."
   },
   {
     "id": 35,

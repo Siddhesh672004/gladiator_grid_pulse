@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject, Subscription, debounceTime } from 'rxjs';
-import { BookingStatusRequest, RaceBooking, raceStatusText } from '../../models/race-booking.model';
+import { BookingStatusRequest, RaceBooking, raceStatusText, statusLabel } from '../../models/race-booking.model';
 import { RaceSession, sessionLabel, sessionTime } from '../../models/session.model';
 import { RaceService } from '../../services/race.service';
 import { UserStorageService } from '../../services/user-storage.service';
@@ -129,6 +129,10 @@ export class AdminviewregistrationsComponent implements OnInit, OnDestroy {
     return raceStatusText(booking);
   }
 
+  statusText(booking: RaceBooking): string {
+    return statusLabel(booking);
+  }
+
   payment(booking: RaceBooking): string {
     return paymentLabel(booking.paymentStatus);
   }
@@ -146,10 +150,11 @@ export class AdminviewregistrationsComponent implements OnInit, OnDestroy {
     return booking.session.status === SESSION_STATUS.SCHEDULED && booking.session.phase !== COMPETITION_PHASE.RACING;
   }
 
-  // the money of a rejected booking went back: the driver has to book again
+  // the money of a rejected booking went back: the driver has to book again. a waitlisted one moves up by itself
   canApprove(booking: RaceBooking): boolean {
     const refunded = booking.status === BOOKING_STATUS.REJECTED && !!booking.paymentStatus && booking.paymentStatus !== 'PAID';
-    return this.canDecide(booking) && booking.status !== BOOKING_STATUS.APPROVED && !refunded;
+    return this.canDecide(booking) && booking.status !== BOOKING_STATUS.APPROVED
+      && booking.status !== BOOKING_STATUS.WAITLISTED && !refunded;
   }
 
   approve(booking: RaceBooking): void {

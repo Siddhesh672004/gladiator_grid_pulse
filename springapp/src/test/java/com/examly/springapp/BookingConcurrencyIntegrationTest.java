@@ -74,15 +74,11 @@ class BookingConcurrencyIntegrationTest extends IntegrationTest {
         Long winner = firstWon ? firstBooking : secondBooking;
         Long loser = firstWon ? secondBooking : firstBooking;
         assertThat(data.booking(winner).getStatus()).isEqualTo(BookingStatus.APPROVED);
-        // the approval that filled the seat sent the waiting booking away, payment-service is asked for the refund
-        RaceBooking rejected = data.booking(loser);
-        assertThat(rejected.getStatus()).isEqualTo(BookingStatus.REJECTED);
-        assertThat(rejected.getPaymentStatus()).isEqualTo(PaymentStatus.REFUND_PENDING);
-        assertThat(outboxEvents(BookingRefundRequested.class))
-                .anySatisfy(refund -> {
-                    assertThat(refund.bookingId()).isEqualTo(loser);
-                    assertThat(refund.orderId()).isEqualTo(rejected.getPaymentOrderId());
-                    assertThat(refund.amount()).isEqualTo(500.0);
-                });
+        // the approval that filled the seat put the other booking on the waitlist: it keeps its money
+        RaceBooking waiting = data.booking(loser);
+        assertThat(waiting.getStatus()).isEqualTo(BookingStatus.WAITLISTED);
+        assertThat(waiting.getPaymentStatus()).isEqualTo(PaymentStatus.PAID);
+        assertThat(outboxEvents(BookingRefundRequested.class)).extracting(BookingRefundRequested::bookingId)
+                .doesNotContain(loser);
     }
 }

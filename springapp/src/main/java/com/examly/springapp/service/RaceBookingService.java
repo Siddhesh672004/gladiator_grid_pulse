@@ -40,6 +40,9 @@ public interface RaceBookingService {
 
     Optional<RaceBookingResponse> findByOrder(String razorpayOrderId);
 
+    // seats came free (approved booking gone, more seats): the oldest waitlisted bookings move up to Pending
+    void promoteFromWaitlist(Long sessionId);
+
     // PaymentStatusChanged: the booking of this order copies the status (unknown order / status -> nothing)
     void applyPaymentStatus(String razorpayOrderId, String status);
 

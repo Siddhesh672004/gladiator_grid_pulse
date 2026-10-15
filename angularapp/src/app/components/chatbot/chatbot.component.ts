@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ChatBubble, ChatResponse } from '../../models/chat.model';
-import { PaymentConfirmRequest, PaymentOrder, RazorpayResult } from '../../models/payment.model';
+import { PaymentConfirmRequest, PaymentConfirmResult, PaymentOrder, RazorpayResult } from '../../models/payment.model';
 import { RaceBookingRequest } from '../../models/race-booking.model';
 import { ChatService } from '../../services/chat.service';
 import { PaymentService } from '../../services/payment.service';
@@ -110,12 +110,22 @@ export class ChatbotComponent {
       razorpaySignature: paid.razorpay_signature
     };
     this.paymentService.confirm(request).subscribe({
-      next: (result) => this.addBotBubble(result.booking
-        ? `Payment received. Booking #${result.booking.raceBookingId} for car #${result.booking.carNumber} `
-          + 'is saved and waiting for approval. You can follow it under My Registrations.'
-        : result.pendingMessage || 'Payment received. Your booking is being confirmed.'),
+      next: (result) => this.addBotBubble(this.confirmedText(result)),
       error: (err) => this.paymentFailed(err, true)
     });
+  }
+
+  private confirmedText(result: PaymentConfirmResult): string {
+    const booking = result.booking;
+    if (!booking) {
+      return result.pendingMessage || 'Payment received. Your booking is being confirmed.';
+    }
+    if (booking.status === 'Waitlisted') {
+      return `Payment received. The session is full: booking #${booking.raceBookingId} for car #${booking.carNumber} `
+        + `is number ${booking.waitlistPosition} on the waitlist and moves up when a seat opens (refunded if none does).`;
+    }
+    return `Payment received. Booking #${booking.raceBookingId} for car #${booking.carNumber} `
+      + 'is saved and waiting for approval. You can follow it under My Registrations.';
   }
 
   private paymentFailed(err: any, hasPaid: boolean): void {

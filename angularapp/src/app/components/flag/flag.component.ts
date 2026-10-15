@@ -3,7 +3,7 @@ import { Component, Input } from '@angular/core';
 // a status shown as a race flag: green = go, yellow = wait, red = stop, chequered = finished, blue = coming up
 const FLAGS: { [status: string]: string } = {
   Approved: 'green', LIVE: 'green', RACING: 'green', QUALIFYING: 'green', PAID: 'green', Active: 'green', POSITIVE: 'green',
-  Pending: 'yellow', CREATED: 'yellow', REFUND_PENDING: 'yellow',
+  Pending: 'yellow', Waitlisted: 'yellow', CREATED: 'yellow', CAPTURED: 'yellow', REFUND_PENDING: 'yellow',
   Rejected: 'red', CANCELLED: 'red', FAILED: 'red', REFUND_FAILED: 'red', Inactive: 'red', NEGATIVE: 'red',
   COMPLETED: 'chequered', FINISHED: 'chequered', QUALIFYING_COMPLETED: 'chequered',
   SCHEDULED: 'blue', UPCOMING: 'blue', REFUNDED: 'blue'

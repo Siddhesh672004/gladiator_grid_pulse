@@ -21,5 +21,6 @@ public record RaceBookingResponse(
         String raceState,
         Integer finalPosition,
         Integer gridPosition,
-        PaymentStatus paymentStatus) { // empty = no payment (old booking / race place)
+        PaymentStatus paymentStatus,   // empty = no payment (old booking / race place)
+        Integer waitlistPosition) {    // 1 = next to move up, empty when not Waitlisted
 }

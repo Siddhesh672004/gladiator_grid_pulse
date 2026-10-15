@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -18,6 +19,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import com.gridpulse.common.event.BookingDecided;
+import com.gridpulse.common.event.BookingPromoted;
+import com.gridpulse.common.event.BookingWaitlisted;
 import com.gridpulse.common.event.EventEnvelope;
 import com.gridpulse.common.event.EventJson;
 import com.gridpulse.common.event.EventReader;
@@ -27,6 +30,7 @@ import com.gridpulse.common.inbox.Inbox;
 import com.gridpulse.notification.email.Attachment;
 import com.gridpulse.notification.email.EmailMessage;
 import com.gridpulse.notification.email.OtpEmail;
+import com.gridpulse.notification.email.PromotedEmail;
 import com.gridpulse.notification.email.RefundDoneEmail;
 import com.gridpulse.notification.service.EmailService;
 
@@ -88,6 +92,24 @@ class NotificationListenerTest {
         assertThat(email.getValue()).isInstanceOf(RefundDoneEmail.class);
         assertThat(email.getValue().body()).contains("Rs.650 has been refunded");
         verify(inbox, never()).isNew("e6", NotificationListener.CONSUMER);
+    }
+
+    @Test
+    void waitlistAndSeatOpened() throws Exception {
+        when(inbox.isNew("e7", NotificationListener.CONSUMER)).thenReturn(true);
+        when(inbox.isNew("e8", NotificationListener.CONSUMER)).thenReturn(true);
+
+        listener.onBookingEvent(envelope("e7", new BookingWaitlisted(9L, "driver@gridpulse.test", "Aarav Rao", "Buddh",
+                "Noida", LocalDate.of(2026, 10, 20), LocalTime.of(10, 0), LocalTime.of(11, 0), 27, "GT3", "Waitlisted",
+                "Session is full - you are number 2 on the waitlist", null)));
+        listener.onBookingEvent(envelope("e8", new BookingPromoted(9L, "driver@gridpulse.test", "Aarav Rao", "Buddh",
+                "Noida", LocalDate.of(2026, 10, 20), LocalTime.of(10, 0), LocalTime.of(11, 0), 27, "GT3", "Pending",
+                "A seat opened up", null)));
+
+        ArgumentCaptor<EmailMessage> emails = ArgumentCaptor.forClass(EmailMessage.class);
+        verify(emailService, times(2)).send(eq("driver@gridpulse.test"), emails.capture(), eq(List.of()));
+        assertThat(emails.getAllValues().get(0).body()).contains("number 2 on the waitlist");
+        assertThat(emails.getAllValues().get(1)).isInstanceOf(PromotedEmail.class);
     }
 
     private static String envelope(String eventId, Object payload) throws Exception {

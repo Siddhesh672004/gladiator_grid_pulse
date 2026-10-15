@@ -30,6 +30,12 @@ public interface RaceBookingRepo extends JpaRepository<RaceBooking, Long> {
     // seats taken = Approved bookings
     long countBySessionSessionIdAndStatus(Long sessionId, String status);
 
+    // the queue of a session: oldest first
+    List<RaceBooking> findBySessionSessionIdAndStatusOrderByRaceBookingIdAsc(Long sessionId, String status);
+
+    // how many of the queue are before this booking
+    long countBySessionSessionIdAndStatusAndRaceBookingIdLessThan(Long sessionId, String status, Long raceBookingId);
+
     // rejected bookings free their car number
     boolean existsBySessionSessionIdAndCarNumberAndStatusNot(Long sessionId, Integer carNumber, String status);
 

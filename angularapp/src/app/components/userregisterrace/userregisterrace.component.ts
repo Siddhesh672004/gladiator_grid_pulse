@@ -4,13 +4,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { RaceTrack } from '../../models/race-track.model';
 import { CarCategory, RaceBookingRequest } from '../../models/race-booking.model';
-import { PaymentConfirmRequest, PaymentOrder, RazorpayResult } from '../../models/payment.model';
+import { PaymentConfirmRequest, PaymentConfirmResult, PaymentOrder, RazorpayResult } from '../../models/payment.model';
 import { RaceSession, hasStarted, isBookable, sessionLabel, sessionTime } from '../../models/session.model';
 import { RaceService } from '../../services/race.service';
 import { SessionService } from '../../services/session.service';
 import { ProfileService } from '../../services/profile.service';
 import { PaymentService } from '../../services/payment.service';
-import { BOOKING_TERMS, CAR_CATEGORIES } from '../../constants';
+import { BOOKING_STATUS, BOOKING_TERMS, CAR_CATEGORIES } from '../../constants';
 import { DIGITS_PATTERN, matches, maxChars, monthsAheadIso, notInPast, required, todayIso, withinMonths } from '../../validation';
 
 // /user/register/:trackId -> pick date and session, car, terms, then Razorpay (PaymentService)
@@ -37,8 +37,9 @@ export class UserregisterraceComponent implements OnInit, OnDestroy {
   isSaving: boolean = false;
   errorMessage: string = '';
   showModal: boolean = false;
-  // paid, but the booking is still being confirmed: the modal shows this instead
-  pendingMessage: string = '';
+  // what the success window says: saved, on the waitlist, or still being confirmed
+  modalText: string = '';
+  modalHint: string = '';
   profileIncomplete: boolean = false;
 
   private dateSubscription?: Subscription;
@@ -147,22 +148,18 @@ export class UserregisterraceComponent implements OnInit, OnDestroy {
     return (session.approvedCars ?? 0) >= session.maxCars;
   }
 
+  // a full session can be picked too: the booking joins its waitlist
   selectSession(session: RaceSession): void {
-    if (!this.isFull(session)) {
-      this.selectedSession = session;
-      this.errorMessage = '';
-    }
+    this.selectedSession = session;
+    this.errorMessage = '';
   }
 
   // text on a session chip
   chipText(session: RaceSession): string {
-    if (this.isFull(session)) {
-      return 'Full';
-    }
     if (this.selectedSession === session) {
       return 'Selected ✓';
     }
-    return 'Select';
+    return this.isFull(session) ? 'Full · Waitlist' : 'Select';
   }
 
   hidePicture(category: CarCategory): void {
@@ -283,14 +280,28 @@ export class UserregisterraceComponent implements OnInit, OnDestroy {
     this.paymentService.confirm(request).subscribe({
       next: (result) => {
         this.isSaving = false;
-        this.pendingMessage = result.pendingMessage || '';
-        this.showModal = true;
+        this.showSuccess(result);
       },
       error: (err) => this.paymentFailed(err, true)
     });
   }
 
-  // window closed, session full meanwhile ... "hasPaid" = the money was already taken when it failed
+  private showSuccess(result: PaymentConfirmResult): void {
+    if (result.pendingMessage) {
+      this.modalText = result.pendingMessage;
+      this.modalHint = 'If the booking can\'t be saved, the amount is refunded.';
+    } else if (result.booking?.status === BOOKING_STATUS.WAITLISTED) {
+      this.modalText = 'Payment received. The session is full: you are number ' + result.booking.waitlistPosition
+        + ' on the waitlist.';
+      this.modalHint = 'You move up by yourself when a seat opens. If none opens before the start, the amount is refunded.';
+    } else {
+      this.modalText = 'Payment received and race registration submitted successfully!';
+      this.modalHint = 'Your booking now waits for the admin\'s approval. If it is rejected, the amount is refunded.';
+    }
+    this.showModal = true;
+  }
+
+  // window closed, car number taken meanwhile ... "hasPaid" = the money was already taken when it failed
   private paymentFailed(err: any, hasPaid: boolean): void {
     this.isSaving = false;
     this.errorMessage = err.error?.message || 'Unable to register. Please try again.';
