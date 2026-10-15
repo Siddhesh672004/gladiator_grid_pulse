@@ -4,11 +4,15 @@ import java.util.List;
 
 import com.examly.springapp.dto.request.AddAdminRequest;
 import com.examly.springapp.dto.response.AdminResponse;
+import com.examly.springapp.dto.response.MessageResponse;
 
 public interface SuperAdminService {
 
-    // sends the invite email, mail failed -> 503 and nothing saved
+    // the invite email (set-password link) goes out after the save
     AdminResponse addAdmin(AddAdminRequest request);
+
+    // a new link, the older one stops working. too soon after the last one -> 400
+    MessageResponse resendInvite(int userId);
 
     List<AdminResponse> getAdmins();
 

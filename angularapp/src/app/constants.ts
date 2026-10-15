@@ -7,9 +7,11 @@ export const API_ENDPOINTS = {
   ADMIN_LOGIN: '/api/admin/login',
   PASSWORD_FORGOT: '/api/password/forgot',
   PASSWORD_RESET: '/api/password/reset',
+  PASSWORD_SET_INITIAL: '/api/password/set-initial',
   PROFILE: '/api/profile',
   IMAGE_UPLOAD: (kind: string) => `/api/images/${kind}`,
   SUPER_ADMIN_ADMINS: '/api/super-admin/admins',
+  SUPER_ADMIN_RESEND_INVITE: (userId: number) => `/api/super-admin/admins/${userId}/resend-invite`,
   RACE_TRACK: '/api/race-track',
   RACE_TRACK_ACTIVATE: (trackId: number) => `/api/race-track/${trackId}/activate`,
   RACE_TRACK_DEACTIVATE: (trackId: number) => `/api/race-track/${trackId}/deactivate`,
@@ -58,7 +60,7 @@ export const API_ENDPOINTS = {
 
 // no Bearer token for these (same list as permitAll in SecurityConfig), matched on the path only
 export const PUBLIC_ENDPOINTS: { method: string; pattern: RegExp }[] = [
-  { method: 'POST', pattern: /\/api\/(register|register\/send-code|login|admin\/login|password\/forgot|password\/reset)$/ },
+  { method: 'POST', pattern: /\/api\/(register|register\/send-code|login|admin\/login|password\/forgot|password\/reset|password\/set-initial)$/ },
   { method: 'GET', pattern: /\/api\/race-track(\/\d+)?$/ },
   { method: 'GET', pattern: /\/api\/race-control\/session\/\d+$/ },
   { method: 'GET', pattern: /\/api\/sessions\/(track\/)?\d+$/ },

@@ -15,6 +15,8 @@ Needs: Java 17+, Node 20, Docker Desktop (or a local MySQL 8, see "Manual MySQL"
    DB_HOST / DB_PORT               mysql, default localhost / 3306 (ignored when DB_URL is set)
    JWT_SECRET                      64+ characters; empty = a key file in ~/.gridpulse (one instance only)
    GRIDPULSE_JOBS_REFUND_ENABLED   false = no refund job here (run it on one instance only)
+   FRONTEND_URL                    where the Angular site runs, default http://localhost:8081
+                                   (the admin invite email links to FRONTEND_URL/set-password)
 
 
 1. Infra with Docker (MySQL + Redis + Kafka + Kafka UI)

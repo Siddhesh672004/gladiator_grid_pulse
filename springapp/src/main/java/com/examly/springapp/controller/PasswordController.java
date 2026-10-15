@@ -8,13 +8,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.examly.springapp.dto.request.EmailRequest;
 import com.examly.springapp.dto.request.ResetPasswordRequest;
+import com.examly.springapp.dto.request.SetPasswordRequest;
 import com.examly.springapp.dto.response.MessageResponse;
 import com.examly.springapp.service.AuthService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-// forgot password for drivers and admins, public
+// forgot password for drivers and admins + the first password of an invited admin, public
 @RestController
 @RequestMapping("/api/password")
 @RequiredArgsConstructor
@@ -31,5 +32,11 @@ public class PasswordController {
     @PostMapping("/reset")
     public ResponseEntity<MessageResponse> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         return ResponseEntity.ok(authService.resetPassword(request));
+    }
+
+    // the page behind the admin invite link; used, expired or wrong link -> 400
+    @PostMapping("/set-initial")
+    public ResponseEntity<MessageResponse> setInitialPassword(@Valid @RequestBody SetPasswordRequest request) {
+        return ResponseEntity.ok(authService.setInitialPassword(request));
     }
 }

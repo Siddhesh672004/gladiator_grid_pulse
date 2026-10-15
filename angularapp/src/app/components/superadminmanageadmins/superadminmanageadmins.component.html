@@ -1,5 +1,5 @@
 <div class="page">
-  <app-pagehead title="Admins" subtitle="Only the super admin sees this page. A new admin gets an invite email with the first password."></app-pagehead>
+  <app-pagehead title="Admins" subtitle="Only the super admin sees this page. A new admin gets an invite email with a link to choose the password."></app-pagehead>
 
   <!-- the list on the left, the Add Admin form stays next to it -->
   <div class="two-col">
@@ -29,6 +29,8 @@
                 <td class="actions">
                   <button class="btn btn-small" [class.btn-green]="!admin.enabled" [class.btn-grey]="admin.enabled"
                           [disabled]="busyId === admin.userId" (click)="toggle(admin)">{{ admin.enabled ? 'Disable' : 'Enable' }}</button>
+                  <button class="btn btn-small btn-light" [disabled]="busyId === admin.userId"
+                          (click)="resendInvite(admin)">Resend invite</button>
                   <button class="btn btn-small btn-danger" [disabled]="busyId === admin.userId"
                           (click)="adminToDelete = admin">Delete</button>
                 </td>
@@ -47,8 +49,6 @@
         <app-field label="Username" inputId="adminUsername" hint="Letters and spaces" [maxlength]="50"
                    [control]="adminForm.get('username')"></app-field>
         <app-field label="Email" type="email" inputId="adminEmail" [maxlength]="100" [control]="adminForm.get('email')"></app-field>
-        <app-field label="Initial Password" name="Initial password" type="password" inputId="adminPassword" autocomplete="new-password"
-                   [maxlength]="64" hint="Sent to the admin by email" [control]="adminForm.get('initialPassword')"></app-field>
         <app-field label="Mobile Number" name="Mobile number" type="tel" inputId="adminMobile" hint="Optional, 10 digits" [optional]="true"
                    [digits]="true" [maxlength]="10" [control]="adminForm.get('mobileNumber')"></app-field>
 

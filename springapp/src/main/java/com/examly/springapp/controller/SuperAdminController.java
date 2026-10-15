@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.examly.springapp.dto.request.AddAdminRequest;
 import com.examly.springapp.dto.request.AdminStatusRequest;
 import com.examly.springapp.dto.response.AdminResponse;
+import com.examly.springapp.dto.response.MessageResponse;
 import com.examly.springapp.security.annotation.SuperAdminOnly;
 import com.examly.springapp.service.SuperAdminService;
 
@@ -29,7 +30,7 @@ public class SuperAdminController {
 
     private final SuperAdminService superAdminService;
 
-    // sends the invite email; 503 when it could not be sent
+    // the new admin gets the set-password link by email
     @SuperAdminOnly
     @PostMapping
     public ResponseEntity<AdminResponse> addAdmin(@Valid @RequestBody AddAdminRequest request) {
@@ -47,6 +48,12 @@ public class SuperAdminController {
     public ResponseEntity<AdminResponse> setStatus(@PathVariable int userId,
             @Valid @RequestBody AdminStatusRequest request) {
         return ResponseEntity.ok(superAdminService.setAdminEnabled(userId, request.enabled()));
+    }
+
+    @SuperAdminOnly
+    @PostMapping("/{userId}/resend-invite")
+    public ResponseEntity<MessageResponse> resendInvite(@PathVariable int userId) {
+        return ResponseEntity.ok(superAdminService.resendInvite(userId));
     }
 
     // 404 for anything that is not an admin (also the super admin itself and drivers)

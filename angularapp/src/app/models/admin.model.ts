@@ -8,9 +8,9 @@ export interface AdminAccount {
   createdAt?: string;
 }
 
+// no password: the new admin chooses it through the emailed link
 export interface AddAdminRequest {
   email: string;
   username: string;
-  initialPassword: string;
   mobileNumber?: string;
 }

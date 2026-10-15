@@ -35,7 +35,8 @@ public class SecurityConfig {
                         // open for everyone
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/register/send-code", "/api/register", "/api/login",
-                                "/api/admin/login", "/api/password/forgot", "/api/password/reset").permitAll()
+                                "/api/admin/login", "/api/password/forgot", "/api/password/reset",
+                                "/api/password/set-initial").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/race-track", "/api/race-track/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/race-control/session/*").permitAll()
                         // the admin list page sits next to the public "/api/sessions/{id}"

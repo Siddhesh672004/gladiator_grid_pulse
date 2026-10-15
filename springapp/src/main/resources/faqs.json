@@ -183,7 +183,7 @@
     "id": 31,
     "category": "Account",
     "question": "How do I become an admin or add a new admin?",
-    "answer": "Signing up always makes a driver account. Only the Super Admin can add admins: on the 'Admins' page they enter the new admin's name, email and an initial password, and the admin gets these by email. The admin then logs in on the 'Admin Login' page. The Super Admin can also disable or enable an admin there."
+    "answer": "Signing up always makes a driver account. Only the Super Admin can add admins: on the 'Admins' page they enter the new admin's name and email, and the admin gets an email with a link to choose a password (the link works once, for 48 hours; the Super Admin can send a new one). The admin then logs in on the 'Admin Login' page. The Super Admin can also disable or enable an admin there."
   },
   {
     "id": 32,

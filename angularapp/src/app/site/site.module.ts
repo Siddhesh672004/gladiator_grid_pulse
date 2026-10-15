@@ -11,6 +11,7 @@ import { AuthshellComponent } from '../components/authshell/authshell.component'
 import { LoginComponent } from '../components/login/login.component';
 import { AdminloginComponent } from '../components/adminlogin/adminlogin.component';
 import { ForgotpasswordComponent } from '../components/forgotpassword/forgotpassword.component';
+import { SetpasswordComponent } from '../components/setpassword/setpassword.component';
 import { SignupComponent } from '../components/signup/signup.component';
 import { HomePageComponent } from '../components/home-page/home-page.component';
 import { UserprofileComponent } from '../components/userprofile/userprofile.component';
@@ -27,6 +28,7 @@ import { ErrorComponent } from '../components/error/error.component';
     LoginComponent,
     AdminloginComponent,
     ForgotpasswordComponent,
+    SetpasswordComponent,
     SignupComponent,
     HomePageComponent,
     UserprofileComponent,

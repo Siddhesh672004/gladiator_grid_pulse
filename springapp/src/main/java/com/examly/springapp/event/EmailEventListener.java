@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
+import com.examly.springapp.email.AdminInviteEmail;
 import com.examly.springapp.email.BookingStatusEmail;
 import com.examly.springapp.email.EmailMessage;
 import com.examly.springapp.email.OtpEmail;
@@ -31,6 +32,12 @@ public class EmailEventListener {
                 ? new OtpEmail(event.username(), event.code(), event.minutes())
                 : new PasswordResetEmail(event.username(), event.code(), event.minutes());
         send(event.email(), email);
+    }
+
+    @Async("emailExecutor")
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
+    public void onAdminInvited(AdminInvited event) {
+        send(event.email(), new AdminInviteEmail(event.username(), event.link(), event.hours()));
     }
 
     @Async("emailExecutor")

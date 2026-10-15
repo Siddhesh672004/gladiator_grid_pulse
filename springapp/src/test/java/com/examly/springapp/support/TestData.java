@@ -55,6 +55,17 @@ public class TestData {
                 Role.ADMIN));
     }
 
+    public User superAdmin() {
+        int n = NEXT.incrementAndGet();
+        return userRepo.save(new User("super" + n + "." + RUN + "@gridpulse.test", "hash-" + n, "Super Admin", null,
+                Role.SUPER_ADMIN));
+    }
+
+    // a mail address no other test uses (for accounts made through the api)
+    public String newEmail(String name) {
+        return name + NEXT.incrementAndGet() + "." + RUN + "@gridpulse.test";
+    }
+
     public User disable(User user) {
         user.setEnabled(false);
         return userRepo.save(user);

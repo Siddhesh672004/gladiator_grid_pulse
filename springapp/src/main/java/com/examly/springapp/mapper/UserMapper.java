@@ -33,8 +33,8 @@ public class UserMapper {
         String mobile = Optional.ofNullable(request.mobileNumber())
                 .filter(number -> !number.isBlank())
                 .orElse(null);
-        return new User(cleanEmail(request.email()), request.initialPassword(), request.username().trim(), mobile,
-                Role.ADMIN);
+        // no password yet, SuperAdminServiceImpl sets one nobody knows until the invite link is used
+        return new User(cleanEmail(request.email()), null, request.username().trim(), mobile, Role.ADMIN);
     }
 
     public UserResponse toResponse(User user) {

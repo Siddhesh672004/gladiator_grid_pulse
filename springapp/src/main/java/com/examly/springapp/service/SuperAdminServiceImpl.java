@@ -1,16 +1,26 @@
 package com.examly.springapp.service;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.examly.springapp.config.properties.FrontendProperties;
+import com.examly.springapp.config.properties.OtpProperties;
 import com.examly.springapp.dto.request.AddAdminRequest;
 import com.examly.springapp.dto.response.AdminResponse;
-import com.examly.springapp.email.AdminInviteEmail;
+import com.examly.springapp.dto.response.MessageResponse;
+import com.examly.springapp.event.AdminInvited;
+import com.examly.springapp.exceptions.OtpException;
 import com.examly.springapp.exceptions.ResourceNotFoundException;
 import com.examly.springapp.mapper.UserMapper;
+import com.examly.springapp.model.OtpPurpose;
 import com.examly.springapp.model.Role;
 import com.examly.springapp.model.User;
 import com.examly.springapp.repository.OtpCodeRepo;
@@ -19,6 +29,7 @@ import com.examly.springapp.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+// a new admin chooses the password through the emailed link (invite = OtpCode ADMIN_INVITE)
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -26,24 +37,51 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     private final UserRepo userRepo;
     private final PasswordEncoder passwordEncoder;
-    private final EmailService emailService;
+    private final ApplicationEventPublisher eventPublisher;
+    private final OtpService otpService;
+    private final OtpProperties otpProperties;
+    private final FrontendProperties frontendProperties;
     private final UserMapper userMapper;
     private final UserService userService;
     private final OtpCodeRepo otpCodeRepo;
 
-    // invite email fails -> the new admin is not saved either
+    // until the link is used the account has a random password nobody knows, so nobody can log in
     @Override
     @Transactional
     public AdminResponse addAdmin(AddAdminRequest request) {
         User admin = userMapper.toAdminEntity(request);
         userService.checkNotRegistered(admin);
-        admin.setPassword(passwordEncoder.encode(request.initialPassword()));
+        admin.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
         User saved = userRepo.save(admin);
 
-        emailService.send(saved.getEmail(),
-                new AdminInviteEmail(saved.getUsername(), saved.getEmail(), request.initialPassword()));
+        invite(saved);
         log.info("Admin {} (id {}) added and invited", saved.getEmail(), saved.getUserId());
         return userMapper.toAdminResponse(saved);
+    }
+
+    @Override
+    @Transactional
+    public MessageResponse resendInvite(int userId) {
+        User admin = findAdmin(userId);
+        // same wait as the emailed codes, so a double click sends one email
+        Optional.of(otpService.secondsUntilNextCode(admin.getEmail(), OtpPurpose.ADMIN_INVITE))
+                .filter(wait -> wait > 0)
+                .ifPresent(wait -> {
+                    throw new OtpException("An invite was just sent. Please wait " + wait
+                            + " seconds before sending a new one.");
+                });
+        invite(admin);
+        log.info("Invite sent again to admin {}", admin.getEmail());
+        return new MessageResponse("A new invite link was sent to " + admin.getEmail());
+    }
+
+    // the email goes out after the commit (event/EmailEventListener)
+    private void invite(User admin) {
+        String token = otpService.createInvite(admin);
+        String link = frontendProperties.link("/set-password?email="
+                + URLEncoder.encode(admin.getEmail(), StandardCharsets.UTF_8) + "&token=" + token);
+        eventPublisher.publishEvent(new AdminInvited(admin.getEmail(), admin.getUsername(), link,
+                otpProperties.inviteHours()));
     }
 
     @Override

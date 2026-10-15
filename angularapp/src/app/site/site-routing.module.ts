@@ -6,6 +6,7 @@ import { HowitworksComponent } from '../components/howitworks/howitworks.compone
 import { LoginComponent } from '../components/login/login.component';
 import { AdminloginComponent } from '../components/adminlogin/adminlogin.component';
 import { ForgotpasswordComponent } from '../components/forgotpassword/forgotpassword.component';
+import { SetpasswordComponent } from '../components/setpassword/setpassword.component';
 import { SignupComponent } from '../components/signup/signup.component';
 import { HomePageComponent } from '../components/home-page/home-page.component';
 import { UserprofileComponent } from '../components/userprofile/userprofile.component';
@@ -18,6 +19,8 @@ const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'admin-login', component: AdminloginComponent },
   { path: 'forgot-password', component: ForgotpasswordComponent },
+  // the link in a new admin's invite email
+  { path: 'set-password', component: SetpasswordComponent },
   { path: 'signup', component: SignupComponent },
   { path: 'home', component: HomePageComponent, canActivate: [AuthGuard] },
   { path: 'profile', component: UserprofileComponent, canActivate: [AuthGuard] },

@@ -2,10 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { AddAdminRequest, AdminAccount } from '../../models/admin.model';
 import { SuperAdminService } from '../../services/super-admin.service';
-import { emailRules, newPasswordRules, optionalMobileRules, usernameRules } from '../../validation';
+import { emailRules, optionalMobileRules, usernameRules } from '../../validation';
 import { pageOf } from '../../shared/paging';
 
-// super admin only (/admin/manage-admins): add, switch on / off and delete admins -> SuperAdminService
+// super admin only (/admin/manage-admins): add (the admin gets a set-password link), resend the link, switch on / off, delete -> SuperAdminService
 @Component({
   selector: 'app-superadminmanageadmins',
   templateUrl: './superadminmanageadmins.component.html'
@@ -27,7 +27,6 @@ export class SuperadminmanageadminsComponent implements OnInit {
     this.adminForm = this.fb.group({
       username: ['', usernameRules],
       email: ['', emailRules],
-      initialPassword: ['', newPasswordRules],
       mobileNumber: ['', optionalMobileRules]
     });
   }
@@ -64,21 +63,36 @@ export class SuperadminmanageadminsComponent implements OnInit {
     const admin: AddAdminRequest = {
       username: value.username.trim(),
       email: value.email.trim(),
-      initialPassword: value.initialPassword,
       mobileNumber: value.mobileNumber?.trim() || undefined
     };
     this.isSaving = true;
     this.superAdminService.addAdmin(admin).subscribe({
       next: (saved) => {
         this.isSaving = false;
-        this.successMessage = `Admin added - the login details were emailed to ${saved.email}`;
-        this.adminForm.reset({ username: '', email: '', initialPassword: '', mobileNumber: '' });
+        this.successMessage = `Admin added - a link to choose the password was emailed to ${saved.email}`;
+        this.adminForm.reset({ username: '', email: '', mobileNumber: '' });
         this.page = 1;
         this.loadAdmins();
       },
       error: (err) => {
         this.isSaving = false;
         this.errorMessage = err.error?.message || 'Unable to add the admin';
+      }
+    });
+  }
+
+  resendInvite(admin: AdminAccount): void {
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.busyId = admin.userId;
+    this.superAdminService.resendInvite(admin.userId).subscribe({
+      next: (res) => {
+        this.busyId = null;
+        this.successMessage = res.message;
+      },
+      error: (err) => {
+        this.busyId = null;
+        this.errorMessage = err.error?.message || 'Unable to send the invite';
       }
     });
   }

@@ -8,5 +8,6 @@ public record OtpProperties(
         int signupMinutes,
         int resetMinutes,
         int maxAttempts,      // wrong tries before the code is dead
-        int resendSeconds) {  // a new code at most once in this time
+        int resendSeconds,    // a new code at most once in this time
+        int inviteHours) {    // how long the set-password link of a new admin works
 }

@@ -47,6 +47,11 @@ export class AuthService {
     return this.http.post<MessageResponse>(this.apiUrl + API_ENDPOINTS.PASSWORD_RESET, { email, code, newPassword });
   }
 
+  // invite link of a new admin: works once
+  setInitialPassword(email: string, token: string, newPassword: string): Observable<MessageResponse> {
+    return this.http.post<MessageResponse>(this.apiUrl + API_ENDPOINTS.PASSWORD_SET_INITIAL, { email, token, newPassword });
+  }
+
   logout(): void {
     this.userStorage.clear();
   }

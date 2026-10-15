@@ -11,6 +11,7 @@ import com.examly.springapp.config.JwtUtils;
 import com.examly.springapp.dto.request.EmailRequest;
 import com.examly.springapp.dto.request.LoginRequest;
 import com.examly.springapp.dto.request.ResetPasswordRequest;
+import com.examly.springapp.dto.request.SetPasswordRequest;
 import com.examly.springapp.dto.response.LoginResponse;
 import com.examly.springapp.dto.response.MessageResponse;
 import com.examly.springapp.exceptions.OtpException;
@@ -103,6 +104,20 @@ public class AuthServiceImpl implements AuthService {
         userRepo.save(user);
         log.info("Password reset for {}", email);
         return new MessageResponse("Your password was changed. You can log in now.");
+    }
+
+    @Override
+    public MessageResponse setInitialPassword(SetPasswordRequest request) {
+        String email = UserMapper.cleanEmail(request.email());
+        otpService.verify(email, OtpPurpose.ADMIN_INVITE, request.token());
+        // only an admin gets an invite: a driver or the super admin with the same email -> same answer as a bad link
+        User admin = userRepo.findByEmailIgnoreCase(email)
+                .filter(found -> found.getUserRole() == Role.ADMIN)
+                .orElseThrow(() -> new OtpException("This invite link is not valid for this email."));
+        admin.setPassword(passwordEncoder.encode(request.newPassword()));
+        userRepo.save(admin);
+        log.info("Admin {} chose a password", email);
+        return new MessageResponse("Your password is set. You can log in now.");
     }
 
     private User checkPassword(LoginRequest request) {

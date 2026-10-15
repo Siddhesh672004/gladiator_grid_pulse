@@ -3,6 +3,7 @@ package com.examly.springapp.service;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -44,12 +45,7 @@ public class OtpServiceImpl implements OtpService {
     @Override
     @Transactional
     public int createAndSend(User user, OtpPurpose purpose) {
-        // a new code closes the older ones
-        List<OtpCode> older = otpCodeRepo.findByEmailAndPurposeAndUsedFalse(user.getEmail(), purpose).stream()
-                .peek(old -> old.setUsed(true))
-                .toList();
-        otpCodeRepo.saveAll(older);
-
+        closeOlder(user.getEmail(), purpose);
         String code = String.format("%06d", RANDOM.nextInt(1_000_000));
         int minutes = purpose == OtpPurpose.SIGNUP ? otpProperties.signupMinutes() : otpProperties.resetMinutes();
         Instant expiresAt = Instant.now().plus(Duration.ofMinutes(minutes));
@@ -61,16 +57,39 @@ public class OtpServiceImpl implements OtpService {
         return minutes * 60;
     }
 
+    // 32 random bytes as url-safe text: the link can't be guessed
+    @Override
+    @Transactional
+    public String createInvite(User admin) {
+        closeOlder(admin.getEmail(), OtpPurpose.ADMIN_INVITE);
+        byte[] bytes = new byte[32];
+        RANDOM.nextBytes(bytes);
+        String token = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+        Instant expiresAt = Instant.now().plus(Duration.ofHours(otpProperties.inviteHours()));
+        otpCodeRepo.save(new OtpCode(admin.getEmail(), OtpPurpose.ADMIN_INVITE, passwordEncoder.encode(token), expiresAt));
+        log.info("Invite link made for admin {}", admin.getEmail());
+        return token;
+    }
+
+    // a new code closes the older ones
+    private void closeOlder(String email, OtpPurpose purpose) {
+        List<OtpCode> older = otpCodeRepo.findByEmailAndPurposeAndUsedFalse(email, purpose).stream()
+                .peek(old -> old.setUsed(true))
+                .toList();
+        otpCodeRepo.saveAll(older);
+    }
+
     // not @Transactional on purpose: a wrong try must be saved even though we throw
     @Override
     public void verify(String email, OtpPurpose purpose, String code) {
+        String what = what(purpose);
         OtpCode otp = lastCode(email, purpose)
-                .orElseThrow(() -> new OtpException("No code was sent to this email. Please ask for a new one."));
+                .orElseThrow(() -> new OtpException("No " + what + " was sent to this email. Please ask for a new one."));
         // used, expired, too many tries: the first one that is true is the answer
-        Stream.of(new Rule(otp.isUsed(), "This code was already used. Please ask for a new one."),
-                        new Rule(otp.isExpired(), "This code has expired. Please ask for a new one."),
+        Stream.of(new Rule(otp.isUsed(), "This " + what + " was already used. Please ask for a new one."),
+                        new Rule(otp.isExpired(), "This " + what + " has expired. Please ask for a new one."),
                         new Rule(otp.getAttempts() >= otpProperties.maxAttempts(),
-                                "Too many wrong tries. Please ask for a new code."))
+                                "Too many wrong tries. Please ask for a new " + what + "."))
                 .filter(Rule::broken)
                 .map(Rule::message)
                 .findFirst()
@@ -92,8 +111,13 @@ public class OtpServiceImpl implements OtpService {
         int left = otpProperties.maxAttempts() - otp.getAttempts();
         log.warn("Wrong {} code for {} ({} tries left)", purpose, email, left);
         return new OtpException(left > 0
-                ? "Wrong code. " + left + (left == 1 ? " try left." : " tries left.")
-                : "Too many wrong tries. Please ask for a new code.");
+                ? "Wrong " + what(purpose) + ". " + left + (left == 1 ? " try left." : " tries left.")
+                : "Too many wrong tries. Please ask for a new " + what(purpose) + ".");
+    }
+
+    // the word the visitor sees: the emailed 6 digits or the invite link
+    private static String what(OtpPurpose purpose) {
+        return purpose == OtpPurpose.ADMIN_INVITE ? "invite link" : "code";
     }
 
     @Override
