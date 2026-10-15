@@ -1,0 +1,59 @@
+# push to main (or "Run workflow" in the Actions tab) -> angular + spring boot in ONE jar -> azure web app
+# needs the repo variable AZURE_WEBAPP_NAME and the secret AZURE_WEBAPP_PUBLISH_PROFILE, without the variable nothing runs
+name: Deploy to Azure
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    if: vars.AZURE_WEBAPP_NAME != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: angularapp/package-lock.json
+
+      - name: Build the Angular site
+        env:
+          NG_CLI_ANALYTICS: "false"
+          PUPPETEER_SKIP_DOWNLOAD: "true"
+          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: "true"
+        run: |
+          # site + api share one address on azure -> empty apiUrl = same server
+          mkdir -p angularapp/src/environments
+          for f in environment.ts environment.prod.ts; do
+            echo "export const environment = { production: true, apiUrl: '' };" > "angularapp/src/environments/$f"
+          done
+          cd angularapp
+          npm ci --no-audit --no-fund
+          npx ng build --configuration production
+
+      - name: Put the site into the Spring Boot jar
+        run: |
+          mkdir -p springapp/src/main/resources/static
+          cp -r angularapp/dist/angularapp/. springapp/src/main/resources/static/
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: maven
+
+      - name: Build the jar
+        working-directory: springapp
+        run: |
+          mvn -B package -DskipTests
+          cp target/*.jar ../gridpulse.jar
+
+      - uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: gridpulse.jar
