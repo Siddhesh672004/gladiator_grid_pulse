@@ -1,0 +1,123 @@
+<div class="page dash">
+  <app-pagehead title="Admin Dashboard" subtitle="Users, bookings, live races and revenue at a glance.">
+    <button class="btn btn-main btn-outline" type="button" id="refreshDashboard" (click)="load()"><app-icon name="refresh"></app-icon>Refresh</button>
+  </app-pagehead>
+
+  <app-loader *ngIf="isLoading" label="Loading the dashboard"></app-loader>
+  <div class="server-error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+
+  <section class="kpi-row six" *ngIf="dashboard" aria-label="Key numbers">
+    <div class="kpi"><span>Total Users</span><b>{{ dashboard.metrics.totalUsers }}</b><small>all roles</small></div>
+    <div class="kpi"><span>Registrations</span><b>{{ dashboard.metrics.registrations }}</b><small>driver accounts</small></div>
+    <div class="kpi"><span>Total Tracks</span><b>{{ dashboard.metrics.totalTracks }}</b><small>active and inactive</small></div>
+    <div class="kpi"><span>Total Bookings</span><b>{{ dashboard.metrics.totalBookings }}</b><small>every status</small></div>
+    <div class="kpi live"><span>Active Races</span><b>{{ liveRaces.length }}</b><small>live right now</small></div>
+    <div class="kpi"><span>Total Revenue</span><b>₹{{ dashboard.metrics.totalRevenue | number:'1.0-0' }}</b><small>paid and kept</small></div>
+  </section>
+
+  <!-- the canvases are always in the page, the charts are drawn when the numbers arrive -->
+  <section class="dash-row">
+    <div class="panel">
+      <h2 class="sub-title">Monthly Revenue <small class="muted">(this year)</small></h2>
+      <div class="chart-box">
+        <canvas #revenueChart aria-label="Revenue per month"></canvas>
+        <p class="chart-empty" *ngIf="dashboard && !hasRevenue">No revenue yet this year</p>
+      </div>
+    </div>
+
+    <!-- live race monitor -->
+    <div class="panel monitor">
+      <h2 class="sub-title">Live Race Monitor<span class="live-dot" *ngIf="liveRaces.length"></span></h2>
+      <p class="muted quiet" *ngIf="liveRaces.length === 0">No race is running right now.</p>
+      <div class="live-race" *ngFor="let race of liveRaces">
+        <div class="live-top">
+          <strong>{{ race.trackName }}</strong>
+          <app-flag status="LIVE" [label]="race.raceStatus"></app-flag>
+        </div>
+        <p class="muted">{{ race.session }} · started {{ race.startTime | slice:0:5 }} · {{ race.activeCars }} car(s) racing</p>
+        <p class="mono">Lap {{ race.currentLap }}{{ race.totalLaps ? ' of ' + race.totalLaps : '' }}
+          <span *ngIf="race.progressPercentage !== null">· {{ race.progressPercentage }}%</span></p>
+        <div class="progress" *ngIf="race.totalLaps"><div class="progress-bar" [style.width.%]="progress(race)"></div></div>
+      </div>
+      <a class="panel-link" routerLink="/admin/race-control">Practice Control</a>
+    </div>
+  </section>
+
+  <section class="dash-row">
+    <div class="panel">
+      <h2 class="sub-title">Bookings / Races per Month</h2>
+      <div class="chart-box tall"><canvas #bookingChart aria-label="Bookings and races per month"></canvas></div>
+    </div>
+
+    <div class="panel pies">
+      <div>
+        <h2 class="sub-title">Registration Status</h2>
+        <div class="chart-box small"><canvas #statusChart aria-label="Driver accounts: active, pending, inactive"></canvas></div>
+      </div>
+      <div>
+        <h2 class="sub-title">Track Category</h2>
+        <div class="chart-box small"><canvas #categoryChart aria-label="Tracks per category"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="dash-row" *ngIf="dashboard">
+    <div class="panel">
+      <h2 class="sub-title">Recent Registrations</h2>
+      <div class="table-wrap">
+        <table class="gp-table flat">
+          <thead>
+            <tr><th>User</th><th>Track / Session</th><th>Booked On</th><th>Status</th><th>Race</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="dashboard.recentRegistrations.length === 0" class="empty-row"><td colspan="5">No bookings yet</td></tr>
+            <tr *ngFor="let row of dashboard.recentRegistrations">
+              <td><strong>{{ row.username }}</strong><small>{{ row.email }}</small></td>
+              <td data-label="Track / Session"><strong>{{ row.trackName }}</strong><small>{{ row.session }}</small></td>
+              <td data-label="Booked On" class="mono">{{ row.registeredAt | date:'dd/MM/yyyy':'+0530' }}</td>
+              <td data-label="Status"><app-flag [status]="row.status"></app-flag></td>
+              <td data-label="Race">{{ row.raceStatus }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <a class="panel-link" routerLink="/admin/view/registrations">All registrations</a>
+    </div>
+
+    <div class="side-stack">
+      <div class="panel">
+        <h2 class="sub-title">Statement Summary</h2>
+        <div class="facts money">
+          <span class="fact-name">Collected (paid and kept)</span><span class="fact-value mono">₹{{ dashboard.statement.collected | number:'1.0-2' }}</span>
+          <span class="fact-name">Refund in progress</span><span class="fact-value mono">₹{{ dashboard.statement.refundInProgress | number:'1.0-2' }}</span>
+          <span class="fact-name">Refunded</span><span class="fact-value mono">₹{{ dashboard.statement.refunded | number:'1.0-2' }}</span>
+          <span class="fact-name">Paid bookings</span><span class="fact-value mono">{{ dashboard.statement.paidBookings }}</span>
+        </div>
+        <a class="panel-link" routerLink="/admin/view/payments">Payments</a>
+      </div>
+
+      <div class="panel">
+        <h2 class="sub-title">Feedback Explorer</h2>
+        <div class="facts money">
+          <span class="fact-name">Feedback received</span><span class="fact-value mono">{{ dashboard.metrics.totalFeedback }}</span>
+          <span class="fact-name">Needs attention (AI)</span><span class="fact-value mono">{{ dashboard.metrics.feedbackNeedsAttention }}</span>
+        </div>
+        <a class="panel-link" routerLink="/admin/view/feedback">Search, filter and summarise feedback</a>
+      </div>
+
+      <div class="panel">
+        <h2 class="sub-title">Quick actions</h2>
+        <div class="quick-grid">
+          <a routerLink="/admin/add/track">Add Track</a>
+          <a routerLink="/admin/view/tracks">Manage Tracks</a>
+          <a routerLink="/admin/add/session">Add Session</a>
+          <a routerLink="/admin/view/registrations">View Registrations</a>
+          <a routerLink="/admin/race-control">Start / Monitor Race</a>
+          <a routerLink="/admin/manage-users">Manage Users</a>
+          <a routerLink="/admin/view/feedback">View Feedback</a>
+          <a routerLink="/admin/view/payments">Payments</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
