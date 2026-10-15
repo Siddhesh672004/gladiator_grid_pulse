@@ -1,0 +1,10 @@
+# the image build only needs the maven modules; never secrets, builds or the frontend
+.git
+.env
+**/secrets.properties
+**/target
+**/logs
+**/node_modules
+angularapp
+docs
+tools

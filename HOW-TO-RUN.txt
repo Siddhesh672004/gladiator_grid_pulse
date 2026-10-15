@@ -3,16 +3,25 @@ GridPulse - how to run
 
 Needs: Java 17+, Node 20, Docker Desktop (or a local MySQL 8, see "Manual MySQL").
 
+Two services + the Angular site:
+   core (springapp)        http://localhost:8080   the api the site calls
+   notification-service    http://localhost:8084   sends every email (sign-up code, invite, booking decision + e-ticket)
+The core writes events into its outbox table; Kafka carries them to notification-service.
+No Kafka or no notification-service = no emails yet: the events wait and go out once both run.
+
 
 0. Secrets
 ----------
    cp springapp/secrets.properties.example springapp/secrets.properties
    fill in the keys you have (empty = that feature is off). never push this file.
+   one file for every service (notification-service reads MAIL_USERNAME / MAIL_PASSWORD from it too).
    an environment variable with the same name wins over the file.
 
    other settings (env vars, all optional):
-   SERVER_PORT                     backend port, default 8080
-   DB_HOST / DB_PORT               mysql, default localhost / 3306 (ignored when DB_URL is set)
+   SERVER_PORT                     core port, default 8080
+   NOTIFICATION_PORT               notification-service port, default 8084
+   DB_HOST / DB_PORT               mysql, default localhost / 3306 (core: ignored when DB_URL is set)
+   NOTIFICATION_DB_URL             notification-service database, default .../notification_db
    JWT_SECRET                      64+ characters; empty = a key file in ~/.gridpulse (one instance only)
    GRIDPULSE_JOBS_REFUND_ENABLED   false = no refund job here (run it on one instance only)
    FRONTEND_URL                    where the Angular site runs, default http://localhost:8081
@@ -21,12 +30,13 @@ Needs: Java 17+, Node 20, Docker Desktop (or a local MySQL 8, see "Manual MySQL"
    CACHE_TYPE                      none = run without redis (no cache); default redis
    KAFKA_BOOTSTRAP                 kafka for the events (emails), default localhost:9092
    TICKET_SECRET                   signs the e-ticket QR codes (secrets.properties); empty = dev secret + warning
+   MAIL_TO_FILE                    true = notification-service writes emails (+ pdf / .ics) to target/test-mails
 
 
 1. Infra with Docker (MySQL + Redis + Kafka + Kafka UI)
 -------------------------------------------------------
    cp .env.example .env            (MYSQL_ROOT_PASSWORD, MYSQL_PORT)
-   docker compose up -d
+   docker compose up -d            (or only what you need: docker compose up -d mysql redis kafka)
    docker compose ps               every container "healthy" after about a minute
 
    DB_PASSWORD in springapp/secrets.properties = MYSQL_ROOT_PASSWORD in .env (both "examly" by default)
@@ -34,29 +44,37 @@ Needs: Java 17+, Node 20, Docker Desktop (or a local MySQL 8, see "Manual MySQL"
    MySQL     localhost:3306  (schemas appdb, payment_db, ai_db, notification_db)
    Redis     localhost:6379
    Kafka     localhost:9092 for apps on this machine, kafka:29092 for containers
-   Kafka UI  http://localhost:8090
+   Kafka UI  http://localhost:8090  (topics gridpulse.account / booking / race / feedback + the retry topics)
 
    stop:            docker compose down
    stop + wipe db:  docker compose down -v
 
    Manual MySQL (alternative): any MySQL 8 on localhost:3306, login DB_USERNAME / DB_PASSWORD
-   (default root / examly). appdb is created on the first backend start.
+   (default root / examly). appdb and notification_db are created on the first start.
 
 
-2. Backend (http://localhost:8080)
-----------------------------------
-   needs MySQL and Redis running (step 1; only these two: docker compose up -d mysql redis)
-   from the repo root (one Maven build for all modules):
-   ./mvnw -q install -DskipTests -pl common        (only after a change in common/)
-   ./mvnw -pl springapp spring-boot:run
+2. Services - terminal mode (infra in Docker, services from the repo root)
+---------------------------------------------------------------------------
+   ./mvnw -q install -DskipTests -pl common                 (first time + after a change in common/)
+   ./mvnw -pl springapp spring-boot:run                     core, http://localhost:8080
+   ./mvnw -pl notification-service spring-boot:run          second terminal, http://localhost:8084
 
    no Redis at hand: CACHE_TYPE=none ./mvnw -pl springapp spring-boot:run   (works the same, without the cache)
    check the cache: docker compose exec redis redis-cli keys 'gp:*'
+   emails to files instead of gmail: MAIL_TO_FILE=true ./mvnw -pl notification-service spring-boot:run
 
-   health:   http://localhost:8080/actuator/health        {"status":"UP"}, details with an admin token
+   health:   http://localhost:8080/actuator/health   and   http://localhost:8084/actuator/health
    swagger:  http://localhost:8080/swagger-ui.html        (not in prod)
              log in on /api/admin/login (or /api/login), copy "token", press Authorize, paste it
    /actuator/info and /actuator/metrics need an Admin / SuperAdmin token
+   the gmail check of notification-service: its log line "EMAIL: ..." (notification-service/logs)
+
+
+2b. Services - full Docker (everything in containers; heavy: builds both images)
+--------------------------------------------------------------------------------
+   fill the service keys in .env (JWT_SECRET, TICKET_SECRET, MAIL_*, SUPER_ADMIN_* ... see .env.example)
+   docker compose --profile apps up -d --build
+   docker compose --profile apps down
 
 
 3. Frontend (http://localhost:8081)
@@ -66,17 +84,16 @@ Needs: Java 17+, Node 20, Docker Desktop (or a local MySQL 8, see "Manual MySQL"
    npm start
 
 
-4. Tests (Docker must be running, nothing else)
------------------------------------------------
-   cd springapp
-   ./mvnw verify
+4. Tests
+--------
+   unit tests, no Docker:   ./mvnw -q -pl common,notification-service test
+   integration tests (need Docker: they start their own MySQL, one test also a Kafka):
+                            ./mvnw -pl springapp verify
 
-   the tests start their own throw-away MySQL, never touch appdb and send no email
-   (texts go to springapp/target/test-mails, logs to springapp/target/test-logs). Razorpay is faked,
-   the cache is off (no Redis needed for the tests).
-   14 tests: two drivers paying for the same car number at once, one order confirmed twice,
-   two admins approving the last seat at once, 401 / 403 rules, competition start guard,
-   approval email in the background, admin list pages (paging + query count), admin invite link,
-   circuit breaker, driver stats + leaderboard after a full competition.
-   one class only:  ./mvnw test -Dtest=StatsIntegrationTest
-   skip them:  ./mvnw package -DskipTests
+   the integration tests never touch appdb and send no email: the events stay in the outbox table
+   (logs go to springapp/target/test-logs). Razorpay is faked, the cache and the outbox relay are off.
+   tests: two drivers paying for the same car number at once, one order confirmed twice, two admins approving
+   the last seat at once, 401 / 403 rules, competition start guard, booking event + e-ticket, admin list pages
+   (paging + query count), admin invite link, circuit breaker, driver stats + leaderboard, outbox relay -> kafka.
+   one class only:  ./mvnw -pl springapp test -Dtest=StatsIntegrationTest
+   skip them:       ./mvnw package -DskipTests

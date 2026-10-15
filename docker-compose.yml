@@ -1,5 +1,6 @@
-# local infra: mysql, redis, kafka + kafka ui. the apps run on the host (or later in containers next to these)
-# start: copy .env.example to .env, then  docker compose up -d
+# local infra: mysql, redis, kafka + kafka ui. the apps run on the host (terminal mode) or here (profile "apps")
+# start: copy .env.example to .env, then  docker compose up -d                        (infra only)
+#                                        docker compose --profile apps up -d --build  (infra + the services)
 name: gridpulse
 
 services:
@@ -74,6 +75,50 @@ services:
       timeout: 5s
       retries: 10
       start_period: 30s
+
+  # the services, only with --profile apps (a plain "docker compose up -d" stays infra only)
+  core:
+    profiles: [apps]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.service
+      args:
+        MODULE: springapp
+    ports:
+      - "8080:8080"
+    env_file: .env
+    environment:
+      DB_HOST: mysql
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      KAFKA_BOOTSTRAP: kafka:29092
+      REDIS_HOST: redis
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
+  notification:
+    profiles: [apps]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.service
+      args:
+        MODULE: notification-service
+    ports:
+      - "8084:8084"
+    env_file: .env
+    environment:
+      DB_HOST: mysql
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      KAFKA_BOOTSTRAP: kafka:29092
+    depends_on:
+      mysql:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
 
 volumes:
   mysql-data:
