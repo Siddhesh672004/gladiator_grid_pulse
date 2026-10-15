@@ -9,6 +9,7 @@ Ports:
    8082   core (springapp)        the api itself, behind the gateway (a second core instance: 8083)
    8084   notification-service    sends every email (sign-up code, invite, booking decision + e-ticket)
    8085   payment-service         razorpay orders + confirm (saves the booking through the core), refunds
+   8086   ai-service              the faq chat (gemini), later the Copilot and the feedback labels
    3306 mysql · 6379 redis · 9092 kafka · 8090 kafka ui
 The core writes events into its outbox table; Kafka carries them to notification-service, payment-service and to
 every core instance (live boards). No Kafka = no emails and no refunds yet (the events wait), and a live board only
@@ -28,7 +29,9 @@ job finishes it within a minute or two. A rejected / cancelled paid booking is r
    other settings (env vars, all optional):
    SERVER_PORT                     core port, default 8082
    CORS_ENABLED                    false = core answers no CORS (behind the gateway); default true
-   CORE_1_URL / CORE_PRIMARY_URL   gateway: where the core runs, default http://localhost:8082
+   CORE_1_URL                      gateway: where the core runs, default http://localhost:8082
+   AI_URL                          gateway: where ai-service runs, default http://localhost:8086
+   AI_PORT / AI_DB_URL             ai-service port (8086) and database (.../ai_db)
    NOTIFICATION_PORT               notification-service port, default 8084
    DB_HOST / DB_PORT               mysql, default localhost / 3306 (core: ignored when DB_URL is set)
    NOTIFICATION_DB_URL             notification-service database, default .../notification_db
@@ -66,22 +69,25 @@ job finishes it within a minute or two. A rejected / cancelled paid booking is r
    stop + wipe db:  docker compose down -v
 
    Manual MySQL (alternative): any MySQL 8 on localhost:3306, login DB_USERNAME / DB_PASSWORD
-   (default root / examly). appdb, payment_db and notification_db are created on the first start.
+   (default root / examly). appdb, payment_db, ai_db and notification_db are created on the first start.
 
    existing appdb from before phase 5 (once, in this order):
    start the core once, then  mysql -uroot -p < docker/sql/phase5-backfill-core.sql
    start payment-service once, then  mysql -uroot -p < docker/sql/phase5-copy-payments.sql
    (old payments move to payment_db, so their refunds still work)
+   existing appdb from before phase 6, BEFORE the first start of ai-service:
+   mysql -uroot -p < docker/sql/phase6-copy-chat.sql   (faqs with their gemini vectors + chat history -> ai_db)
 
 
 2. Services - terminal mode (infra in Docker, services from the repo root)
 ---------------------------------------------------------------------------
-   start order: infra (step 1) -> install common -> core -> notification -> payment -> gateway
+   start order: infra (step 1) -> install common -> core -> notification -> payment -> ai -> gateway
    ./mvnw -q install -DskipTests -pl common                 (first time + after a change in common/)
    CORS_ENABLED=false ./mvnw -pl springapp spring-boot:run  core, http://localhost:8082
    ./mvnw -pl notification-service spring-boot:run          second terminal, http://localhost:8084
    ./mvnw -pl payment-service spring-boot:run               third terminal, http://localhost:8085
-   ./mvnw -pl gateway spring-boot:run                       fourth terminal, http://localhost:8080 (what angular calls)
+   ./mvnw -pl ai-service spring-boot:run                    fourth terminal, http://localhost:8086 (the chat)
+   ./mvnw -pl gateway spring-boot:run                       fifth terminal, http://localhost:8080 (what angular calls)
    (set the same JWT_SECRET for all of them in secrets.properties: the gateway reads tokens for the rate limits)
 
    two core instances (load balancing): a second core + the gateway's docker profile
@@ -93,7 +99,8 @@ job finishes it within a minute or two. A rejected / cancelled paid booking is r
    check the cache: docker compose exec redis redis-cli keys 'gp:*'
    emails to files instead of gmail: MAIL_TO_FILE=true ./mvnw -pl notification-service spring-boot:run
 
-   health:   http://localhost:8082/actuator/health (core), :8084 (notification), :8085 (payment), :8080 (gateway)
+   health:   http://localhost:8082/actuator/health (core), :8084 (notification), :8085 (payment), :8086 (ai),
+             :8080 (gateway)
    swagger:  http://localhost:8082/swagger-ui.html        (on the core itself, not in prod)
              log in on /api/admin/login (or /api/login), copy "token", press Authorize, paste it
    /actuator/info and /actuator/metrics need an Admin / SuperAdmin token

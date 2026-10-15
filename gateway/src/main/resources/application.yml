@@ -1,5 +1,5 @@
 # gateway: port 8080 = what angular calls. core instances behind it on 8082 (and 8083 / core-2 with the docker profile),
-# payment-service on 8085
+# payment-service on 8085, ai-service on 8086
 # a new service gets its route here, above the catch-all /api/** route
 server:
   port: ${GATEWAY_PORT:8080}
@@ -20,6 +20,8 @@ spring:
               - uri: ${CORE_1_URL:http://localhost:8082}
             payment-service:
               - uri: ${PAYMENT_URL:http://localhost:8085}
+            ai-service:
+              - uri: ${AI_URL:http://localhost:8086}
     loadbalancer:
       configurations: health-check
       health-check:
@@ -60,9 +62,9 @@ spring:
                 - Path=/api/live/**
               metadata:
                 response-timeout: -1
-            # the chat remembers the conversation in the memory of one core instance (until phase 6)
+            # the faq chat lives in ai-service
             - id: chat
-              uri: ${CORE_PRIMARY_URL:http://localhost:8082}
+              uri: lb://ai-service
               predicates:
                 - Path=/api/chat,/api/chat/**,/api/faqs
             # payments, refunds and the revenue summary live in payment-service

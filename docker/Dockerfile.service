@@ -8,6 +8,7 @@ COPY common common
 COPY springapp springapp
 COPY notification-service notification-service
 COPY payment-service payment-service
+COPY ai-service ai-service
 COPY gateway gateway
 # the service + what it needs (common); the maven cache survives between builds
 RUN --mount=type=cache,target=/root/.m2 mvn -q -B -pl ${MODULE} -am package -DskipTests \

@@ -3,7 +3,7 @@ package com.examly.springapp.exceptions;
 // parent of every business exception; GlobalExceptionHandler gives each child its http status
 public abstract sealed class GridPulseException extends RuntimeException
         permits BookingException, ConflictException, DuplicateCarNumberException, DuplicateTrackException, GatewayException,
-        GeminiException, OtpException, RegistrationException, ResourceNotFoundException,
+        OtpException, RegistrationException, ResourceNotFoundException,
         TrackDeletionException {
 
     protected GridPulseException(String message) {

@@ -37,7 +37,7 @@ class GatewayIntegrationTest {
     static void core(DynamicPropertyRegistry registry) {
         String url = "http://localhost:" + CORE.getAddress().getPort();
         registry.add("CORE_1_URL", () -> url);
-        registry.add("CORE_PRIMARY_URL", () -> url);
+        registry.add("AI_URL", () -> url);
     }
 
     @AfterAll

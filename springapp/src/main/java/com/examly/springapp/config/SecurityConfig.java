@@ -50,7 +50,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/sessions/*", "/api/sessions/track/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/competitions", "/api/competitions/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/stats/leaderboard").permitAll()
-                        .requestMatchers("/api/chat", "/api/chat/**", "/api/faqs").permitAll()
                         .requestMatchers("/error").permitAll()
                         // other services only (InternalKeyFilter checks the key first): by-order needs only the key,
                         // the rest also the driver's own token

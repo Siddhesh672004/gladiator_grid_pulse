@@ -177,6 +177,34 @@ services:
       kafka:
         condition: service_healthy
 
+  # the faq chat, the Copilot and the feedback labels (gemini / groq keys from .env)
+  ai:
+    profiles: [apps]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.service
+      args:
+        MODULE: ai-service
+    ports:
+      - "8086:8086"
+    env_file: .env
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DB_HOST: mysql
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      KAFKA_BOOTSTRAP: kafka:29092
+      REDIS_HOST: redis
+      CORE_1_URL: http://core-1:8082
+      CORE_2_URL: http://core-2:8082
+      PAYMENT_URL: http://payment:8085
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
   # the one address of the site: angular calls http://localhost:8080
   gateway:
     profiles: [apps]
@@ -192,12 +220,13 @@ services:
       SPRING_PROFILES_ACTIVE: docker
       CORE_1_URL: http://core-1:8082
       CORE_2_URL: http://core-2:8082
-      CORE_PRIMARY_URL: http://core-1:8082
       PAYMENT_URL: http://payment:8085
+      AI_URL: http://ai:8086
     depends_on:
       - core-1
       - core-2
       - payment
+      - ai
 
 volumes:
   mysql-data:
