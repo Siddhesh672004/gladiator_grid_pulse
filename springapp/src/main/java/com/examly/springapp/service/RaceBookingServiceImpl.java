@@ -17,8 +17,11 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.examly.springapp.dto.request.BookingStatusRequest;
+import com.examly.springapp.dto.request.InternalBookingRequest;
 import com.examly.springapp.dto.request.RaceBookingRequest;
+import com.examly.springapp.dto.response.BookingQuote;
 import com.examly.springapp.dto.response.CarCategoryResponse;
+import com.examly.springapp.dto.response.InternalBookingResult;
 import com.examly.springapp.dto.response.PageResponse;
 import com.examly.springapp.dto.response.RaceBookingResponse;
 import com.examly.springapp.exceptions.BookingException;
@@ -27,10 +30,12 @@ import com.examly.springapp.exceptions.DuplicateCarNumberException;
 import com.examly.springapp.exceptions.ResourceNotFoundException;
 import com.examly.springapp.mapper.RaceBookingMapper;
 import com.examly.springapp.model.BookingStatus;
+import com.examly.springapp.model.Competition;
 import com.examly.springapp.model.Payment;
 import com.examly.springapp.model.PaymentStatus;
 import com.examly.springapp.model.RaceBooking;
 import com.examly.springapp.model.RaceSession;
+import com.examly.springapp.model.RaceTrack;
 import com.examly.springapp.model.User;
 import com.examly.springapp.repository.RaceBookingRepo;
 import com.examly.springapp.repository.RaceSessionRepo;
@@ -129,6 +134,58 @@ public class RaceBookingServiceImpl implements RaceBookingService {
         RaceSession session = findSessionToBook(request.sessionId());
         checkBookingRules(newBooking(request, driver, session));
         return session;
+    }
+
+    @Override
+    public BookingQuote quote(RaceBookingRequest request) {
+        RaceSession session = checkCanBook(request);
+        User driver = userService.getLoggedInUser();
+        RaceTrack track = session.getTrack();
+        String competitionName = Optional.ofNullable(session.getCompetition())
+                .map(Competition::getCompetitionName)
+                .orElse(null);
+        return new BookingQuote(session.getSessionId(), session.getPrice(), description(session), false,
+                driver.getUserId(), driver.getUsername(), driver.getEmail(), driver.getMobileNumber(),
+                track.getTrackName(), track.getLocation(), session.getSessionDate(), session.getStartTime(),
+                session.getEndTime(), session.getSessionType(), session.getPhase(), competitionName);
+    }
+
+    // the order of the payment is the key: the same order again (payment-service retrying) gets the same booking
+    // READ_COMMITTED: after waiting for the session lock the rules must see what the other request just saved
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public InternalBookingResult createPaidBooking(InternalBookingRequest request) {
+        User driver = userService.getLoggedInUser();
+        RaceSession session = lockSession(request.booking().sessionId());
+        // looked up under the lock: a retry that raced the first call finds its booking here
+        Optional<RaceBooking> existing = raceBookingRepo.findByPaymentOrderId(request.razorpayOrderId());
+        if (existing.isPresent()) {
+            RaceBooking booking = existing.get();
+            userService.checkOwnerOrAdmin(booking.getUser().getUserId());
+            return new InternalBookingResult(raceBookingMapper.toResponse(booking), false);
+        }
+        RaceBooking booking = newBooking(request.booking(), driver, session);
+        checkBookingRules(booking);
+        booking.setPaymentOrderId(request.razorpayOrderId());
+        booking.setPaymentStatus(PaymentStatus.PAID);
+        booking.setTotalPrice(request.amount());
+        booking.setStatus(BookingStatus.PENDING);
+        booking.setTermsAcceptedAt(Instant.now());
+        RaceBooking saved = raceBookingRepo.save(booking);
+        log.info("Booking {} created for order {}: car #{} in session {}, paid {}", saved.getRaceBookingId(),
+                request.razorpayOrderId(), saved.getCarNumber(), session.getSessionId(), saved.getTotalPrice());
+        return new InternalBookingResult(raceBookingMapper.toResponse(saved), true);
+    }
+
+    @Override
+    public Optional<RaceBookingResponse> findByOrder(String razorpayOrderId) {
+        return raceBookingRepo.findByPaymentOrderId(razorpayOrderId).map(raceBookingMapper::toResponse);
+    }
+
+    // what the razorpay window shows: "Buddh Circuit · 2026-10-20 10:00-11:00"
+    private String description(RaceSession session) {
+        return session.getTrack().getTrackName() + " \u00b7 " + session.getSessionDate() + " "
+                + session.getStartTime() + "-" + session.getEndTime();
     }
 
     // the booking transaction: payment PAID + booking saved, all or nothing. a

@@ -3,6 +3,7 @@ package com.examly.springapp.repository;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -79,6 +80,8 @@ public interface RaceBookingRepo extends JpaRepository<RaceBooking, Long> {
             + " group by b.user.userId, b.user.username"
             + " order by wins desc, podiums desc, laps desc, b.user.username")
     List<LeaderboardRow> leaderboard(CompetitionPhase racing, SessionStatus completed, Pageable limit);
+
+    Optional<RaceBooking> findByPaymentOrderId(String paymentOrderId);
 
     // the booking's copy of its payment status follows the payment
     @Modifying

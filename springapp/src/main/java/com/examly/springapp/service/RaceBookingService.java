@@ -3,10 +3,14 @@ package com.examly.springapp.service;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.examly.springapp.dto.request.BookingStatusRequest;
+import com.examly.springapp.dto.request.InternalBookingRequest;
 import com.examly.springapp.dto.request.RaceBookingRequest;
+import com.examly.springapp.dto.response.BookingQuote;
 import com.examly.springapp.dto.response.CarCategoryResponse;
+import com.examly.springapp.dto.response.InternalBookingResult;
 import com.examly.springapp.dto.response.PageResponse;
 import com.examly.springapp.dto.response.RaceBookingResponse;
 import com.examly.springapp.model.RaceBooking;
@@ -27,6 +31,14 @@ public interface RaceBookingService {
     RaceBookingResponse getRaceBookingById(Long bookingId);
 
     RaceSession checkCanBook(RaceBookingRequest request);
+
+    // payment-service before the razorpay order (the driver's token): the rules + what the payment keeps
+    BookingQuote quote(RaceBookingRequest request);
+
+    // payment-service after the money came in: the booking, or the one this order already made
+    InternalBookingResult createPaidBooking(InternalBookingRequest request);
+
+    Optional<RaceBookingResponse> findByOrder(String razorpayOrderId);
 
     // after paying, only PaymentServiceImpl calls this: payment PAID + booking saved in one transaction
     RaceBookingResponse addRaceBooking(RaceBookingRequest request, String razorpayOrderId, String razorpayPaymentId);

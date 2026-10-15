@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Profile;
 
 import com.examly.springapp.config.properties.CloudinaryProperties;
 import com.examly.springapp.config.properties.CorsProperties;
+import com.examly.springapp.config.properties.InternalApiProperties;
 import com.examly.springapp.config.properties.JwtProperties;
 import com.examly.springapp.config.properties.RazorpayProperties;
 import com.examly.springapp.config.properties.SuperAdminProperties;
@@ -31,6 +32,7 @@ public class ProdSettingsCheck {
     private final CloudinaryProperties cloudinaryProperties;
     private final RazorpayProperties razorpayProperties;
     private final TicketProperties ticketProperties;
+    private final InternalApiProperties internalApiProperties;
 
     @PostConstruct
     public void check() {
@@ -52,6 +54,10 @@ public class ProdSettingsCheck {
         // the e-ticket codes must not be made with the known dev secret
         missing.put("set TICKET_SECRET (at least 32 characters)",
                 isMissing(ticketProperties.ticketSecret()) || ticketProperties.ticketSecret().length() < 32);
+        // the other services call /internal/** with it, the known dev key must not open it
+        missing.put("set INTERNAL_API_KEY (at least 32 characters)",
+                isMissing(internalApiProperties.internalApiKey())
+                        || internalApiProperties.internalApiKey().length() < 32);
         missing.put("set SUPER_ADMIN_EMAIL and SUPER_ADMIN_PASSWORD",
                 isMissing(superAdminProperties.email()) || isMissing(superAdminProperties.password()));
         // no cloudinary = no track can be added (pictures are required)

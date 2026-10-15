@@ -28,6 +28,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final CorsProperties corsProperties;
+    private final InternalKeyFilter internalKeyFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -51,6 +52,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/stats/leaderboard").permitAll()
                         .requestMatchers("/api/chat", "/api/chat/**", "/api/faqs").permitAll()
                         .requestMatchers("/error").permitAll()
+                        // other services only (InternalKeyFilter checks the key first): by-order needs only the key,
+                        // the rest also the driver's own token
+                        .requestMatchers("/internal/bookings/by-order/**").permitAll()
+                        .requestMatchers("/internal/**").authenticated()
                         // health for docker / the gateway, the other actuator urls are for admins
                         .requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/health/**").permitAll()
                         .requestMatchers("/actuator/**").hasAnyRole("Admin", "SuperAdmin")
@@ -61,6 +66,7 @@ public class SecurityConfig {
 
                         // everything else needs a token
                         .anyRequest().authenticated())
+                .addFilterBefore(internalKeyFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
