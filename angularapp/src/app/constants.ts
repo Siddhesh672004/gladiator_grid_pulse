@@ -44,6 +44,8 @@ export const API_ENDPOINTS = {
   ADMIN_USERS: '/api/admin/users',
   ADMIN_USER_STATUS: (userId: number) => `/api/admin/users/${userId}/status`,
   RACE_CONTROL_SESSION: (sessionId: number) => `/api/race-control/session/${sessionId}`,
+  // server-sent events: the board pushed after every change (LiveBoardService)
+  LIVE_SESSION: (sessionId: number) => `/api/live/session/${sessionId}`,
   RACE_CONTROL_START: (raceBookingId: number) => `/api/race-control/${raceBookingId}/start`,
   RACE_CONTROL_LAP: (raceBookingId: number) => `/api/race-control/${raceBookingId}/lap`,
   RACE_CONTROL_RETIRE: (raceBookingId: number) => `/api/race-control/${raceBookingId}/retire`,
@@ -67,6 +69,7 @@ export const PUBLIC_ENDPOINTS: { method: string; pattern: RegExp }[] = [
   { method: 'POST', pattern: /\/api\/(register|register\/send-code|login|admin\/login|password\/forgot|password\/reset|password\/set-initial)$/ },
   { method: 'GET', pattern: /\/api\/race-track(\/\d+)?$/ },
   { method: 'GET', pattern: /\/api\/race-control\/session\/\d+$/ },
+  { method: 'GET', pattern: /\/api\/live\/session\/\d+$/ },
   { method: 'GET', pattern: /\/api\/sessions\/(track\/)?\d+$/ },
   { method: 'GET', pattern: /\/api\/competitions(\/\d+)?$/ },
   { method: 'GET', pattern: /\/api\/stats\/leaderboard$/ },

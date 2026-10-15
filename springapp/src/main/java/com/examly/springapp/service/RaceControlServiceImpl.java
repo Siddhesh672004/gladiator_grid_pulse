@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.examly.springapp.config.CacheConfig;
 import com.examly.springapp.dto.response.LiveStandingResponse;
+import com.examly.springapp.messaging.LiveBoardEvents;
 import com.examly.springapp.exceptions.BookingException;
 import com.examly.springapp.exceptions.ResourceNotFoundException;
 import com.examly.springapp.mapper.RaceBookingMapper;
@@ -33,6 +34,7 @@ public class RaceControlServiceImpl implements RaceControlService {
     private final RaceSessionRepo raceSessionRepo;
     private final RaceBookingService raceBookingService;
     private final RaceBookingMapper raceBookingMapper;
+    private final LiveBoardEvents liveBoardEvents;
 
     @Override
     public List<LiveStandingResponse> getLiveStandings(Long sessionId) {
@@ -48,6 +50,7 @@ public class RaceControlServiceImpl implements RaceControlService {
         RaceRules.start(booking);
         RaceBooking saved = raceBookingRepo.save(booking);
         markLive(saved.getSession());
+        liveBoardEvents.changed(saved.getSession().getSessionId(), "START");
         log.info("Car #{} (booking {}) started", saved.getCarNumber(), raceBookingId);
         return raceBookingMapper.toLiveStanding(saved);
     }
@@ -58,6 +61,7 @@ public class RaceControlServiceImpl implements RaceControlService {
         RaceBooking booking = findPracticeCar(raceBookingId);
         RaceRules.addLap(booking);
         RaceBooking saved = raceBookingRepo.save(booking);
+        liveBoardEvents.changed(saved.getSession().getSessionId(), "LAP");
         log.info("Car #{} (booking {}) completed lap {}", saved.getCarNumber(), raceBookingId, saved.getLapCount());
         return raceBookingMapper.toLiveStanding(saved);
     }
@@ -68,6 +72,7 @@ public class RaceControlServiceImpl implements RaceControlService {
         RaceBooking booking = findPracticeCar(raceBookingId);
         RaceRules.retire(booking);
         RaceBooking saved = raceBookingRepo.save(booking);
+        liveBoardEvents.changed(saved.getSession().getSessionId(), "RETIRE");
         log.info("Car #{} (booking {}) is RETIRED after {} lap(s)", saved.getCarNumber(), raceBookingId,
                 saved.getLapCount());
         return raceBookingMapper.toLiveStanding(saved);
@@ -88,6 +93,7 @@ public class RaceControlServiceImpl implements RaceControlService {
 
         session.setStatus(SessionStatus.SCHEDULED);
         raceSessionRepo.save(session);
+        liveBoardEvents.changed(sessionId, "RESET");
         log.info("Session {} reset ({} car(s))", sessionId, cars.size());
         return toResponses(RaceRules.rank(cars));
     }
@@ -106,6 +112,7 @@ public class RaceControlServiceImpl implements RaceControlService {
 
         session.setStatus(SessionStatus.COMPLETED);
         raceSessionRepo.save(session);
+        liveBoardEvents.changed(sessionId, "FINISH");
         // finished without a single start: the drivers still waiting are rejected (and refunded) here
         Optional.of(neverStarted)
                 .filter(Boolean::booleanValue)

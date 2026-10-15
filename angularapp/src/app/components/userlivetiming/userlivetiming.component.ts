@@ -6,7 +6,8 @@ import { RaceSession, isLiveOrUpcoming, sessionLabel, sessionTime } from '../../
 import { RaceService } from '../../services/race.service';
 import { SessionService } from '../../services/session.service';
 import { RaceControlService } from '../../services/race-control.service';
-import { LIVE_REFRESH_MS, RACE_TIME_ZONE_LABEL } from '../../constants';
+import { LiveBoardService } from '../../services/live-board.service';
+import { RACE_TIME_ZONE_LABEL } from '../../constants';
 import { todayIso } from '../../validation';
 import { formatRaceTime } from '../adminracecontrol/race-time';
 import { carState, isLeaderRow, pickerDateProblem, positionText } from '../adminracecontrol/live-board';
@@ -32,11 +33,12 @@ export class UserlivetimingComponent implements OnInit, OnDestroy {
   boardError: string = '';
   timeZoneLabel: string = RACE_TIME_ZONE_LABEL;
 
-  private pollTimer: number = 0;
+  private boardWatch?: Subscription;
+  private watchedSessionId: number | null = null;
   private sessionsRequest?: Subscription;
   private standingsRequest?: Subscription;
 
-  constructor(private raceService: RaceService, private sessionService: SessionService,
+  constructor(private liveBoard: LiveBoardService, private raceService: RaceService, private sessionService: SessionService,
               private raceControlService: RaceControlService) { }
 
   ngOnInit(): void {
@@ -97,11 +99,23 @@ export class UserlivetimingComponent implements OnInit, OnDestroy {
     this.lastUpdated = null;
   }
 
-  // load the board now, then every 4 s
+  // the board comes from the server as it changes (LiveBoardService: server-sent events, polling only as a fallback)
+  // called again after an action: the same board is then read once more at once
   private startPolling(): void {
+    if (!this.selectedSession) {
+      this.stopPolling();
+      return;
+    }
+    if (this.watchedSessionId === this.selectedSession.sessionId) {
+      this.loadStandings();
+      return;
+    }
     this.stopPolling();
-    this.loadStandings();
-    this.pollTimer = window.setInterval(() => this.loadStandings(), LIVE_REFRESH_MS);
+    this.watchedSessionId = this.selectedSession.sessionId;
+    this.boardWatch = this.liveBoard.watch(this.watchedSessionId).subscribe({
+      next: (rows) => this.showBoard(rows),
+      error: (err) => this.boardError = err.error?.message || 'Live timing is not reachable, retrying...'
+    });
   }
 
   private loadStandings(): void {
@@ -111,17 +125,20 @@ export class UserlivetimingComponent implements OnInit, OnDestroy {
     // an older answer that is still on its way is dropped
     this.standingsRequest?.unsubscribe();
     this.standingsRequest = this.raceControlService.getLiveStandings(this.selectedSession.sessionId).subscribe({
-      next: (rows) => {
-        this.standings = rows;
-        this.lastUpdated = new Date();
-        this.boardError = '';
-      },
+      next: (rows) => this.showBoard(rows),
       error: (err) => this.boardError = err.error?.message || 'Live timing is not reachable, retrying...'
     });
   }
 
+  private showBoard(rows: LiveStanding[]): void {
+    this.standings = rows;
+    this.lastUpdated = new Date();
+    this.boardError = '';
+  }
+
   private stopPolling(): void {
-    window.clearInterval(this.pollTimer);
+    this.boardWatch?.unsubscribe();
+    this.watchedSessionId = null;
     this.standingsRequest?.unsubscribe();
   }
 

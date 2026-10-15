@@ -6,7 +6,8 @@ import { RaceSession, sessionLabel, sessionTime } from '../../models/session.mod
 import { RaceService } from '../../services/race.service';
 import { SessionService } from '../../services/session.service';
 import { RaceControlService } from '../../services/race-control.service';
-import { LIVE_REFRESH_MS, RACE_STATES, RACE_TIME_ZONE_LABEL, SESSION_STATUS, SESSION_TYPE } from '../../constants';
+import { LiveBoardService } from '../../services/live-board.service';
+import { RACE_STATES, RACE_TIME_ZONE_LABEL, SESSION_STATUS, SESSION_TYPE } from '../../constants';
 import { todayIso } from '../../validation';
 import { formatRaceTime } from './race-time';
 import { carState, isLeaderRow, pickerDateProblem, positionText } from './live-board';
@@ -37,12 +38,13 @@ export class AdminracecontrolComponent implements OnInit, OnDestroy {
   showResetPopup: boolean = false;
   actionError: string = '';
 
-  private pollTimer: number = 0;
+  private boardWatch?: Subscription;
+  private watchedSessionId: number | null = null;
   private sessionsRequest?: Subscription;
   private standingsRequest?: Subscription;
   private pageClosed: boolean = false;
 
-  constructor(private raceService: RaceService, private sessionService: SessionService,
+  constructor(private liveBoard: LiveBoardService, private raceService: RaceService, private sessionService: SessionService,
               private raceControlService: RaceControlService) { }
 
   ngOnInit(): void {
@@ -104,14 +106,23 @@ export class AdminracecontrolComponent implements OnInit, OnDestroy {
     this.lastUpdated = null;
   }
 
-  // load the board now, then every 4 s. called again after every action, so the board is fresh at once
+  // the board comes from the server as it changes (LiveBoardService: server-sent events, polling only as a fallback)
+  // called again after an action: the same board is then read once more at once
   private startPolling(): void {
-    this.stopPolling();
     if (!this.selectedSession || this.pageClosed) {
+      this.stopPolling();
       return;
     }
-    this.loadStandings();
-    this.pollTimer = window.setInterval(() => this.loadStandings(), LIVE_REFRESH_MS);
+    if (this.watchedSessionId === this.selectedSession.sessionId) {
+      this.loadStandings();
+      return;
+    }
+    this.stopPolling();
+    this.watchedSessionId = this.selectedSession.sessionId;
+    this.boardWatch = this.liveBoard.watch(this.watchedSessionId).subscribe({
+      next: (rows) => this.showBoard(rows),
+      error: (err) => this.boardError = err.error?.message || 'Live timing is not reachable, retrying...'
+    });
   }
 
   private loadStandings(): void {
@@ -121,17 +132,20 @@ export class AdminracecontrolComponent implements OnInit, OnDestroy {
     // an older answer that is still on its way is dropped
     this.standingsRequest?.unsubscribe();
     this.standingsRequest = this.raceControlService.getLiveStandings(this.selectedSession.sessionId).subscribe({
-      next: (rows) => {
-        this.standings = rows;
-        this.lastUpdated = new Date();
-        this.boardError = '';
-      },
+      next: (rows) => this.showBoard(rows),
       error: (err) => this.boardError = err.error?.message || 'Live timing is not reachable, retrying...'
     });
   }
 
+  private showBoard(rows: LiveStanding[]): void {
+    this.standings = rows;
+    this.lastUpdated = new Date();
+    this.boardError = '';
+  }
+
   private stopPolling(): void {
-    window.clearInterval(this.pollTimer);
+    this.boardWatch?.unsubscribe();
+    this.watchedSessionId = null;
     this.standingsRequest?.unsubscribe();
   }
 

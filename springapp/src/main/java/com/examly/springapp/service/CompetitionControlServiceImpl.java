@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.examly.springapp.config.CacheConfig;
 import com.examly.springapp.dto.response.CompetitionResponse;
 import com.examly.springapp.dto.response.LiveStandingResponse;
+import com.examly.springapp.messaging.LiveBoardEvents;
 import com.examly.springapp.exceptions.BookingException;
 import com.examly.springapp.mapper.RaceBookingMapper;
 import com.examly.springapp.model.BookingStatus;
@@ -40,6 +41,7 @@ public class CompetitionControlServiceImpl implements CompetitionControlService 
     private final RaceBookingService raceBookingService;
     private final CompetitionService competitionService;
     private final RaceBookingMapper raceBookingMapper;
+    private final LiveBoardEvents liveBoardEvents;
 
     @Override
     @Transactional
@@ -88,6 +90,8 @@ public class CompetitionControlServiceImpl implements CompetitionControlService 
                 .forEach(raceBookingRepo::save);
 
         moveTo(competition, CompetitionStatus.QUALIFYING_COMPLETED, qualifying, SessionStatus.COMPLETED);
+        // the race board now has its grid
+        liveBoardEvents.changed(race.getSessionId(), "GRID");
         log.info("Competition {}: qualifying finished, grid of {} car(s) created", competitionId, result.size());
         return competitionService.getCompetitionById(competitionId);
     }
@@ -141,6 +145,7 @@ public class CompetitionControlServiceImpl implements CompetitionControlService 
                 .filter(car -> RaceRules.lapsOf(car) >= car.getSession().lapLimit())
                 .ifPresent(car -> car.setRaceState(RaceRules.FINISHED));
         RaceBooking saved = raceBookingRepo.save(booking);
+        liveBoardEvents.changed(saved.getSession().getSessionId(), "LAP");
         log.info("Car #{} (booking {}) completed lap {}", saved.getCarNumber(), raceBookingId, saved.getLapCount());
         return raceBookingMapper.toLiveStanding(saved);
     }
@@ -151,6 +156,7 @@ public class CompetitionControlServiceImpl implements CompetitionControlService 
         RaceBooking booking = findRunningCar(raceBookingId);
         RaceRules.retire(booking);
         RaceBooking saved = raceBookingRepo.save(booking);
+        liveBoardEvents.changed(saved.getSession().getSessionId(), "RETIRE");
         log.info("Car #{} (booking {}) is RETIRED after {} lap(s)", saved.getCarNumber(), raceBookingId,
                 saved.getLapCount());
         return raceBookingMapper.toLiveStanding(saved);
@@ -170,6 +176,7 @@ public class CompetitionControlServiceImpl implements CompetitionControlService 
         competitionRepo.save(competition);
         stage.setStatus(stageStatus);
         raceSessionRepo.save(stage);
+        liveBoardEvents.changed(stage.getSessionId(), stageStatus.name());
     }
 
     // race place for a qualifier: already approved, nothing more to pay

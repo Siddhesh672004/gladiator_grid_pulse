@@ -43,6 +43,7 @@ import com.gridpulse.common.outbox.OutboxRepository;
         "gridpulse.ticket-secret=" + IntegrationTest.TICKET_SECRET,
         "gridpulse.outbox.relay.enabled=false",
         "spring.kafka.admin.auto-create=false",
+        "spring.kafka.listener.auto-startup=false",
         "gemini.api-key=",
         "gemini.api-key2=",
         "gemini.api-key3=",
