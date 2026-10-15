@@ -98,6 +98,7 @@ services:
       KAFKA_BOOTSTRAP: kafka:29092
       REDIS_HOST: redis
       PAYMENT_URL: http://payment:8085
+      AI_URL: http://ai:8086
     depends_on:
       mysql:
         condition: service_healthy
@@ -125,6 +126,7 @@ services:
       KAFKA_BOOTSTRAP: kafka:29092
       REDIS_HOST: redis
       PAYMENT_URL: http://payment:8085
+      AI_URL: http://ai:8086
     depends_on:
       mysql:
         condition: service_healthy

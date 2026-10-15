@@ -1,144 +1,117 @@
 GridPulse - how to run
 ======================
 
-Needs: Java 17+, Node 20, Docker Desktop (or a local MySQL 8, see "Manual MySQL").
+Needs: Java 17+, Node 20, and either Docker Desktop or a local MySQL 8 (+ Kafka in Docker for emails / refunds).
 
-Ports:
-   8080   gateway                 the one address the site calls: routes /api/**, CORS, rate limits (429)
+
+What runs where
+---------------
+   port   service                 what it does
+   8080   gateway                 the one address the site calls: routes, CORS, rate limits (429)
    8081   angular (npm start)     the site
-   8082   core (springapp)        the api itself, behind the gateway (a second core instance: 8083)
-   8084   notification-service    sends every email (sign-up code, invite, booking decision + e-ticket)
-   8085   payment-service         razorpay orders + confirm (saves the booking through the core), refunds
-   8086   ai-service              the faq chat (gemini), later the Copilot and the feedback labels
+   8082   core (springapp)        accounts, tracks, sessions, bookings, waitlist, race control, feedback
+                                  (a second core instance: 8083)
+   8084   notification-service    every email (codes, invites, booking decisions + e-ticket, refunds, waitlist,
+                                  urgent feedback for the admins)
+   8085   payment-service         razorpay orders, the confirm saga with the core, refunds
+   8086   ai-service              the faq chat (logged out), the Copilot (logged in: reads + Confirm cards),
+                                  feedback labels / suggestions / summary (groq)
    3306 mysql · 6379 redis · 9092 kafka · 8090 kafka ui
-The core writes events into its outbox table; Kafka carries them to notification-service, payment-service and to
-every core instance (live boards). No Kafka = no emails and no refunds yet (the events wait), and a live board only
-updates on the instance where the change was made.
-Paying: payment-service checks the booking with the core (/internal/bookings, INTERNAL_API_KEY), makes the Razorpay
-order, and after the payment asks the core to save the booking. Core not answering = "being confirmed" (202), its
-job finishes it within a minute or two. A rejected / cancelled paid booking is refunded by payment-service.
+
+   How they talk: the browser only talks to the gateway. Services call each other's /internal/** with
+   INTERNAL_API_KEY (the gateway never routes /internal/**) and pass the user's own token along.
+   Changes travel as events (outbox -> Kafka): emails, refunds, payment badges, feedback labels, live boards.
+   No Kafka = the site works, but emails, refunds and labels wait until Kafka is back.
 
 
-0. Secrets
-----------
-   cp springapp/secrets.properties.example springapp/secrets.properties
-   fill in the keys you have (empty = that feature is off). never push this file.
-   one file for every service (notification-service reads MAIL_USERNAME / MAIL_PASSWORD from it too).
-   an environment variable with the same name wins over the file.
-
-   other settings (env vars, all optional):
-   SERVER_PORT                     core port, default 8082
-   CORS_ENABLED                    false = core answers no CORS (behind the gateway); default true
-   CORE_1_URL                      gateway: where the core runs, default http://localhost:8082
-   AI_URL                          gateway + core: where ai-service runs, default http://localhost:8086
-   AI_PORT / AI_DB_URL             ai-service port (8086) and database (.../ai_db)
-   NOTIFICATION_PORT               notification-service port, default 8084
-   DB_HOST / DB_PORT               mysql, default localhost / 3306 (core: ignored when DB_URL is set)
-   NOTIFICATION_DB_URL             notification-service database, default .../notification_db
-   PAYMENT_PORT / PAYMENT_DB_URL   payment-service port (8085) and database (.../payment_db)
-   PAYMENT_URL                     gateway + core: where payment-service runs, default http://localhost:8085
-   INTERNAL_API_KEY                the services call the core's /internal/** with it (secrets.properties,
-                                   the same everywhere); empty = a fixed dev key + warning
-   RAZORPAY_BASE_URL               payment-service: razorpay api, default https://api.razorpay.com/v1
-   JWT_SECRET                      64+ characters; empty = a key file in ~/.gridpulse (one machine only:
-                                   payment-service reads the core's key file, start the core first)
-   GRIDPULSE_JOBS_REFUND_ENABLED   payment-service: false = no refund job here (run it on one instance only)
-   FRONTEND_URL                    where the Angular site runs, default http://localhost:8081
-                                   (the admin invite email links to FRONTEND_URL/set-password)
-   REDIS_HOST / REDIS_PORT         redis for the cache, default localhost / 6379
-   CACHE_TYPE                      none = run without redis (no cache); default redis
-   KAFKA_BOOTSTRAP                 kafka for the events (emails), default localhost:9092
-   TICKET_SECRET                   signs the e-ticket QR codes (secrets.properties); empty = dev secret + warning
-   MAIL_TO_FILE                    true = notification-service writes emails (+ pdf / .ics) to target/test-mails
+First run (once)
+----------------
+1. Secrets: cp springapp/secrets.properties.example springapp/secrets.properties and fill in what you have
+   (empty = that feature is off). One file for every service; an environment variable with the same name wins.
+   Set the same JWT_SECRET and INTERNAL_API_KEY for all services (they are in that one file).
+2. Infra: cp .env.example .env, then  docker compose up -d mysql redis kafka   (kafka-ui optional)
+   or a local MySQL 8 on 3306 (root / examly by default) and only  docker compose up -d kafka.
+   DB_PASSWORD in secrets.properties = MYSQL_ROOT_PASSWORD in .env (both "examly" by default).
+   The databases appdb, payment_db, ai_db and notification_db are made on the first start.
+3. Shared code: ./mvnw -q install -DskipTests -pl common   (again after every change in common/)
+4. Only for an appdb from before phase 5 / 6 (once, in this order):
+   start the core once, then             mysql -uroot -p < docker/sql/phase5-backfill-core.sql
+   start payment-service once, then      mysql -uroot -p < docker/sql/phase5-copy-payments.sql
+   BEFORE the first start of ai-service: mysql -uroot -p < docker/sql/phase6-copy-chat.sql
+   (old payments keep their refunds; the faqs keep their gemini vectors, which saves the daily quota)
 
 
-1. Infra with Docker (MySQL + Redis + Kafka + Kafka UI)
--------------------------------------------------------
-   cp .env.example .env            (MYSQL_ROOT_PASSWORD, MYSQL_PORT)
-   docker compose up -d            (or only what you need: docker compose up -d mysql redis kafka)
-   docker compose ps               every container "healthy" after about a minute
+Mode A - terminal (light: infra in Docker / local MySQL, services from the repo root)
+-------------------------------------------------------------------------------------
+   start order: core -> notification -> payment -> ai -> gateway (one terminal each)
+   CORS_ENABLED=false ./mvnw -pl springapp spring-boot:run   http://localhost:8082
+   ./mvnw -pl notification-service spring-boot:run           http://localhost:8084
+   ./mvnw -pl payment-service spring-boot:run                http://localhost:8085
+   ./mvnw -pl ai-service spring-boot:run                     http://localhost:8086
+   ./mvnw -pl gateway spring-boot:run                        http://localhost:8080 (what angular calls)
 
-   DB_PASSWORD in springapp/secrets.properties = MYSQL_ROOT_PASSWORD in .env (both "examly" by default)
+   no Redis:            CACHE_TYPE=none for the core and ai-service (no cache, same answers)
+   emails to files:     MAIL_TO_FILE=true ./mvnw -pl notification-service spring-boot:run (target/test-mails)
+   two core instances:  SERVER_PORT=8083 CORS_ENABLED=false ./mvnw -pl springapp spring-boot:run
+                        SPRING_PROFILES_ACTIVE=docker CORE_2_URL=http://localhost:8083 ./mvnw -pl gateway spring-boot:run
+                        (which one answered: the X-Served-By header, dev only)
 
-   MySQL     localhost:3306  (schemas appdb, payment_db, ai_db, notification_db)
-   Redis     localhost:6379
-   Kafka     localhost:9092 for apps on this machine, kafka:29092 for containers
-   Kafka UI  http://localhost:8090  (topics gridpulse.account / booking / payment / race / feedback + the retry topics)
-
-   stop:            docker compose down
-   stop + wipe db:  docker compose down -v
-
-   Manual MySQL (alternative): any MySQL 8 on localhost:3306, login DB_USERNAME / DB_PASSWORD
-   (default root / examly). appdb, payment_db, ai_db and notification_db are created on the first start.
-
-   existing appdb from before phase 5 (once, in this order):
-   start the core once, then  mysql -uroot -p < docker/sql/phase5-backfill-core.sql
-   start payment-service once, then  mysql -uroot -p < docker/sql/phase5-copy-payments.sql
-   (old payments move to payment_db, so their refunds still work)
-   existing appdb from before phase 6, BEFORE the first start of ai-service:
-   mysql -uroot -p < docker/sql/phase6-copy-chat.sql   (faqs with their gemini vectors + chat history -> ai_db)
-
-
-2. Services - terminal mode (infra in Docker, services from the repo root)
----------------------------------------------------------------------------
-   start order: infra (step 1) -> install common -> core -> notification -> payment -> ai -> gateway
-   ./mvnw -q install -DskipTests -pl common                 (first time + after a change in common/)
-   CORS_ENABLED=false ./mvnw -pl springapp spring-boot:run  core, http://localhost:8082
-   ./mvnw -pl notification-service spring-boot:run          second terminal, http://localhost:8084
-   ./mvnw -pl payment-service spring-boot:run               third terminal, http://localhost:8085
-   ./mvnw -pl ai-service spring-boot:run                    fourth terminal, http://localhost:8086 (the chat)
-   ./mvnw -pl gateway spring-boot:run                       fifth terminal, http://localhost:8080 (what angular calls)
-   (set the same JWT_SECRET for all of them in secrets.properties: the gateway reads tokens for the rate limits)
-
-   two core instances (load balancing): a second core + the gateway's docker profile
-   SERVER_PORT=8083 CORS_ENABLED=false ./mvnw -pl springapp spring-boot:run
-   SPRING_PROFILES_ACTIVE=docker CORE_2_URL=http://localhost:8083 ./mvnw -pl gateway spring-boot:run
-   which instance answered: the X-Served-By header (dev only), e.g. curl -I http://localhost:8080/api/race-track
-
-   no Redis at hand: CACHE_TYPE=none ./mvnw -pl springapp spring-boot:run   (works the same, without the cache)
-   check the cache: docker compose exec redis redis-cli keys 'gp:*'
-   emails to files instead of gmail: MAIL_TO_FILE=true ./mvnw -pl notification-service spring-boot:run
-
-   health:   http://localhost:8082/actuator/health (core), :8084 (notification), :8085 (payment), :8086 (ai),
-             :8080 (gateway)
-   swagger:  http://localhost:8082/swagger-ui.html        (on the core itself, not in prod)
-             log in on /api/admin/login (or /api/login), copy "token", press Authorize, paste it
-   /actuator/info and /actuator/metrics need an Admin / SuperAdmin token
+   health:   http://localhost:<port>/actuator/health for every service
+   swagger:  http://localhost:8082/swagger-ui.html (the core, not in prod): log in, copy "token", Authorize
    the gmail check of notification-service: its log line "EMAIL: ..." (notification-service/logs)
 
 
-2b. Services - full Docker (everything in containers; heavy: builds the images)
---------------------------------------------------------------------------------
-   fill the service keys in .env (JWT_SECRET is required, TICKET_SECRET, MAIL_*, SUPER_ADMIN_* ... see .env.example)
-   docker compose --profile apps up -d --build      gateway :8080, core-1 :8082, core-2 :8083, notification :8084,
-                                                    payment :8085
-   docker compose stop core-2                       the site keeps working on core-1
+Mode B - full Docker (everything in containers; heavy: builds 6 images)
+-----------------------------------------------------------------------
+   fill the keys in .env (JWT_SECRET and INTERNAL_API_KEY are required; MAIL_*, SUPER_ADMIN_*, RAZORPAY_*,
+   GEMINI_*, GROQ_API_KEY ... see .env.example)
+   docker compose --profile apps up -d --build
+       gateway :8080, core-1 :8082, core-2 :8083, notification :8084, payment :8085, ai :8086 + the infra
+   docker compose stop core-2         the site keeps working on core-1
    docker compose --profile apps down
 
 
-3. Frontend (http://localhost:8081)
------------------------------------
-   cd angularapp
-   npm install
-   npm start
+Frontend (http://localhost:8081)
+--------------------------------
+   cd angularapp && npm install && npm start
+   logged out the chat bubble answers from the FAQ list; logged in it is the Copilot ("Copilot · <role>"):
+   it reads your data and shows every change as a card that only happens when you press Confirm.
 
 
-4. Tests
---------
+Settings (environment variables, all optional; keys live in secrets.properties)
+-------------------------------------------------------------------------------
+   JWT_SECRET                      64+ characters, the same everywhere; empty = a key file in ~/.gridpulse
+                                   (one machine only: the other services read the core's file, start it first)
+   INTERNAL_API_KEY                32+ characters, the same everywhere; empty = a fixed dev key + warning
+   DB_HOST / DB_PORT               mysql, default localhost / 3306 (core: ignored when DB_URL is set)
+   PAYMENT_DB_URL / AI_DB_URL / NOTIFICATION_DB_URL   the other services' databases
+   SERVER_PORT                     core port, default 8082
+   PAYMENT_PORT / AI_PORT / NOTIFICATION_PORT         8085 / 8086 / 8084
+   CORE_1_URL / CORE_2_URL         where the core instances run (gateway, payment-service, ai-service)
+   PAYMENT_URL / AI_URL            where payment-service / ai-service run (gateway + core + ai-service)
+   CORS_ENABLED                    false = the core answers no CORS (behind the gateway); default true
+   KAFKA_BOOTSTRAP                 default localhost:9092
+   REDIS_HOST / REDIS_PORT         default localhost / 6379;  CACHE_TYPE=none = no redis needed
+   FRONTEND_URL                    where the site runs (invite links), default http://localhost:8081
+   TICKET_SECRET                   signs the e-ticket QR codes; empty = dev secret + warning
+   MAIL_TO_FILE                    true = emails go to notification-service/target/test-mails
+   RAZORPAY_BASE_URL               payment-service: razorpay api, default https://api.razorpay.com/v1
+   GRIDPULSE_JOBS_REFUND_ENABLED   payment-service: false = no refund job here (run it on one instance only)
+   GEMINI_GENERATION_MODEL         ai-service: default gemini-flash-latest (google retired gemini-2.5-flash)
+   GEMINI_TIMEOUT_SECONDS          ai-service: per gemini call, default 25
+
+
+Tests
+-----
    unit tests, no Docker:   ./mvnw -q -pl common,notification-service test
-   integration tests (need Docker: they start their own MySQL, one test also a Kafka):
+   integration tests (need Docker: their own MySQL, some also a Kafka; no real AI or payment is ever called):
                             ./mvnw -pl springapp verify
                             ./mvnw -pl payment-service verify    (wiremock plays the core, razorpay is faked)
-
-   the integration tests never touch appdb and send no email: the events stay in the outbox table
-   (logs go to springapp/target/test-logs). Bookings are made the way payment-service makes them
-   (/internal/bookings), the cache and the outbox relay are off.
-   core tests: two paid bookings for the same car number at once, one order sent twice, two admins approving
-   the last seat at once, 401 / 403 rules, competition start guard, booking event + e-ticket, admin list pages
-   (paging + query count), admin invite link, circuit breaker, driver stats + leaderboard, outbox relay -> kafka,
-   internal key rules, payment status events applied once, waitlist (full -> waitlisted -> a seat opens -> moved
-   up -> the session starts -> the rest refunded).
-   payment-service tests: booked -> PAID, refused -> refund + same error, core too slow -> 202 -> the job finds
-   the booking, core down + no booking -> refund, a refund asked twice changes once.
+                            ./mvnw -pl ai-service verify         (wiremock plays the core + payment, no model)
+   core: concurrency (car numbers, last seat), internal api rules, payment events once, waitlist, feedback labels
+   + urgent event, security, admin pages, e-ticket, stats, circuit breakers, outbox -> kafka.
+   payment-service: booked -> PAID, refused -> refund, core too slow -> 202 -> the job finishes, refund once.
+   ai-service: tools per role, prepare changes nothing, Confirm only by its owner / once / in time, with the
+   caller's token; FeedbackSubmitted -> FeedbackLabelled over kafka, once.
    one class only:  ./mvnw -pl springapp test -Dtest=StatsIntegrationTest
    skip them:       ./mvnw package -DskipTests
