@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
-import { STORAGE_KEYS } from '../constants';
+import { COPILOT_CHAT_KEY, STORAGE_KEYS } from '../constants';
 
 // what is inside our jwt (JwtUtils.generateToken in spring)
 export interface GridPulseToken {
@@ -31,6 +31,10 @@ export class UserStorageService {
 
   clear(): void {
     localStorage.clear();
+    // the next user of this tab starts a new Copilot chat (sessionStorage can throw in private mode)
+    try {
+      sessionStorage.removeItem(COPILOT_CHAT_KEY);
+    } catch { }
     this.loggedIn$.next(false);
   }
 

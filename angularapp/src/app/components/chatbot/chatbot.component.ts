@@ -1,40 +1,64 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ChatBubble, ChatResponse } from '../../models/chat.model';
+import { Subscription } from 'rxjs';
+import { CardView, ChatBubble, ChatResponse } from '../../models/chat.model';
+import { ActionResult, CopilotReply } from '../../models/copilot.model';
 import { PaymentConfirmRequest, PaymentConfirmResult, PaymentOrder, RazorpayResult } from '../../models/payment.model';
 import { RaceBookingRequest } from '../../models/race-booking.model';
 import { ChatService } from '../../services/chat.service';
+import { CopilotService } from '../../services/copilot.service';
 import { PaymentService } from '../../services/payment.service';
-import { CHAT_SESSION_KEY } from '../../constants';
+import { UserStorageService } from '../../services/user-storage.service';
+import { CHAT_SESSION_KEY, COPILOT_CHAT_KEY } from '../../constants';
 
 const GREETING = "Hi! 🏁 I'm the GridPulse assistant. Ask me about tracks, bookings, the Live Race "
-  + 'Control Board or feedback - or just tell me which session to book.';
+  + 'Control Board or feedback. Log in to book or manage things right here.';
+const COPILOT_GREETING = "Hi! I'm the GridPulse Copilot. Ask me anything about your GridPulse data, or tell me what "
+  + 'to do - every change shows a card and happens only when you press Confirm.';
 const NOT_REACHED = 'Sorry, I cannot reach the GridPulse server right now. Please try again in a moment.';
-// same number as ChatRequest in spring
+// same number as ChatRequest / CopilotRequest in spring
 const MESSAGE_MAX = 1000;
 
 // floating assistant, mounted once in app.component.html so it is on every page
-// a message goes to ChatService; when the answer carries a payment order, the Razorpay window opens (PaymentService)
+// logged out: the faq chat (ChatService). logged in: the Copilot (CopilotService), whose changes come as cards;
+// a confirmed booking opens the Razorpay window like the booking page (PaymentService)
 @Component({
   selector: 'app-chatbot',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './chatbot.component.html'
 })
-export class ChatbotComponent {
+export class ChatbotComponent implements OnInit, OnDestroy {
 
   isOpen: boolean = false;
   message: string = '';
   maxLength: number = MESSAGE_MAX;
   isSending: boolean = false;
-  bubbles: ChatBubble[] = [{ from: 'bot', text: GREETING, time: new Date() }];
+  copilot: boolean = false;
+  role: string = '';
+  bubbles: ChatBubble[] = [];
+
+  private loginWatch?: Subscription;
+  private countdown?: ReturnType<typeof setInterval>;
 
   // the message list (to scroll it) and the text box (to put the cursor in it)
   @ViewChild('messageList') messageList?: ElementRef<HTMLElement>;
   @ViewChild('messageInput') messageInput?: ElementRef<HTMLInputElement>;
 
-  constructor(private chatService: ChatService, private paymentService: PaymentService) { }
+  constructor(private chatService: ChatService, private copilotService: CopilotService,
+    private paymentService: PaymentService, private userStorage: UserStorageService) { }
+
+  ngOnInit(): void {
+    // logging in or out switches the mode and starts a fresh chat
+    this.loginWatch = this.userStorage.loggedIn$.subscribe(() => this.startChat());
+    this.countdown = setInterval(() => this.tick(), 1000);
+  }
+
+  ngOnDestroy(): void {
+    this.loginWatch?.unsubscribe();
+    clearInterval(this.countdown);
+  }
 
   toggle(): void {
     this.isOpen = !this.isOpen;
@@ -60,17 +84,84 @@ export class ChatbotComponent {
     this.isSending = true;
     this.scrollToBottom();
 
-    this.chatService.sendMessage({ message: text, sessionId: this.getSessionId() }).subscribe({
+    if (this.copilot) {
+      this.copilotService.ask({ message: text, chatId: this.getChatId(COPILOT_CHAT_KEY) }).subscribe({
+        next: (reply) => this.showReply(reply),
+        error: (err) => this.sendFailed(err, COPILOT_CHAT_KEY)
+      });
+      return;
+    }
+    this.chatService.sendMessage({ message: text, sessionId: this.getChatId(CHAT_SESSION_KEY) }).subscribe({
       next: (answer) => this.showAnswer(answer),
-      error: (err) => this.sendFailed(err)
+      error: (err) => this.sendFailed(err, CHAT_SESSION_KEY)
     });
   }
 
-  private sendFailed(err: any): void {
+  confirm(view: CardView): void {
+    if (view.state !== 'open') {
+      return;
+    }
+    view.state = 'busy';
+    this.copilotService.confirm(view.card.token).subscribe({
+      next: (result) => this.showResult(view, result),
+      error: (err) => {
+        // used, expired or not yours: the card is done either way
+        view.state = 'expired';
+        this.addBotBubble(err.error?.message || NOT_REACHED);
+      }
+    });
+  }
+
+  cancel(view: CardView): void {
+    if (view.state !== 'open') {
+      return;
+    }
+    view.state = 'cancelled';
+    this.copilotService.cancel(view.card.token).subscribe({ error: () => { } });
+  }
+
+  clear(): void {
+    const key = this.copilot ? COPILOT_CHAT_KEY : CHAT_SESSION_KEY;
+    const chatId = this.getChatId(key);
+    if (chatId) {
+      const forget = this.copilot ? this.copilotService.clearMemory(chatId) : this.chatService.clearMemory(chatId);
+      forget.subscribe({ error: () => { } });
+    }
+    this.removeChatId(key);
+    this.startChat();
+  }
+
+  // "4:59" left on a card
+  timeLeft(view: CardView): string {
+    const minutes = Math.floor(view.secondsLeft / 60);
+    const seconds = view.secondsLeft % 60;
+    return minutes + ':' + String(seconds).padStart(2, '0');
+  }
+
+  // small grey line under a bot bubble
+  metaLine(bubble: ChatBubble): string {
+    if (bubble.matchedQuestion) {
+      const percent = Math.round((bubble.confidence ?? 0) * 100);
+      return `matched: "${bubble.matchedQuestion}" · ${percent}% · ${bubble.source}`;
+    }
+    if (bubble.source === 'fallback') {
+      return 'no faq matched · fallback';
+    }
+    return '';
+  }
+
+  private startChat(): void {
+    const token = this.userStorage.decodeToken();
+    this.copilot = token !== null && !this.userStorage.isTokenExpired();
+    this.role = this.copilot ? (this.userStorage.getUserRole() ?? '') : '';
+    this.bubbles = [{ from: 'bot', text: this.copilot ? COPILOT_GREETING : GREETING, time: new Date() }];
+  }
+
+  private sendFailed(err: any, key: string): void {
     this.isSending = false;
     // a chat id the server refuses would stop every next message too: the next one starts a new chat
-    if (err.error?.fieldErrors?.sessionId) {
-      this.removeSessionId();
+    if (err.error?.fieldErrors?.sessionId || err.error?.fieldErrors?.chatId) {
+      this.removeChatId(key);
     }
     // our backend says why it refused (400, 500 ...). no sentence at all = it was not reached
     this.addBotBubble(err.error?.message || NOT_REACHED);
@@ -78,7 +169,7 @@ export class ChatbotComponent {
 
   private showAnswer(answer: ChatResponse): void {
     this.isSending = false;
-    this.saveSessionId(answer.sessionId);
+    this.saveChatId(CHAT_SESSION_KEY, answer.sessionId);
     const bubble: ChatBubble = { from: 'bot', text: answer.reply, source: answer.source, time: new Date() };
     // the grey line names the faq only when one really matched
     if (answer.matched) {
@@ -87,10 +178,37 @@ export class ChatbotComponent {
     }
     this.bubbles.push(bubble);
     this.scrollToBottom();
-    // the assistant booked a session: it already made the Razorpay order, now the driver pays
-    if (answer.paymentOrder && answer.booking) {
-      this.openPaymentWindow(answer.paymentOrder, answer.booking);
+  }
+
+  private showReply(reply: CopilotReply): void {
+    this.isSending = false;
+    this.saveChatId(COPILOT_CHAT_KEY, reply.chatId);
+    const cards: CardView[] = reply.actions.map(card => ({ card: card, state: 'open', secondsLeft: 0 }));
+    this.bubbles.push({ from: 'bot', text: reply.reply, time: new Date(), cards: cards });
+    this.tick();
+    this.scrollToBottom();
+  }
+
+  private showResult(view: CardView, result: ActionResult): void {
+    view.state = 'done';
+    this.addBotBubble(result.message);
+    // a confirmed booking: the payment window opens, then the same confirm as the booking page
+    if (result.ok && result.paymentOrder && result.booking) {
+      this.openPaymentWindow(result.paymentOrder, result.booking);
     }
+  }
+
+  // every second: the time left on the open cards, an open card at 0 is over
+  private tick(): void {
+    const now = Date.now();
+    this.bubbles.reduce<CardView[]>((all, bubble) => all.concat(bubble.cards ?? []), [])
+      .filter(view => view.state === 'open')
+      .forEach(view => {
+        view.secondsLeft = Math.max(0, Math.floor((new Date(view.card.expiresAt).getTime() - now) / 1000));
+        if (view.secondsLeft === 0) {
+          view.state = 'expired';
+        }
+      });
   }
 
   // same two steps as the booking page: the driver pays in Razorpay's window ...
@@ -137,30 +255,6 @@ export class ChatbotComponent {
     this.addBotBubble(text);
   }
 
-  clear(): void {
-    const sessionId = this.getSessionId();
-    if (sessionId) {
-      this.chatService.clearMemory(sessionId).subscribe({ error: () => { } });
-    }
-    this.removeSessionId();
-    this.bubbles = [{ from: 'bot', text: GREETING, time: new Date() }];
-  }
-
-  // small grey line under a bot bubble
-  metaLine(bubble: ChatBubble): string {
-    if (bubble.source === 'booking') {
-      return 'spring ai · booking tool';
-    }
-    if (bubble.matchedQuestion) {
-      const percent = Math.round((bubble.confidence ?? 0) * 100);
-      return `matched: "${bubble.matchedQuestion}" · ${percent}% · ${bubble.source}`;
-    }
-    if (bubble.source === 'fallback') {
-      return 'no faq matched · fallback';
-    }
-    return '';
-  }
-
   private addBotBubble(text: string): void {
     this.bubbles.push({ from: 'bot', text: text, time: new Date() });
     this.scrollToBottom();
@@ -168,23 +262,23 @@ export class ChatbotComponent {
 
   // the chat's id is kept for this browser tab. sessionStorage can throw in private mode:
   // the chat still works then, only without memory
-  private getSessionId(): string | undefined {
+  private getChatId(key: string): string | undefined {
     try {
-      return sessionStorage.getItem(CHAT_SESSION_KEY) ?? undefined;
+      return sessionStorage.getItem(key) ?? undefined;
     } catch {
       return undefined;
     }
   }
 
-  private saveSessionId(sessionId: string): void {
+  private saveChatId(key: string, chatId: string): void {
     try {
-      sessionStorage.setItem(CHAT_SESSION_KEY, sessionId);
+      sessionStorage.setItem(key, chatId);
     } catch { }
   }
 
-  private removeSessionId(): void {
+  private removeChatId(key: string): void {
     try {
-      sessionStorage.removeItem(CHAT_SESSION_KEY);
+      sessionStorage.removeItem(key);
     } catch { }
   }
 

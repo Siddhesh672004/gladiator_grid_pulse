@@ -61,7 +61,11 @@ export const API_ENDPOINTS = {
   CHAT: '/api/chat',
   STATS_ME: '/api/stats/me',
   STATS_LEADERBOARD: '/api/stats/leaderboard',
-  CHAT_MEMORY: '/api/chat/memory'
+  CHAT_MEMORY: '/api/chat/memory',
+  COPILOT: '/api/ai/copilot',
+  COPILOT_CONFIRM: (token: string) => `/api/ai/copilot/actions/${token}/confirm`,
+  COPILOT_CANCEL: (token: string) => `/api/ai/copilot/actions/${token}/cancel`,
+  COPILOT_MEMORY: '/api/ai/copilot/memory'
 };
 
 // no Bearer token for these (same list as permitAll in SecurityConfig), matched on the path only
@@ -86,6 +90,8 @@ export const STORAGE_KEYS = {
 };
 
 export const CHAT_SESSION_KEY = 'gridpulseChatSessionId';
+// the Copilot's chat id for this tab (logged in); logout forgets it
+export const COPILOT_CHAT_KEY = 'gridpulseCopilotChatId';
 
 // SuperAdmin = the predefined owner: everything an Admin can do + managing admins
 export const ROLES = {

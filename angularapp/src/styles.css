@@ -4436,6 +4436,66 @@ app-chatbot .bubble-meta {
   color: var(--gp-muted);
 }
 
+/* a Copilot card: nothing changes until Confirm */
+app-chatbot .action-card {
+  max-width: 88%;
+  margin-top: 6px;
+  padding: 9px 12px;
+  border: 1px solid var(--gp-accent);
+  border-radius: var(--gp-radius);
+  background: var(--gp-accent-soft);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+app-chatbot .action-card.closed {
+  border-color: var(--gp-line);
+  background: var(--gp-field);
+  color: var(--gp-muted);
+}
+
+app-chatbot .action-card p {
+  margin: 0 0 8px;
+}
+
+app-chatbot .action-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+app-chatbot .action-confirm,
+app-chatbot .action-cancel {
+  padding: 4px 12px;
+  border: 1px solid var(--gp-ink);
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+app-chatbot .action-confirm {
+  background: var(--gp-ink);
+  color: #fff;
+}
+
+app-chatbot .action-cancel {
+  background: var(--gp-surface);
+  color: var(--gp-ink);
+}
+
+app-chatbot .action-confirm:disabled,
+app-chatbot .action-cancel:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+app-chatbot .action-state {
+  margin-left: auto;
+  font: 500 10px var(--gp-mono);
+  color: var(--gp-muted);
+}
+
 app-chatbot .typing {
   display: flex;
   gap: 4px;
