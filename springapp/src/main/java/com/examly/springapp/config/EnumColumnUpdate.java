@@ -28,9 +28,9 @@ public class EnumColumnUpdate {
         String values = Arrays.stream(OtpPurpose.values())
                 .map(purpose -> "'" + purpose.name() + "'")
                 .collect(Collectors.joining(","));
-        // only an enum(...) column that misses a value
+        // only an enum(...) column that misses a value (mysql keeps the values as written: upper case)
         Optional.ofNullable(columnType("otp_code", "purpose"))
-                .filter(type -> type.startsWith("enum("))
+                .filter(type -> type.toLowerCase().startsWith("enum("))
                 .filter(type -> Arrays.stream(OtpPurpose.values()).anyMatch(p -> !type.contains("'" + p.name() + "'")))
                 .ifPresent(type -> {
                     jdbcTemplate.execute("ALTER TABLE otp_code MODIFY purpose ENUM(" + values + ") NOT NULL");
@@ -44,7 +44,6 @@ public class EnumColumnUpdate {
                         + " WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?",
                 String.class, table, column).stream()
                 .findFirst()
-                .map(String::toLowerCase)
                 .orElse(null);
     }
 }
