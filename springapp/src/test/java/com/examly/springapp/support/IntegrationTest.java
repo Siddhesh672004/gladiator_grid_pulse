@@ -141,7 +141,7 @@ public abstract class IntegrationTest {
     // payment-service after the money came in: the booking of this order
     protected ResponseEntity<String> createPaid(User driver, RaceSession session, int carNumber, String orderId) {
         InternalBookingRequest paid = new InternalBookingRequest(booking(session, carNumber), orderId,
-                "pay_" + orderId, session.getPrice());
+                "pay_" + orderId, data.priceOf(session));
         return postInternal("/internal/bookings", data.token(driver), paid);
     }
 

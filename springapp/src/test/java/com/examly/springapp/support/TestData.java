@@ -107,6 +107,11 @@ public class TestData {
         return raceBookingRepo.findById(bookingId).orElseThrow();
     }
 
+    // what the driver pays: the session's own price (a test may only know the session id)
+    public Double priceOf(RaceSession session) {
+        return raceSessionRepo.findById(session.getSessionId()).orElseThrow().getPrice();
+    }
+
     public RaceBooking bookingOfOrder(String razorpayOrderId) {
         return raceBookingRepo.findByPaymentOrderId(razorpayOrderId).orElseThrow();
     }
