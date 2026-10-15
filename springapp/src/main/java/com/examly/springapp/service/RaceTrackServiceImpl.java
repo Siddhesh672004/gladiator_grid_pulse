@@ -7,8 +7,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import com.examly.springapp.config.CacheConfig;
 import com.examly.springapp.dto.request.TrackRequest;
 import com.examly.springapp.dto.response.TrackResponse;
 import com.examly.springapp.exceptions.ConflictException;
@@ -41,6 +44,7 @@ public class RaceTrackServiceImpl implements RaceTrackService {
     private final CloudinaryService cloudinaryService;
 
     @Override
+    @CacheEvict(cacheNames = { CacheConfig.TRACKS, CacheConfig.TRACK }, allEntries = true)
     public TrackResponse addTrack(TrackRequest request) {
         RaceTrack track = trackMapper.toEntity(request);
         checkTrackRules(track);
@@ -51,11 +55,14 @@ public class RaceTrackServiceImpl implements RaceTrackService {
     }
 
     @Override
+    @Cacheable(cacheNames = CacheConfig.TRACK, key = "#trackId")
     public TrackResponse getTrackById(Long trackId) {
         return toResponse(findTrack(trackId));
     }
 
+    // every page with tracks asks for this list, redis answers for 30 s
     @Override
+    @Cacheable(cacheNames = CacheConfig.TRACKS)
     public List<TrackResponse> getAllTracks() {
         Map<Long, TrackOffer> offers = offers();
         return raceTrackRepo.findAll().stream()
@@ -64,6 +71,7 @@ public class RaceTrackServiceImpl implements RaceTrackService {
     }
 
     @Override
+    @CacheEvict(cacheNames = { CacheConfig.TRACKS, CacheConfig.TRACK }, allEntries = true)
     public TrackResponse updateTrack(Long trackId, TrackRequest request) {
         RaceTrack existing = findTrack(trackId);
         trackMapper.updateEntity(existing, request);
@@ -76,6 +84,7 @@ public class RaceTrackServiceImpl implements RaceTrackService {
 
     // a track with sessions has history, so it is only deactivated
     @Override
+    @CacheEvict(cacheNames = { CacheConfig.TRACKS, CacheConfig.TRACK }, allEntries = true)
     public TrackResponse deleteTrack(Long trackId) {
         RaceTrack track = findTrack(trackId);
         // only a track that never had a session can go
@@ -89,6 +98,7 @@ public class RaceTrackServiceImpl implements RaceTrackService {
     }
 
     @Override
+    @CacheEvict(cacheNames = { CacheConfig.TRACKS, CacheConfig.TRACK }, allEntries = true)
     public TrackResponse deactivateTrack(Long trackId) {
         RaceTrack track = findTrack(trackId);
         // scheduled or live sessions have to be cancelled or finished first
@@ -101,6 +111,7 @@ public class RaceTrackServiceImpl implements RaceTrackService {
     }
 
     @Override
+    @CacheEvict(cacheNames = { CacheConfig.TRACKS, CacheConfig.TRACK }, allEntries = true)
     public TrackResponse activateTrack(Long trackId) {
         return setActive(findTrack(trackId), true);
     }

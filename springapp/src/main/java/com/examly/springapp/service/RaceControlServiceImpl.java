@@ -3,9 +3,11 @@ package com.examly.springapp.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.examly.springapp.config.CacheConfig;
 import com.examly.springapp.dto.response.LiveStandingResponse;
 import com.examly.springapp.exceptions.BookingException;
 import com.examly.springapp.exceptions.ResourceNotFoundException;
@@ -40,6 +42,7 @@ public class RaceControlServiceImpl implements RaceControlService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = { CacheConfig.TRACKS, CacheConfig.TRACK }, allEntries = true)
     public LiveStandingResponse startRace(Long raceBookingId) {
         RaceBooking booking = findPracticeCar(raceBookingId);
         RaceRules.start(booking);
@@ -72,6 +75,7 @@ public class RaceControlServiceImpl implements RaceControlService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = { CacheConfig.TRACKS, CacheConfig.TRACK }, allEntries = true)
     public List<LiveStandingResponse> resetSession(Long sessionId) {
         RaceSession session = findSession(sessionId);
         checkPracticeStillOpen(session);
@@ -90,6 +94,7 @@ public class RaceControlServiceImpl implements RaceControlService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = { CacheConfig.TRACKS, CacheConfig.TRACK }, allEntries = true)
     public List<LiveStandingResponse> finishSession(Long sessionId) {
         RaceSession session = findSession(sessionId);
         checkPracticeStillOpen(session);

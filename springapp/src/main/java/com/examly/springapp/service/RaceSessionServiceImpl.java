@@ -9,11 +9,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.examly.springapp.config.CacheConfig;
 import com.examly.springapp.dto.request.SessionRequest;
 import com.examly.springapp.dto.response.PageResponse;
 import com.examly.springapp.dto.response.SessionResponse;
@@ -46,6 +48,7 @@ public class RaceSessionServiceImpl implements RaceSessionService {
     private final SessionMapper sessionMapper;
 
     @Override
+    @CacheEvict(cacheNames = { CacheConfig.TRACKS, CacheConfig.TRACK }, allEntries = true)
     public SessionResponse addPracticeSession(SessionRequest request) {
         RaceTrack track = findTrack(request.trackId());
         checkSlot(track, request.sessionDate(), request.startTime(), request.endTime(), null);
@@ -58,6 +61,7 @@ public class RaceSessionServiceImpl implements RaceSessionService {
     }
 
     @Override
+    @CacheEvict(cacheNames = { CacheConfig.TRACKS, CacheConfig.TRACK }, allEntries = true)
     public SessionResponse updatePracticeSession(Long sessionId, SessionRequest request) {
         RaceSession session = findSession(sessionId);
         checkIsPractice(session);
@@ -76,6 +80,7 @@ public class RaceSessionServiceImpl implements RaceSessionService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = { CacheConfig.TRACKS, CacheConfig.TRACK }, allEntries = true)
     public SessionResponse cancelSession(Long sessionId) {
         RaceSession session = findSession(sessionId);
         checkIsPractice(session);

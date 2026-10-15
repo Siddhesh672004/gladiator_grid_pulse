@@ -4,9 +4,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.examly.springapp.config.CacheConfig;
 import com.examly.springapp.dto.response.CompetitionResponse;
 import com.examly.springapp.dto.response.LiveStandingResponse;
 import com.examly.springapp.exceptions.BookingException;
@@ -41,6 +43,7 @@ public class CompetitionControlServiceImpl implements CompetitionControlService 
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = { CacheConfig.TRACKS, CacheConfig.TRACK, CacheConfig.COMPETITIONS }, allEntries = true)
     public CompetitionResponse startQualifying(Long competitionId) {
         Competition competition = competitionService.findCompetition(competitionId);
         checkStatus(competition, CompetitionStatus.UPCOMING, "Start Qualifying");
@@ -66,6 +69,7 @@ public class CompetitionControlServiceImpl implements CompetitionControlService 
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = { CacheConfig.TRACKS, CacheConfig.TRACK, CacheConfig.COMPETITIONS }, allEntries = true)
     public CompetitionResponse finishQualifying(Long competitionId) {
         Competition competition = competitionService.findCompetition(competitionId);
         checkStatus(competition, CompetitionStatus.QUALIFYING, "Finish Qualifying");
@@ -89,6 +93,7 @@ public class CompetitionControlServiceImpl implements CompetitionControlService 
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = { CacheConfig.TRACKS, CacheConfig.TRACK, CacheConfig.COMPETITIONS }, allEntries = true)
     public CompetitionResponse startRace(Long competitionId) {
         Competition competition = competitionService.findCompetition(competitionId);
         checkStatus(competition, CompetitionStatus.QUALIFYING_COMPLETED, "Start Race");
@@ -107,6 +112,7 @@ public class CompetitionControlServiceImpl implements CompetitionControlService 
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = { CacheConfig.TRACKS, CacheConfig.TRACK, CacheConfig.COMPETITIONS }, allEntries = true)
     public CompetitionResponse finishRace(Long competitionId) {
         Competition competition = competitionService.findCompetition(competitionId);
         checkStatus(competition, CompetitionStatus.RACING, "Finish Race");

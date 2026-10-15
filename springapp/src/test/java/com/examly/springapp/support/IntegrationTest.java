@@ -58,7 +58,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
         "gridpulse.super-admin.password=",
         "gridpulse.jobs.refund.enabled=false",
         "gridpulse.log-dir=target/test-logs",
-        "spring.jpa.properties.hibernate.generate_statistics=true" })
+        "spring.jpa.properties.hibernate.generate_statistics=true",
+        "spring.cache.type=none" })
 @Import({ FakeRazorpayService.class, TestData.class })
 public abstract class IntegrationTest {
 

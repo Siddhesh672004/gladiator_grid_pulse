@@ -4,9 +4,12 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.examly.springapp.config.CacheConfig;
 import com.examly.springapp.dto.CompetitionRule;
 import com.examly.springapp.dto.request.CompetitionRequest;
 import com.examly.springapp.dto.response.CompetitionResponse;
@@ -44,6 +47,7 @@ public class CompetitionServiceImpl implements CompetitionService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = { CacheConfig.TRACKS, CacheConfig.TRACK, CacheConfig.COMPETITIONS }, allEntries = true)
     public CompetitionResponse createCompetition(CompetitionRequest request) {
         // a name can be used once (any case)
         Optional.of(request.competitionName().trim())
@@ -78,6 +82,7 @@ public class CompetitionServiceImpl implements CompetitionService {
     }
 
     @Override
+    @Cacheable(cacheNames = CacheConfig.COMPETITIONS)
     public List<CompetitionResponse> getAllCompetitions() {
         return competitionRepo.findAllByOrderByCompetitionDateDesc().stream()
                 .map(this::toResponse)
@@ -91,6 +96,7 @@ public class CompetitionServiceImpl implements CompetitionService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = { CacheConfig.TRACKS, CacheConfig.TRACK, CacheConfig.COMPETITIONS }, allEntries = true)
     public CompetitionResponse cancelCompetition(Long competitionId) {
         Competition competition = findCompetition(competitionId);
         // once qualifying has started it is too late to cancel
