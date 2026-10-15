@@ -8,6 +8,8 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -82,6 +84,14 @@ public class LiveBoardHub {
                 watching.remove(emitter);
             }
         }));
+    }
+
+    // shutting down: the open boards are closed at once (the browsers connect again, to another instance),
+    // else the graceful shutdown waits for every open stream
+    @EventListener(ContextClosedEvent.class)
+    public void closeAll() {
+        viewers.values().forEach(watching -> watching.forEach(SseEmitter::complete));
+        viewers.clear();
     }
 
     // a viewer that went away is dropped

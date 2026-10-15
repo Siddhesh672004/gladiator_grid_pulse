@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Stream;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -96,10 +97,9 @@ class KafkaIntegrationTest extends IntegrationTest {
         List<String> boards = new CopyOnWriteArrayList<>();
         HttpRequest watch = HttpRequest.newBuilder(URI.create(rest.getRootUri() + "/api/live/session/"
                 + session.getSessionId())).header("Accept", "text/event-stream").build();
-        Thread reader = new Thread(() -> HttpClient.newHttpClient()
-                .sendAsync(watch, HttpResponse.BodyHandlers.ofLines())
-                .join()
-                .body()
+        HttpResponse<Stream<String>> stream = HttpClient.newHttpClient()
+                .send(watch, HttpResponse.BodyHandlers.ofLines());
+        Thread reader = new Thread(() -> stream.body()
                 .filter(line -> line.startsWith("data:"))
                 .forEach(boards::add));
         reader.setDaemon(true);
@@ -114,5 +114,7 @@ class KafkaIntegrationTest extends IntegrationTest {
         // this instance pushed it at once, kafka brings the same board a moment later (what the other instance uses)
         await().atMost(Duration.ofSeconds(5))
                 .until(() -> boards.stream().filter(board -> board.contains("\"lapCount\":1")).count() >= 2);
+        // the viewer leaves: the server drops it
+        stream.body().close();
     }
 }
