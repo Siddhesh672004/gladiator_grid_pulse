@@ -53,3 +53,15 @@ Needs: Java 17+, Node 20, Docker Desktop (or a local MySQL 8, see "Manual MySQL"
    cd angularapp
    npm install
    npm start
+
+
+4. Tests (Docker must be running, nothing else)
+-----------------------------------------------
+   cd springapp
+   ./mvnw verify
+
+   the tests start their own throw-away MySQL, never touch appdb and send no email
+   (texts go to springapp/target/test-mails, logs to springapp/target/test-logs). Razorpay is faked.
+   5 tests: two drivers paying for the same car number at once, one order confirmed twice,
+   two admins approving the last seat at once, 401 / 403 rules, competition start guard.
+   skip them:  ./mvnw package -DskipTests
