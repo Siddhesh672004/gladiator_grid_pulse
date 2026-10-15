@@ -12,6 +12,7 @@ import com.examly.springapp.model.RaceBooking;
 import com.examly.springapp.model.RaceSession;
 import com.examly.springapp.model.RaceTrack;
 import com.examly.springapp.model.Role;
+import com.examly.springapp.model.SessionStatus;
 import com.examly.springapp.model.User;
 import com.examly.springapp.repository.RaceBookingRepo;
 import com.examly.springapp.repository.RaceSessionRepo;
@@ -91,6 +92,13 @@ public class TestData {
     public RaceSession practiceSession(RaceTrack track, int daysAhead, int maxCars) {
         return raceSessionRepo.save(new RaceSession(track, RaceSession.today().plusDays(daysAhead), LocalTime.of(10, 0),
                 LocalTime.of(11, 0), 500.0, maxCars));
+    }
+
+    // the session is over (feedback can be given now)
+    public RaceSession complete(RaceSession session) {
+        RaceSession saved = raceSessionRepo.findById(session.getSessionId()).orElseThrow();
+        saved.setStatus(SessionStatus.COMPLETED);
+        return raceSessionRepo.save(saved);
     }
 
     public List<RaceBooking> bookingsOf(RaceSession session) {
