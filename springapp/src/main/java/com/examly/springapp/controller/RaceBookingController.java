@@ -28,7 +28,7 @@ import com.examly.springapp.service.TicketService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-// approve / reject / cancel / list; a booking itself is only made through the payment (PaymentController)
+// approve / reject / cancel / list; a booking itself is only made through the payment (payment-service)
 @RestController
 @RequestMapping("/api/race-booking")
 @RequiredArgsConstructor

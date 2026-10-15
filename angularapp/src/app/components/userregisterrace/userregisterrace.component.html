@@ -107,8 +107,14 @@
 
 <ng-template [appPopup]="showModal">
   <div class="modal-box" *ngIf="showModal">
-    <p>Payment received and race registration submitted successfully!</p>
-    <p class="modal-hint">Your booking now waits for the admin's approval. If it is rejected, the amount is refunded.</p>
+    <ng-container *ngIf="!pendingMessage; else stillConfirming">
+      <p>Payment received and race registration submitted successfully!</p>
+      <p class="modal-hint">Your booking now waits for the admin's approval. If it is rejected, the amount is refunded.</p>
+    </ng-container>
+    <ng-template #stillConfirming>
+      <p>{{ pendingMessage }}</p>
+      <p class="modal-hint">If the booking can't be saved, the amount is refunded.</p>
+    </ng-template>
     <button class="btn btn-main" (click)="closeModal()">Ok</button>
   </div>
 </ng-template>

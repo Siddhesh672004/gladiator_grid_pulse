@@ -1,7 +1,7 @@
 import { Injectable, NgZone } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { Payment, PaymentAudit, PaymentConfirmRequest, PaymentOrder, RazorpayResult, Revenue } from '../models/payment.model';
+import { Observable, map } from 'rxjs';
+import { Payment, PaymentAudit, PaymentConfirmRequest, PaymentConfirmResult, PaymentOrder, RazorpayResult, Revenue } from '../models/payment.model';
 import { RaceBooking, RaceBookingRequest } from '../models/race-booking.model';
 import { PageResponse } from '../models/admin-user.model';
 import { environment } from '../../environments/environment';
@@ -26,8 +26,12 @@ export class PaymentService {
     return this.http.post<PaymentOrder>(this.apiUrl + API_ENDPOINTS.PAYMENT_ORDER, booking);
   }
 
-  confirm(request: PaymentConfirmRequest): Observable<RaceBooking> {
-    return this.http.post<RaceBooking>(this.apiUrl + API_ENDPOINTS.PAYMENT_CONFIRM, request);
+  // 201 = the booking is saved; 202 = paid, the booking is still being confirmed (only a message comes back)
+  confirm(request: PaymentConfirmRequest): Observable<PaymentConfirmResult> {
+    return this.http.post<any>(this.apiUrl + API_ENDPOINTS.PAYMENT_CONFIRM, request, { observe: 'response' }).pipe(
+      map(response => response.status === 202
+        ? { pendingMessage: response.body?.message }
+        : { booking: response.body as RaceBooking }));
   }
 
   // emits Razorpay's three values once paid, errors when the window is closed without paying

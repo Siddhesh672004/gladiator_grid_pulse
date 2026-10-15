@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,7 @@ import org.springframework.http.ResponseEntity;
 import org.testcontainers.containers.MySQLContainer;
 
 import com.examly.springapp.dto.request.BookingStatusRequest;
-import com.examly.springapp.dto.request.PaymentConfirmRequest;
+import com.examly.springapp.dto.request.InternalBookingRequest;
 import com.examly.springapp.dto.request.RaceBookingRequest;
 import com.examly.springapp.model.BookingStatus;
 import com.examly.springapp.model.RaceSession;
@@ -34,9 +35,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gridpulse.common.event.EventReader;
 import com.gridpulse.common.outbox.OutboxRepository;
+import com.gridpulse.common.security.InternalApi;
 
 // the real app on a random port against a throw-away mysql in docker
-// razorpay is faked, no ai / cloudinary call leaves the machine, the refund job is off
+// bookings are made the way payment-service makes them (/internal/bookings), no ai / cloudinary call leaves the machine
 // events stay in the outbox table (relay off, no kafka needed): the tests read them there
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
         "jwt.secret=" + IntegrationTest.JWT_SECRET,
@@ -51,19 +53,21 @@ import com.gridpulse.common.outbox.OutboxRepository;
         "cloudinary.cloud-name=",
         "cloudinary.api-key=",
         "cloudinary.api-secret=",
-        "razorpay.key-id=rzp_test_dummy",
-        "razorpay.key-secret=dummy_secret",
+        "gridpulse.internal-api-key=" + IntegrationTest.INTERNAL_KEY,
+        "gridpulse.payment-url=http://localhost:1",
         "gridpulse.super-admin.email=",
         "gridpulse.super-admin.password=",
-        "gridpulse.jobs.refund.enabled=false",
         "gridpulse.log-dir=target/test-logs",
         "spring.jpa.properties.hibernate.generate_statistics=true",
         "spring.cache.type=none" })
-@Import({ FakeRazorpayService.class, TestData.class })
+@Import(TestData.class)
 public abstract class IntegrationTest {
 
     static final String JWT_SECRET = "gridpulse-integration-tests-fixed-jwt-secret-0123456789abcdefghij";
     protected static final String TICKET_SECRET = "gridpulse-integration-tests-ticket-secret-0123456789";
+    protected static final String INTERNAL_KEY = "gridpulse-integration-tests-internal-key-0123456789";
+    // one counter for the whole run: every booking gets its own razorpay order id
+    private static final AtomicInteger ORDERS = new AtomicInteger();
 
     // one container for every test class (same spring context), docker removes it when the jvm stops
     @ServiceConnection
@@ -100,11 +104,22 @@ public abstract class IntegrationTest {
         return call(HttpMethod.PUT, url, token, body);
     }
 
+    // what payment-service sends: the internal key + the driver's own token
+    protected ResponseEntity<String> postInternal(String url, String token, Object body) {
+        HttpHeaders headers = headers(token);
+        headers.set(InternalApi.HEADER, INTERNAL_KEY);
+        return rest.exchange(url, HttpMethod.POST, new HttpEntity<>(body, headers), String.class);
+    }
+
     private ResponseEntity<String> call(HttpMethod method, String url, String token, Object body) {
+        return rest.exchange(url, method, new HttpEntity<>(body, headers(token)), String.class);
+    }
+
+    private static HttpHeaders headers(String token) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         Optional.ofNullable(token).ifPresent(headers::setBearerAuth);
-        return rest.exchange(url, method, new HttpEntity<>(body, headers), String.class);
+        return headers;
     }
 
     protected JsonNode json(ResponseEntity<String> response) throws JsonProcessingException {
@@ -115,25 +130,20 @@ public abstract class IntegrationTest {
         return response.getStatusCode().value();
     }
 
-    // checkout step 1, returns the (fake) razorpay order id
-    protected String createOrder(User driver, RaceSession session, int carNumber) throws JsonProcessingException {
-        ResponseEntity<String> order = post("/api/payments/order", data.token(driver), booking(session, carNumber));
-        if (status(order) != 201) {
-            throw new IllegalStateException("order failed: " + order.getBody());
-        }
-        return json(order).get("orderId").asText();
+    protected static String newOrderId() {
+        return "order_test_" + ORDERS.incrementAndGet();
     }
 
-    // checkout step 2 with the signature the fake accepts
-    protected ResponseEntity<String> confirm(User driver, RaceSession session, int carNumber, String orderId) {
-        PaymentConfirmRequest paid = new PaymentConfirmRequest(booking(session, carNumber), orderId,
-                "pay_" + orderId, "valid");
-        return post("/api/payments/confirm", data.token(driver), paid);
+    // payment-service after the money came in: the booking of this order
+    protected ResponseEntity<String> createPaid(User driver, RaceSession session, int carNumber, String orderId) {
+        InternalBookingRequest paid = new InternalBookingRequest(booking(session, carNumber), orderId,
+                "pay_" + orderId, session.getPrice());
+        return postInternal("/internal/bookings", data.token(driver), paid);
     }
 
-    // order + confirm = a Pending booking, returns its id
+    // a paid Pending booking, returns its id
     protected Long book(User driver, RaceSession session, int carNumber) throws JsonProcessingException {
-        ResponseEntity<String> booked = confirm(driver, session, carNumber, createOrder(driver, session, carNumber));
+        ResponseEntity<String> booked = createPaid(driver, session, carNumber, newOrderId());
         if (status(booked) != 201) {
             throw new IllegalStateException("booking failed: " + booked.getBody());
         }

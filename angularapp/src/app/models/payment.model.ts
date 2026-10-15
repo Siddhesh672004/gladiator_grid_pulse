@@ -1,5 +1,5 @@
 import { ChartPoint } from './admin-dashboard.model';
-import { RaceBookingRequest } from './race-booking.model';
+import { RaceBooking, RaceBookingRequest } from './race-booking.model';
 import { RaceSession } from './session.model';
 import { User } from './user.model';
 
@@ -29,12 +29,18 @@ export interface PaymentConfirmRequest {
   razorpaySignature: string;
 }
 
+// confirm answer: the booking (201), or only a message while it is still being confirmed (202)
+export interface PaymentConfirmResult {
+  booking?: RaceBooking;
+  pendingMessage?: string;
+}
+
 export interface Payment {
   paymentId: number;
   user: User;
   session: RaceSession;
   amount: number;
-  status: string;                 // CREATED, PAID, FAILED, REFUND_PENDING, REFUNDED, REFUND_FAILED
+  status: string;                 // CREATED, CAPTURED, PAID, FAILED, REFUND_PENDING, REFUNDED, REFUND_FAILED
   razorpayOrderId: string;
   razorpayPaymentId?: string;
   razorpayRefundId?: string;

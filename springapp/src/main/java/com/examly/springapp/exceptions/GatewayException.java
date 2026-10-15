@@ -1,6 +1,6 @@
 package com.examly.springapp.exceptions;
 
-// cloudinary or razorpay is not set up, not reachable or refused the request -> 503 (reason is in the log)
+// cloudinary or payment-service is not set up, not reachable or refused the request -> 503 (reason is in the log)
 public final class GatewayException extends GridPulseException {
 
     public GatewayException(String message) {

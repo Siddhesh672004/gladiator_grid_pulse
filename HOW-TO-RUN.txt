@@ -30,13 +30,13 @@ instance where the change was made.
    DB_HOST / DB_PORT               mysql, default localhost / 3306 (core: ignored when DB_URL is set)
    NOTIFICATION_DB_URL             notification-service database, default .../notification_db
    PAYMENT_PORT / PAYMENT_DB_URL   payment-service port (8085) and database (.../payment_db)
-   PAYMENT_URL                     gateway: where payment-service runs, default http://localhost:8085
+   PAYMENT_URL                     gateway + core: where payment-service runs, default http://localhost:8085
    INTERNAL_API_KEY                the services call the core's /internal/** with it (secrets.properties,
                                    the same everywhere); empty = a fixed dev key + warning
    RAZORPAY_BASE_URL               payment-service: razorpay api, default https://api.razorpay.com/v1
    JWT_SECRET                      64+ characters; empty = a key file in ~/.gridpulse (one machine only:
                                    payment-service reads the core's key file, start the core first)
-   GRIDPULSE_JOBS_REFUND_ENABLED   false = no refund job here (run it on one instance only)
+   GRIDPULSE_JOBS_REFUND_ENABLED   payment-service: false = no refund job here (run it on one instance only)
    FRONTEND_URL                    where the Angular site runs, default http://localhost:8081
                                    (the admin invite email links to FRONTEND_URL/set-password)
    REDIS_HOST / REDIS_PORT         redis for the cache, default localhost / 6379
@@ -82,7 +82,7 @@ instance where the change was made.
    (set the same JWT_SECRET for all of them in secrets.properties: the gateway reads tokens for the rate limits)
 
    two core instances (load balancing): a second core + the gateway's docker profile
-   SERVER_PORT=8083 CORS_ENABLED=false GRIDPULSE_JOBS_REFUND_ENABLED=false ./mvnw -pl springapp spring-boot:run
+   SERVER_PORT=8083 CORS_ENABLED=false ./mvnw -pl springapp spring-boot:run
    SPRING_PROFILES_ACTIVE=docker CORE_2_URL=http://localhost:8083 ./mvnw -pl gateway spring-boot:run
    which instance answered: the X-Served-By header (dev only), e.g. curl -I http://localhost:8080/api/race-track
 

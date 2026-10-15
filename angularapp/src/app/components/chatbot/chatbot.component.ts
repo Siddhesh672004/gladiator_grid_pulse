@@ -110,8 +110,10 @@ export class ChatbotComponent {
       razorpaySignature: paid.razorpay_signature
     };
     this.paymentService.confirm(request).subscribe({
-      next: (done) => this.addBotBubble(`Payment received. Booking #${done.raceBookingId} for car #${done.carNumber} `
-        + 'is saved and waiting for approval. You can follow it under My Registrations.'),
+      next: (result) => this.addBotBubble(result.booking
+        ? `Payment received. Booking #${result.booking.raceBookingId} for car #${result.booking.carNumber} `
+          + 'is saved and waiting for approval. You can follow it under My Registrations.'
+        : result.pendingMessage || 'Payment received. Your booking is being confirmed.'),
       error: (err) => this.paymentFailed(err, true)
     });
   }

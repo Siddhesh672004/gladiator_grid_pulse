@@ -11,7 +11,6 @@ import com.examly.springapp.config.properties.CloudinaryProperties;
 import com.examly.springapp.config.properties.CorsProperties;
 import com.examly.springapp.config.properties.InternalApiProperties;
 import com.examly.springapp.config.properties.JwtProperties;
-import com.examly.springapp.config.properties.RazorpayProperties;
 import com.examly.springapp.config.properties.SuperAdminProperties;
 import com.examly.springapp.config.properties.TicketProperties;
 
@@ -30,7 +29,6 @@ public class ProdSettingsCheck {
     private final CorsProperties corsProperties;
     private final SuperAdminProperties superAdminProperties;
     private final CloudinaryProperties cloudinaryProperties;
-    private final RazorpayProperties razorpayProperties;
     private final TicketProperties ticketProperties;
     private final InternalApiProperties internalApiProperties;
 
@@ -42,7 +40,7 @@ public class ProdSettingsCheck {
                 .map(Map.Entry::getKey)
                 .findFirst()
                 .ifPresent(this::fail);
-        log.info("prod settings checked: jwt, cors, ticket secret, super admin, cloudinary and razorpay are set");
+        log.info("prod settings checked: jwt, cors, ticket secret, super admin, cloudinary and internal key are set");
     }
 
     // what to set -> is it missing, kept in the order they are reported
@@ -63,8 +61,6 @@ public class ProdSettingsCheck {
         // no cloudinary = no track can be added (pictures are required)
         missing.put("set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET",
                 !cloudinaryProperties.isConfigured());
-        // no razorpay = nobody can book (a booking comes from a payment)
-        missing.put("set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET", !razorpayProperties.isConfigured());
         return missing;
     }
 

@@ -9,11 +9,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import com.examly.springapp.model.CompetitionPhase;
-import com.examly.springapp.model.PaymentStatus;
 import com.examly.springapp.model.RaceBooking;
 import com.examly.springapp.model.SessionStatus;
 
@@ -46,8 +44,8 @@ public interface RaceBookingRepo extends JpaRepository<RaceBooking, Long> {
     List<RaceBooking> findByUserUserIdAndSessionSessionDateAndStatusIn(int userId, LocalDate sessionDate,
             List<String> statuses);
 
-    // admin list page: rows come with driver, session, track and payment in the same query (no select per row)
-    @EntityGraph(attributePaths = { "user", "session", "session.track", "session.competition", "payment" })
+    // admin list page: rows come with driver, session and track in the same query (no select per row)
+    @EntityGraph(attributePaths = { "user", "session", "session.track", "session.competition" })
     @Query("select b from RaceBooking b where (?1 is null or b.status = ?1)"
             + " and lower(b.session.track.trackName) like ?2")
     Page<RaceBooking> searchPage(String status, String pattern, Pageable pageable);
@@ -82,11 +80,6 @@ public interface RaceBookingRepo extends JpaRepository<RaceBooking, Long> {
     List<LeaderboardRow> leaderboard(CompetitionPhase racing, SessionStatus completed, Pageable limit);
 
     Optional<RaceBooking> findByPaymentOrderId(String paymentOrderId);
-
-    // the booking's copy of its payment status follows the payment
-    @Modifying
-    @Query("update RaceBooking b set b.paymentStatus = ?2 where b.paymentOrderId = ?1")
-    int updatePaymentStatus(String paymentOrderId, PaymentStatus status);
 
     // approved cars of every session on a page in one query
     @Query("select b.session.sessionId as sessionId, count(b) as cars from RaceBooking b"

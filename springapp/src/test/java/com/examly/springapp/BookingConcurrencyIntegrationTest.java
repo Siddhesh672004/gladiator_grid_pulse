@@ -13,44 +13,48 @@ import com.examly.springapp.model.RaceBooking;
 import com.examly.springapp.model.RaceSession;
 import com.examly.springapp.model.User;
 import com.examly.springapp.support.IntegrationTest;
+import com.gridpulse.common.event.BookingRefundRequested;
 
-// the session row lock: two requests at the same moment, exactly one wins, the money of the other goes back
+// the session row lock: two paid bookings at the same moment, exactly one wins (payment-service refunds the other)
 class BookingConcurrencyIntegrationTest extends IntegrationTest {
 
     @Test
-    void sameCarNumberTwoDriversConcurrentConfirm() throws Exception {
+    void sameCarNumberTwoDriversAtOnce() throws Exception {
         RaceSession session = data.practiceSession(10);
         User first = data.driver();
         User second = data.driver();
-        String firstOrder = createOrder(first, session, 7);
-        String secondOrder = createOrder(second, session, 7);
+        String firstOrder = newOrderId();
+        String secondOrder = newOrderId();
 
         List<ResponseEntity<String>> answers = atTheSameTime(
-                () -> confirm(first, session, 7, firstOrder),
-                () -> confirm(second, session, 7, secondOrder));
+                () -> createPaid(first, session, 7, firstOrder),
+                () -> createPaid(second, session, 7, secondOrder));
 
         assertThat(answers).extracting(IntegrationTest::status).containsExactlyInAnyOrder(201, 409);
         assertThat(data.bookingsOf(session)).hasSize(1);
         boolean firstWon = status(answers.get(0)) == 201;
         String winningOrder = firstWon ? firstOrder : secondOrder;
-        String losingOrder = firstWon ? secondOrder : firstOrder;
-        assertThat(data.payment(winningOrder).getStatus()).isEqualTo(PaymentStatus.PAID);
-        assertThat(data.payment(losingOrder).getStatus()).isEqualTo(PaymentStatus.REFUND_PENDING);
+        // the loser's order made no booking: payment-service refunds it
+        assertThat(data.bookingsOf(session)).extracting(RaceBooking::getPaymentOrderId).containsExactly(winningOrder);
+        assertThat(data.bookingOfOrder(winningOrder).getPaymentStatus()).isEqualTo(PaymentStatus.PAID);
+        assertThat(json(firstWon ? answers.get(1) : answers.get(0)).get("message").asText())
+                .contains("Car number 7");
     }
 
     @Test
-    void sameOrderConfirmedTwice() throws Exception {
+    void sameOrderTwiceGivesTheSameBooking() throws Exception {
         RaceSession session = data.practiceSession(10);
         User driver = data.driver();
-        String order = createOrder(driver, session, 11);
+        String order = newOrderId();
 
-        ResponseEntity<String> first = confirm(driver, session, 11, order);
-        ResponseEntity<String> second = confirm(driver, session, 11, order);
+        ResponseEntity<String> first = createPaid(driver, session, 11, order);
+        ResponseEntity<String> second = createPaid(driver, session, 11, order);
 
         assertThat(status(first)).isEqualTo(201);
-        assertThat(second.getStatusCode().is4xxClientError()).isTrue();
+        assertThat(status(second)).isEqualTo(200);
+        assertThat(json(second).get("raceBookingId").asLong()).isEqualTo(json(first).get("raceBookingId").asLong());
         assertThat(data.bookingsOf(session)).hasSize(1);
-        assertThat(data.payment(order).getStatus()).isEqualTo(PaymentStatus.PAID);
+        assertThat(data.bookingOfOrder(order).getPaymentStatus()).isEqualTo(PaymentStatus.PAID);
     }
 
     @Test
@@ -70,9 +74,15 @@ class BookingConcurrencyIntegrationTest extends IntegrationTest {
         Long winner = firstWon ? firstBooking : secondBooking;
         Long loser = firstWon ? secondBooking : firstBooking;
         assertThat(data.booking(winner).getStatus()).isEqualTo(BookingStatus.APPROVED);
-        // the approval that filled the seat sent the waiting booking away with a refund
+        // the approval that filled the seat sent the waiting booking away, payment-service is asked for the refund
         RaceBooking rejected = data.booking(loser);
         assertThat(rejected.getStatus()).isEqualTo(BookingStatus.REJECTED);
-        assertThat(rejected.getPayment().getStatus()).isEqualTo(PaymentStatus.REFUND_PENDING);
+        assertThat(rejected.getPaymentStatus()).isEqualTo(PaymentStatus.REFUND_PENDING);
+        assertThat(outboxEvents(BookingRefundRequested.class))
+                .anySatisfy(refund -> {
+                    assertThat(refund.bookingId()).isEqualTo(loser);
+                    assertThat(refund.orderId()).isEqualTo(rejected.getPaymentOrderId());
+                    assertThat(refund.amount()).isEqualTo(500.0);
+                });
     }
 }

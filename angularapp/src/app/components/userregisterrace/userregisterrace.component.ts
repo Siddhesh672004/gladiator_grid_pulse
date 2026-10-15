@@ -37,6 +37,8 @@ export class UserregisterraceComponent implements OnInit, OnDestroy {
   isSaving: boolean = false;
   errorMessage: string = '';
   showModal: boolean = false;
+  // paid, but the booking is still being confirmed: the modal shows this instead
+  pendingMessage: string = '';
   profileIncomplete: boolean = false;
 
   private dateSubscription?: Subscription;
@@ -279,8 +281,9 @@ export class UserregisterraceComponent implements OnInit, OnDestroy {
       razorpaySignature: paid.razorpay_signature
     };
     this.paymentService.confirm(request).subscribe({
-      next: () => {
+      next: (result) => {
         this.isSaving = false;
+        this.pendingMessage = result.pendingMessage || '';
         this.showModal = true;
       },
       error: (err) => this.paymentFailed(err, true)

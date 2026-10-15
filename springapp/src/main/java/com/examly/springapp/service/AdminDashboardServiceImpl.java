@@ -30,7 +30,7 @@ import com.examly.springapp.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 
 // every number is counted by the database, no table of its own
-// no @Transactional here: getRevenueReport opens its own (one snapshot for the money numbers)
+// the money numbers come from payment-service (one snapshot there), 0 when it does not answer
 @Service
 @RequiredArgsConstructor
 public class AdminDashboardServiceImpl implements AdminDashboardService {
@@ -40,11 +40,11 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
     private final RaceBookingRepo raceBookingRepo;
     private final RaceSessionRepo raceSessionRepo;
     private final FeedbackRepo feedbackRepo;
-    private final PaymentRecordService paymentRecordService;
+    private final PaymentClient paymentClient;
 
     @Override
     public AdminDashboardResponse getDashboard() {
-        RevenueResponse statement = paymentRecordService.getRevenueReport();
+        RevenueResponse statement = paymentClient.summary();
         return new AdminDashboardResponse(metrics(statement), registrationStatus(), trackCategories(),
                 bookingRaceStatistics(), recentRegistrations(), getLiveRaces(), statement);
     }

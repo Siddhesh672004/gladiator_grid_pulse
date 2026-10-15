@@ -1,10 +1,13 @@
 package com.examly.springapp.service;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -31,7 +34,6 @@ import com.examly.springapp.exceptions.ResourceNotFoundException;
 import com.examly.springapp.mapper.RaceBookingMapper;
 import com.examly.springapp.model.BookingStatus;
 import com.examly.springapp.model.Competition;
-import com.examly.springapp.model.Payment;
 import com.examly.springapp.model.PaymentStatus;
 import com.examly.springapp.model.RaceBooking;
 import com.examly.springapp.model.RaceSession;
@@ -41,11 +43,14 @@ import com.examly.springapp.repository.RaceBookingRepo;
 import com.examly.springapp.repository.RaceSessionRepo;
 import com.examly.springapp.repository.SessionCars;
 import com.gridpulse.common.event.BookingDecided;
+import com.gridpulse.common.event.BookingRefundRequested;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-// a booking only comes from a paid order: PaymentServiceImpl.confirm -> addRaceBooking. a reject sends the money back
+// a booking only comes from a paid order: payment-service -> /internal/bookings (createPaidBooking)
+// a reject / cancel asks payment-service for the money back (BookingRefundRequested), its answers come back as
+// PaymentStatusChanged (applyPaymentStatus)
 // only Approved bookings take a seat, any number can wait as Pending
 @Slf4j
 @Service
@@ -58,6 +63,9 @@ public class RaceBookingServiceImpl implements RaceBookingService {
     private static final String CAR_PICTURE_PREFIX = "gridpulse_car_";
     // a rejected booking holds no car number and no time slot
     private static final List<String> HOLDS_A_PLACE = List.of(BookingStatus.PENDING, BookingStatus.APPROVED);
+    // what payment-service's events may change on a booking
+    private static final Set<PaymentStatus> COPIED_PAYMENT_STATUSES = EnumSet.of(PaymentStatus.REFUND_PENDING,
+            PaymentStatus.REFUNDED, PaymentStatus.REFUND_FAILED);
 
     // one rule of a session: when it is broken + the message for it
     private record SessionRule(Predicate<RaceSession> broken, Function<RaceSession, String> message) {
@@ -87,7 +95,6 @@ public class RaceBookingServiceImpl implements RaceBookingService {
     private final RaceBookingMapper raceBookingMapper;
     private final ApplicationEventPublisher eventPublisher;
     private final CloudinaryService cloudinaryService;
-    private final PaymentRecordService paymentRecordService;
     private final TicketService ticketService;
 
     @Override
@@ -188,40 +195,19 @@ public class RaceBookingServiceImpl implements RaceBookingService {
                 + session.getStartTime() + "-" + session.getEndTime();
     }
 
-    // the booking transaction: payment PAID + booking saved, all or nothing. a
-    // rollback leaves the payment CREATED
-    // READ_COMMITTED: after waiting for the session lock the rules must see what
-    // the other request just saved
+    // the refund statuses only: PAID is set here when the booking is made, a late PAID must not undo a refund
     @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    public RaceBookingResponse addRaceBooking(RaceBookingRequest request, String razorpayOrderId,
-            String razorpayPaymentId) {
-        User driver = userService.getLoggedInUser();
-        // one at a time per session: two drivers can't save the same car number
-        RaceSession session = lockSession(request.sessionId());
-
-        Payment payment = paymentRecordService.markPaid(razorpayOrderId, razorpayPaymentId, driver,
-                request.sessionId());
-
-        // rules again, things may have changed while the driver was paying
-        RaceBooking booking = newBooking(request, driver, session);
-        checkBookingRules(booking);
-
-        booking.setPayment(payment);
-        booking.setPaymentOrderId(payment.getRazorpayOrderId());
-        booking.setPaymentStatus(payment.getStatus());
-        booking.setTotalPrice(payment.getAmount());
-        booking.setStatus(BookingStatus.PENDING);
-        booking.setTermsAcceptedAt(Instant.now());
-
-        RaceBooking saved = raceBookingRepo.save(booking);
-        log.info("Booking {} created: car #{} in session {} ('{}' {}), paid {}", saved.getRaceBookingId(),
-                saved.getCarNumber(), session.getSessionId(), session.getTrack().getTrackName(),
-                session.getSessionDate(), saved.getTotalPrice());
-        return raceBookingMapper.toResponse(saved);
+    @Transactional
+    public void applyPaymentStatus(String razorpayOrderId, String status) {
+        Arrays.stream(PaymentStatus.values())
+                .filter(known -> known.name().equals(status))
+                .filter(COPIED_PAYMENT_STATUSES::contains)
+                .findFirst()
+                .ifPresent(copied -> raceBookingRepo.findByPaymentOrderId(razorpayOrderId)
+                        .ifPresent(booking -> booking.setPaymentStatus(copied)));
     }
 
-    // READ_COMMITTED: same reason as above, the seat count must be fresh after
+    // READ_COMMITTED: same reason as createPaidBooking, the seat count must be fresh after
     // waiting for the session lock
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
@@ -466,11 +452,11 @@ public class RaceBookingServiceImpl implements RaceBookingService {
                 });
     }
 
-    // a refunded booking can't be approved again
+    // a refunded booking can't be approved again (no payment status = a free race place)
     private void checkMoneyStillHere(RaceBooking booking) {
-        Optional.ofNullable(booking.getPayment())
-                .filter(payment -> !payment.hasStatus(PaymentStatus.PAID))
-                .ifPresent(payment -> {
+        Optional.ofNullable(booking.getPaymentStatus())
+                .filter(status -> status != PaymentStatus.PAID)
+                .ifPresent(status -> {
                     throw new BookingException(
                             "The payment of this booking was refunded - the driver has to book again");
                 });
@@ -498,11 +484,16 @@ public class RaceBookingServiceImpl implements RaceBookingService {
         emailIfDecided(booking);
     }
 
-    // money back, and the booking's own copy of the payment status follows
+    // a paid booking shows REFUND_PENDING at once, payment-service sends the money (BookingRefundRequested, outbox)
+    // nothing paid (free race place, booking older than payments) or already on its way back -> nothing
     private void refund(RaceBooking booking, String reason) {
-        paymentRecordService.requestRefund(booking.getPayment(), reason);
-        Optional.ofNullable(booking.getPayment())
-                .ifPresent(payment -> booking.setPaymentStatus(payment.getStatus()));
+        Optional.of(booking)
+                .filter(paid -> paid.getPaymentStatus() == PaymentStatus.PAID)
+                .ifPresent(paid -> {
+                    paid.setPaymentStatus(PaymentStatus.REFUND_PENDING);
+                    eventPublisher.publishEvent(new BookingRefundRequested(paid.getPaymentOrderId(),
+                            paid.getRaceBookingId(), paid.getTotalPrice(), reason));
+                });
     }
 
     // a still Pending booking gets no email yet
@@ -529,9 +520,9 @@ public class RaceBookingServiceImpl implements RaceBookingService {
 
     // only money that is on its way back shows in the email
     private Double refundAmount(RaceBooking booking) {
-        return Optional.ofNullable(booking.getPayment())
-                .filter(payment -> payment.hasStatus(PaymentStatus.REFUND_PENDING))
-                .map(Payment::getAmount)
+        return Optional.of(booking)
+                .filter(refunding -> refunding.getPaymentStatus() == PaymentStatus.REFUND_PENDING)
+                .map(RaceBooking::getTotalPrice)
                 .orElse(null);
     }
 

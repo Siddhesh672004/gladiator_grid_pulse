@@ -8,13 +8,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.boot.test.context.TestComponent;
 
 import com.examly.springapp.config.JwtUtils;
-import com.examly.springapp.model.Payment;
 import com.examly.springapp.model.RaceBooking;
 import com.examly.springapp.model.RaceSession;
 import com.examly.springapp.model.RaceTrack;
 import com.examly.springapp.model.Role;
 import com.examly.springapp.model.User;
-import com.examly.springapp.repository.PaymentRepo;
 import com.examly.springapp.repository.RaceBookingRepo;
 import com.examly.springapp.repository.RaceSessionRepo;
 import com.examly.springapp.repository.RaceTrackRepo;
@@ -36,7 +34,6 @@ public class TestData {
     private final RaceTrackRepo raceTrackRepo;
     private final RaceSessionRepo raceSessionRepo;
     private final RaceBookingRepo raceBookingRepo;
-    private final PaymentRepo paymentRepo;
     private final JwtUtils jwtUtils;
 
     // date of birth + license on file = may book
@@ -110,10 +107,7 @@ public class TestData {
         return raceBookingRepo.findById(bookingId).orElseThrow();
     }
 
-    public Payment payment(String razorpayOrderId) {
-        return paymentRepo.findAll().stream()
-                .filter(payment -> payment.getRazorpayOrderId().equals(razorpayOrderId))
-                .findFirst()
-                .orElseThrow();
+    public RaceBooking bookingOfOrder(String razorpayOrderId) {
+        return raceBookingRepo.findByPaymentOrderId(razorpayOrderId).orElseThrow();
     }
 }

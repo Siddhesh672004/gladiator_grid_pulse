@@ -97,6 +97,7 @@ services:
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       KAFKA_BOOTSTRAP: kafka:29092
       REDIS_HOST: redis
+      PAYMENT_URL: http://payment:8085
     depends_on:
       mysql:
         condition: service_healthy
@@ -123,8 +124,7 @@ services:
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       KAFKA_BOOTSTRAP: kafka:29092
       REDIS_HOST: redis
-      # only one instance sends the refunds
-      GRIDPULSE_JOBS_REFUND_ENABLED: "false"
+      PAYMENT_URL: http://payment:8085
     depends_on:
       mysql:
         condition: service_healthy

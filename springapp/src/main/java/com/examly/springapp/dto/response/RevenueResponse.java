@@ -2,7 +2,7 @@ package com.examly.springapp.dto.response;
 
 import java.util.List;
 
-// the money summary, every number comes from ONE database snapshot (one read-only transaction in PaymentRecordServiceImpl)
+// the money summary from payment-service, every number from ONE database snapshot there
 public record RevenueResponse(
         double collected,
         double refunded,

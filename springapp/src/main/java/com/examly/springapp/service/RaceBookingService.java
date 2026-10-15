@@ -40,8 +40,8 @@ public interface RaceBookingService {
 
     Optional<RaceBookingResponse> findByOrder(String razorpayOrderId);
 
-    // after paying, only PaymentServiceImpl calls this: payment PAID + booking saved in one transaction
-    RaceBookingResponse addRaceBooking(RaceBookingRequest request, String razorpayOrderId, String razorpayPaymentId);
+    // PaymentStatusChanged: the booking of this order copies the status (unknown order / status -> nothing)
+    void applyPaymentStatus(String razorpayOrderId, String status);
 
     // a reject needs a note. the approval that fills the last seat rejects everyone still waiting
     RaceBookingResponse updateRaceBooking(Long bookingId, BookingStatusRequest request);

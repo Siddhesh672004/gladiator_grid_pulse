@@ -48,7 +48,7 @@ public class BookingTool {
 
     private final RaceSessionRepo raceSessionRepo;
     private final RaceBookingService raceBookingService;
-    private final PaymentService paymentService;
+    private final PaymentClient paymentClient;
     private final UserService userService;
 
     // filled only when a payment was started, ChatServiceImpl sends both to the chat window
@@ -138,7 +138,7 @@ public class BookingTool {
 
     // same call as "Pay & Register": the rules once more, then a Razorpay order
     private String startPayment(RaceSession session, RaceBookingRequest request) {
-        paymentOrder = paymentService.createOrder(request);
+        paymentOrder = paymentClient.createOrder(request);
         booking = request;
         return "The payment window is opening now for " + price(session)
                 + ". The booking is made as soon as the payment goes through.";

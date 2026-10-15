@@ -54,15 +54,11 @@ public class RaceBooking {
 
     private Double totalPrice;
 
-    // empty for bookings older than payments and for the free race place of a competition
-    @ManyToOne
-    @JoinColumn(name = "paymentId")
-    private Payment payment;
-
     @JdbcTypeCode(SqlTypes.TIMESTAMP_UTC)
     private Instant termsAcceptedAt;
 
     // the razorpay order of this booking + a copy of its payment status (payment-service owns the payment itself)
+    // empty for bookings older than payments and for the free race place of a competition
     // varchar, not a mysql enum: a new status needs no table change
     @Column(length = 40, unique = true)
     private String paymentOrderId;
