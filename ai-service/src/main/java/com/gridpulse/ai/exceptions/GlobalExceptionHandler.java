@@ -52,6 +52,13 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.SERVICE_UNAVAILABLE, "That part of GridPulse is unavailable right now.", request);
     }
 
+    // a Confirm / Cancel that is not possible (unknown, used, expired)
+    @ExceptionHandler(ActionRefusedException.class)
+    public ResponseEntity<ErrorResponse> handleActionRefused(ActionRefusedException e, HttpServletRequest request) {
+        HttpStatus status = Optional.ofNullable(HttpStatus.resolve(e.getStatus())).orElse(HttpStatus.BAD_REQUEST);
+        return build(status, e.getMessage(), request);
+    }
+
     // the other service's own 4xx, passed on as it came
     @ExceptionHandler(ToolCallException.class)
     public ResponseEntity<ErrorResponse> handleRefused(ToolCallException e, HttpServletRequest request) {

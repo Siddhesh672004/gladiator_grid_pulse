@@ -104,6 +104,11 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<!-- the Copilot remembers its chats in mysql (spring ai's jdbc chat memory) -->
+		<dependency>
+			<groupId>org.springframework.ai</groupId>
+			<artifactId>spring-ai-starter-model-chat-memory-repository-jdbc</artifactId>
+		</dependency>
 		<!-- groq speaks the openai api: the feedback labels, suggestions and summary -->
 		<dependency>
 			<groupId>org.springframework.ai</groupId>
