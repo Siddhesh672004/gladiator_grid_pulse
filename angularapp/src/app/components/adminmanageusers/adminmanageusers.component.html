@@ -1,0 +1,53 @@
+<div class="page">
+  <app-pagehead title="Manage Users" subtitle="Driver accounts, newest first. A deactivated driver cannot log in."></app-pagehead>
+
+  <div class="toolbar">
+    <!-- the search runs on the server: Enter or the button -->
+    <form class="search-form" (ngSubmit)="search()">
+      <div class="search-box">
+        <app-icon name="search"></app-icon>
+        <input id="userSearch" name="userSearch" type="search" maxlength="100" placeholder="Name or email" aria-label="Search users"
+               [(ngModel)]="searchText">
+      </div>
+      <button class="btn btn-main btn-outline" type="submit">Search</button>
+    </form>
+    <app-filterbox label="Status" [options]="statusOptions" [(value)]="statusFilter" (valueChange)="search()"></app-filterbox>
+    <span class="muted mono count" *ngIf="!isLoading">{{ total }} driver{{ total === 1 ? '' : 's' }}</span>
+  </div>
+
+  <div class="server-error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+  <app-loader *ngIf="isLoading && users.length === 0" label="Loading users"></app-loader>
+  <app-empty *ngIf="!isLoading && users.length === 0" title="No driver found" text="Try another name, email or status."></app-empty>
+
+  <!-- paginator stays after the table, same *ngIf -->
+  <ng-container *ngIf="users.length > 0">
+    <div class="table-wrap">
+      <table class="gp-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Mobile Number</th>
+            <th>Profile</th>
+            <th>Joined</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of users">
+            <td><strong>{{ user.username }}</strong><small>{{ user.email }}</small></td>
+            <td data-label="Mobile Number" class="mono">{{ user.mobileNumber }}</td>
+            <td data-label="Profile">{{ user.profileComplete ? 'Complete' : 'Incomplete' }}</td>
+            <td data-label="Joined" class="mono">{{ user.createdAt | date:'dd/MM/yyyy' }}</td>
+            <td data-label="Status"><app-flag [status]="user.enabled ? 'Active' : 'Inactive'"></app-flag></td>
+            <td class="actions">
+              <button class="btn btn-small" [class.btn-green]="!user.enabled" [class.btn-grey]="user.enabled"
+                      [disabled]="busyId === user.userId" (click)="toggle(user)">{{ user.enabled ? 'Deactivate' : 'Activate' }}</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <app-paginator [total]="total" [page]="page" [pageSize]="pageSize" (pageChange)="goToPage($event)"></app-paginator>
+  </ng-container>
+</div>
