@@ -3,8 +3,9 @@ GridPulse - how to run
 
 Needs: Java 17+, Node 20, Docker Desktop (or a local MySQL 8, see "Manual MySQL").
 
-Two services + the Angular site:
-   core (springapp)        http://localhost:8080   the api the site calls
+The services + the Angular site:
+   gateway                 http://localhost:8080   the one address the site calls: routes /api/** to the core, CORS
+   core (springapp)        http://localhost:8082   the api itself (behind the gateway)
    notification-service    http://localhost:8084   sends every email (sign-up code, invite, booking decision + e-ticket)
 The core writes events into its outbox table; Kafka carries them to notification-service.
 No Kafka or no notification-service = no emails yet: the events wait and go out once both run.
@@ -18,7 +19,9 @@ No Kafka or no notification-service = no emails yet: the events wait and go out 
    an environment variable with the same name wins over the file.
 
    other settings (env vars, all optional):
-   SERVER_PORT                     core port, default 8080
+   SERVER_PORT                     core port, default 8082
+   CORS_ENABLED                    false = core answers no CORS (behind the gateway); default true
+   CORE_1_URL / CORE_PRIMARY_URL   gateway: where the core runs, default http://localhost:8082
    NOTIFICATION_PORT               notification-service port, default 8084
    DB_HOST / DB_PORT               mysql, default localhost / 3306 (core: ignored when DB_URL is set)
    NOTIFICATION_DB_URL             notification-service database, default .../notification_db
@@ -56,15 +59,16 @@ No Kafka or no notification-service = no emails yet: the events wait and go out 
 2. Services - terminal mode (infra in Docker, services from the repo root)
 ---------------------------------------------------------------------------
    ./mvnw -q install -DskipTests -pl common                 (first time + after a change in common/)
-   ./mvnw -pl springapp spring-boot:run                     core, http://localhost:8080
+   CORS_ENABLED=false ./mvnw -pl springapp spring-boot:run  core, http://localhost:8082
    ./mvnw -pl notification-service spring-boot:run          second terminal, http://localhost:8084
+   ./mvnw -pl gateway spring-boot:run                       third terminal, http://localhost:8080 (what angular calls)
 
    no Redis at hand: CACHE_TYPE=none ./mvnw -pl springapp spring-boot:run   (works the same, without the cache)
    check the cache: docker compose exec redis redis-cli keys 'gp:*'
    emails to files instead of gmail: MAIL_TO_FILE=true ./mvnw -pl notification-service spring-boot:run
 
-   health:   http://localhost:8080/actuator/health   and   http://localhost:8084/actuator/health
-   swagger:  http://localhost:8080/swagger-ui.html        (not in prod)
+   health:   http://localhost:8082/actuator/health (core), :8084 (notification), :8080 (gateway)
+   swagger:  http://localhost:8082/swagger-ui.html        (on the core itself, not in prod)
              log in on /api/admin/login (or /api/login), copy "token", press Authorize, paste it
    /actuator/info and /actuator/metrics need an Admin / SuperAdmin token
    the gmail check of notification-service: its log line "EMAIL: ..." (notification-service/logs)

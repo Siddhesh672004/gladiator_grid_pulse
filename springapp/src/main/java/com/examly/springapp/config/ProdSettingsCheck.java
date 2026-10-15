@@ -63,8 +63,9 @@ public class ProdSettingsCheck {
     }
 
     private boolean corsMissing() {
+        // behind the gateway the core answers no CORS: nothing to set here
         // no list at all, an empty entry or "*" (= every website) is not ok in prod
-        return Optional.ofNullable(corsProperties.allowedOrigins())
+        return corsProperties.enabled() && Optional.ofNullable(corsProperties.allowedOrigins())
                 .map(origins -> origins.stream().anyMatch(origin -> isMissing(origin) || origin.equals("*")))
                 .orElse(true);
     }

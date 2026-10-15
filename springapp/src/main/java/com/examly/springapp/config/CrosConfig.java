@@ -1,5 +1,6 @@
 package com.examly.springapp.config;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -9,8 +10,10 @@ import com.examly.springapp.config.properties.CorsProperties;
 
 import lombok.RequiredArgsConstructor;
 
-// lets angular (8081) call the backend (8080); allowed origins come from CorsProperties
+// lets angular (8081) call the core directly; allowed origins come from CorsProperties
+// off behind the gateway (gridpulse.cors.enabled=false), the gateway answers CORS there
 @Configuration
+@ConditionalOnProperty(name = "gridpulse.cors.enabled", havingValue = "true", matchIfMissing = true)
 @RequiredArgsConstructor
 public class CrosConfig implements WebMvcConfigurer {
 

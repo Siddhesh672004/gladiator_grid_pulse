@@ -1,0 +1,10 @@
+# docker profile (compose "apps"): two core instances behind the gateway
+spring:
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            core-service:
+              - uri: ${CORE_1_URL:http://localhost:8082}
+              - uri: ${CORE_2_URL:http://localhost:8083}

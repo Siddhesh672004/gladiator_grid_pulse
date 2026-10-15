@@ -85,9 +85,11 @@ services:
       args:
         MODULE: springapp
     ports:
-      - "8080:8080"
+      - "8082:8082"
     env_file: .env
     environment:
+      SERVER_PORT: 8082
+      CORS_ENABLED: "false"
       DB_HOST: mysql
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       KAFKA_BOOTSTRAP: kafka:29092
@@ -119,6 +121,23 @@ services:
         condition: service_healthy
       kafka:
         condition: service_healthy
+
+  # the one address of the site: angular calls http://localhost:8080
+  gateway:
+    profiles: [apps]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.service
+      args:
+        MODULE: gateway
+    ports:
+      - "8080:8080"
+    env_file: .env
+    environment:
+      CORE_1_URL: http://core:8082
+      CORE_PRIMARY_URL: http://core:8082
+    depends_on:
+      - core
 
 volumes:
   mysql-data:
