@@ -1,8 +1,12 @@
 package com.examly.springapp.repository;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -36,4 +40,15 @@ public interface RaceBookingRepo extends JpaRepository<RaceBooking, Long> {
     // what one driver booked on one day on any track (stops two bookings at the same time)
     List<RaceBooking> findByUserUserIdAndSessionSessionDateAndStatusIn(int userId, LocalDate sessionDate,
             List<String> statuses);
+
+    // admin list page: rows come with driver, session, track and payment in the same query (no select per row)
+    @EntityGraph(attributePaths = { "user", "session", "session.track", "session.competition", "payment" })
+    @Query("select b from RaceBooking b where (?1 is null or b.status = ?1)"
+            + " and lower(b.session.track.trackName) like ?2")
+    Page<RaceBooking> searchPage(String status, String pattern, Pageable pageable);
+
+    // approved cars of every session on a page in one query
+    @Query("select b.session.sessionId as sessionId, count(b) as cars from RaceBooking b"
+            + " where b.session.sessionId in ?1 and b.status = 'Approved' group by b.session.sessionId")
+    List<SessionCars> countApprovedPerSession(Collection<Long> sessionIds);
 }

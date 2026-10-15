@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.examly.springapp.dto.request.PaymentConfirmRequest;
 import com.examly.springapp.dto.request.RaceBookingRequest;
+import com.examly.springapp.dto.response.PageResponse;
 import com.examly.springapp.dto.response.PaymentAuditResponse;
 import com.examly.springapp.dto.response.PaymentOrderResponse;
 import com.examly.springapp.dto.response.PaymentResponse;
@@ -55,6 +56,17 @@ public class PaymentController {
     @GetMapping
     public ResponseEntity<List<PaymentResponse>> getAllPayments() {
         return ResponseEntity.ok(paymentRecordService.getAllPayments());
+    }
+
+    // one page of the admin list, page counts from 0
+    @AdminOnly
+    @GetMapping("/page")
+    public ResponseEntity<PageResponse<PaymentResponse>> getPaymentPage(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(paymentRecordService.getPaymentPage(search, status, page, size));
     }
 
     @AdminOnly

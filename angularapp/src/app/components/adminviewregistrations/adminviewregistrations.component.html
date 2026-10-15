@@ -3,19 +3,19 @@
                 subtitle="Approve or reject while the session is scheduled. The list refreshes on its own every 4 seconds."></app-pagehead>
 
   <div class="toolbar">
-    <app-searchbox label="Search by track name" [(text)]="searchText" (textChange)="page = 1"></app-searchbox>
-    <app-filterbox label="Status" [options]="statusOptions" [(value)]="statusFilter" (valueChange)="page = 1"></app-filterbox>
-    <span class="muted mono count" *ngIf="!isLoading">{{ filteredBookings.length }} booking{{ filteredBookings.length === 1 ? '' : 's' }}</span>
+    <app-searchbox label="Search by track name" [(text)]="searchText" (textChange)="searchTyped()"></app-searchbox>
+    <app-filterbox label="Status" [options]="statusOptions" [(value)]="statusFilter" (valueChange)="filterChanged()"></app-filterbox>
+    <span class="muted mono count" *ngIf="!isLoading">{{ total }} booking{{ total === 1 ? '' : 's' }}</span>
   </div>
 
   <div class="server-error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
   <app-loader *ngIf="isLoading" label="Loading registrations"></app-loader>
-  <app-empty *ngIf="!isLoading && filteredBookings.length === 0"
-             [title]="bookings.length === 0 ? 'No bookings yet' : 'No booking matches the search'"
-             [text]="bookings.length === 0 ? 'Bookings show up here as soon as a driver pays for a session.' : 'Try another track name or status.'"></app-empty>
+  <app-empty *ngIf="!isLoading && total === 0"
+             [title]="!hasFilters ? 'No bookings yet' : 'No booking matches the search'"
+             [text]="!hasFilters ? 'Bookings show up here as soon as a driver pays for a session.' : 'Try another track name or status.'"></app-empty>
 
   <!-- paginator stays after the table, same *ngIf -->
-  <ng-container *ngIf="filteredBookings.length > 0">
+  <ng-container *ngIf="bookings.length > 0">
     <div class="table-wrap">
       <table class="gp-table">
         <thead>
@@ -31,7 +31,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let booking of pagedBookings">
+          <tr *ngFor="let booking of bookings">
             <td><strong>{{ booking.user.username }}</strong><small class="mono">ID {{ booking.user.userId }}</small></td>
             <td data-label="Track / session"><strong>{{ booking.session.trackName }}</strong><small>{{ label(booking.session) }}</small></td>
             <td data-label="Car" class="mono">#{{ booking.carNumber }}<small>{{ booking.carCategory }}</small></td>
@@ -53,7 +53,7 @@
         </tbody>
       </table>
     </div>
-    <app-paginator [total]="filteredBookings.length" [page]="page" [pageSize]="pageSize" (pageChange)="page = $event"></app-paginator>
+    <app-paginator [total]="total" [page]="page" [pageSize]="pageSize" (pageChange)="goToPage($event)"></app-paginator>
   </ng-container>
 </div>
 

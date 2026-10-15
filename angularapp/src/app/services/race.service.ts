@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { RaceTrack } from '../models/race-track.model';
 import { BookingStatusRequest, CarCategory, RaceBooking } from '../models/race-booking.model';
+import { PageResponse } from '../models/admin-user.model';
 import { environment } from '../../environments/environment';
 import { API_ENDPOINTS } from '../constants';
 
@@ -51,6 +52,16 @@ export class RaceService {
 
   getAllRaceBookings(): Observable<RaceBooking[]> {
     return this.http.get<RaceBooking[]>(this.apiUrl + API_ENDPOINTS.RACE_BOOKING);
+  }
+
+  // admin list, page counts from 0
+  getBookingPage(search: string, status: string, page: number, size: number): Observable<PageResponse<RaceBooking>> {
+    const params = new HttpParams()
+      .set('search', search)
+      .set('status', status)
+      .set('page', page)
+      .set('size', size);
+    return this.http.get<PageResponse<RaceBooking>>(this.apiUrl + API_ENDPOINTS.RACE_BOOKING_PAGE, { params });
   }
 
   getRaceBookingsByUserId(userId: number): Observable<RaceBooking[]> {

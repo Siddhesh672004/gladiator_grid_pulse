@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { AiLines, Feedback, FeedbackRow } from '../models/feedback.model';
+import { AiLines, Feedback, FeedbackCounts, FeedbackRow } from '../models/feedback.model';
+import { PageResponse } from '../models/admin-user.model';
 import { environment } from '../../environments/environment';
 import { API_ENDPOINTS } from '../constants';
 
@@ -35,6 +36,23 @@ export class FeedbackService {
 
   getFeedbacks(): Observable<FeedbackRow[]> {
     return this.http.get<FeedbackRow[]>(this.apiUrl + API_ENDPOINTS.FEEDBACK);
+  }
+
+  // admin list, page counts from 0
+  getFeedbackPage(search: string, sentiment: string, rating: string, urgent: boolean,
+                  page: number, size: number): Observable<PageResponse<FeedbackRow>> {
+    const params = new HttpParams()
+      .set('search', search)
+      .set('sentiment', sentiment)
+      .set('rating', rating)
+      .set('urgent', urgent)
+      .set('page', page)
+      .set('size', size);
+    return this.http.get<PageResponse<FeedbackRow>>(this.apiUrl + API_ENDPOINTS.FEEDBACK_PAGE, { params });
+  }
+
+  getCounts(): Observable<FeedbackCounts> {
+    return this.http.get<FeedbackCounts>(this.apiUrl + API_ENDPOINTS.FEEDBACK_COUNTS);
   }
 
   // driver: up to 3 clearer versions of the text, [] = AI not available

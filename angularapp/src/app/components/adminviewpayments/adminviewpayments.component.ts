@@ -1,19 +1,22 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Subject, Subscription, debounceTime } from 'rxjs';
 import { Payment, PaymentAudit, Revenue, paymentLabel } from '../../models/payment.model';
 import { RaceSession, sessionLabel, sessionTime } from '../../models/session.model';
 import { PaymentService } from '../../services/payment.service';
-import { pageOf } from '../../shared/paging';
+import { pageCount } from '../../shared/paging';
+import { SEARCH_DEBOUNCE_MS } from '../../constants';
 import { FieldOption, toOptions } from '../field/field.component';
 
-// Payments (/admin/view/payments): money summary, every payment (newest first), Show More = details + audit trail -> PaymentService
+// Payments (/admin/view/payments): money summary, every payment (newest first, one page from the backend), Show More = details + audit trail -> PaymentService
 // Retry refund is for a refund Razorpay refused; refunds move on by themselves (backend job), Refresh shows the latest state
 @Component({
   selector: 'app-adminviewpayments',
   templateUrl: './adminviewpayments.component.html'
 })
-export class AdminviewpaymentsComponent implements OnInit {
+export class AdminviewpaymentsComponent implements OnInit, OnDestroy {
 
-  payments: Payment[] = [];
+  payments: Payment[] = [];            // the rows of this page only
+  total: number = 0;                   // every payment that matches the search + filter
   summary: Revenue | null = null;
   statuses: string[] = ['PAID', 'REFUND_PENDING', 'REFUNDED', 'REFUND_FAILED', 'CREATED', 'FAILED'];
   statusOptions: FieldOption[] = this.statuses.map(status => ({ value: status, text: paymentLabel(status) }));
@@ -29,17 +32,48 @@ export class AdminviewpaymentsComponent implements OnInit {
   trail: PaymentAudit[] = [];
   trailLoading: boolean = false;
 
+  private pageRequest?: Subscription;
+  private searchChanges = new Subject<void>();
+  private searchWatch?: Subscription;
+
   constructor(private paymentService: PaymentService) { }
 
   ngOnInit(): void {
+    // typing: one request once the typing stops, back to page 1
+    this.searchWatch = this.searchChanges.pipe(debounceTime(SEARCH_DEBOUNCE_MS)).subscribe(() => this.filterChanged());
     this.load();
   }
 
+  ngOnDestroy(): void {
+    this.searchWatch?.unsubscribe();
+    this.pageRequest?.unsubscribe();
+  }
+
+  // Refresh: the page on screen + the summary
   load(): void {
     this.errorMessage = '';
-    this.paymentService.getAllPayments().subscribe({
-      next: (payments) => {
-        this.payments = payments;
+    this.loadPage();
+    this.paymentService.getSummary().subscribe({
+      next: (summary) => this.summary = summary,
+      error: () => this.summary = null
+    });
+  }
+
+  // search looks at the driver's name, email and the track (the backend does it)
+  private loadPage(): void {
+    // an older answer that is still on its way is dropped
+    this.pageRequest?.unsubscribe();
+    this.pageRequest = this.paymentService.getPaymentPage(this.searchText.trim(), this.statusFilter, this.page - 1, this.pageSize).subscribe({
+      next: (result) => {
+        // the page got empty (the list got shorter): show the new last page
+        const lastPage = pageCount(result.totalElements, this.pageSize);
+        if (result.content.length === 0 && this.page > lastPage) {
+          this.page = lastPage;
+          this.loadPage();
+          return;
+        }
+        this.payments = result.content;
+        this.total = result.totalElements;
         this.isLoading = false;
       },
       error: (err) => {
@@ -47,21 +81,24 @@ export class AdminviewpaymentsComponent implements OnInit {
         this.errorMessage = err.error?.message || 'Unable to load the payments';
       }
     });
-    this.paymentService.getSummary().subscribe({
-      next: (summary) => this.summary = summary,
-      error: () => this.summary = null
-    });
   }
 
-  get filteredPayments(): Payment[] {
-    const text = this.searchText.trim().toLowerCase();
-    return this.payments.filter(payment =>
-      (this.statusFilter === 'All' || payment.status === this.statusFilter)
-      && (payment.user.username + ' ' + payment.user.email + ' ' + payment.session.trackName).toLowerCase().includes(text));
+  searchTyped(): void {
+    this.searchChanges.next();
   }
 
-  get pagedPayments(): Payment[] {
-    return pageOf(this.filteredPayments, this.page, this.pageSize);
+  filterChanged(): void {
+    this.page = 1;
+    this.loadPage();
+  }
+
+  goToPage(page: number): void {
+    this.page = page;
+    this.loadPage();
+  }
+
+  get hasFilters(): boolean {
+    return this.searchText.trim() !== '' || this.statusFilter !== 'All';
   }
 
   label(status: string): string {

@@ -6,12 +6,16 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.examly.springapp.dto.request.SessionRequest;
+import com.examly.springapp.dto.response.PageResponse;
 import com.examly.springapp.dto.response.SessionResponse;
 import com.examly.springapp.exceptions.BookingException;
 import com.examly.springapp.exceptions.ConflictException;
@@ -20,6 +24,7 @@ import com.examly.springapp.mapper.SessionMapper;
 import com.examly.springapp.model.RaceSession;
 import com.examly.springapp.model.RaceTrack;
 import com.examly.springapp.model.SessionStatus;
+import com.examly.springapp.model.SessionType;
 import com.examly.springapp.repository.RaceSessionRepo;
 import com.examly.springapp.repository.RaceTrackRepo;
 
@@ -86,6 +91,19 @@ public class RaceSessionServiceImpl implements RaceSessionService {
     @Override
     public List<SessionResponse> getAllSessions() {
         return toResponses(raceSessionRepo.findAllByOrderBySessionDateDescStartTimeAsc());
+    }
+
+    @Override
+    public PageResponse<SessionResponse> getSessionPage(String search, String status, String type, int page,
+            int size) {
+        Sort newestFirst = Sort.by(Sort.Direction.DESC, "sessionDate", "startTime", "sessionId");
+        Page<RaceSession> sessions = raceSessionRepo.searchPage(Paging.enumFilter(SessionStatus.class, status, "Status"),
+                Paging.enumFilter(SessionType.class, type, "Type"), Paging.likePattern(search),
+                Paging.pageable(page, size, newestFirst));
+        // seats of the whole page in one query, not one per row
+        Map<Long, Long> cars = raceBookingService.countApprovedCars(sessions.map(RaceSession::getSessionId).getContent());
+        return Paging.toResponse(sessions,
+                session -> sessionMapper.toResponse(session, cars.getOrDefault(session.getSessionId(), 0L)));
     }
 
     @Override

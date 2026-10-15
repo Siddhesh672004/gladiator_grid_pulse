@@ -38,6 +38,8 @@ public class SecurityConfig {
                                 "/api/admin/login", "/api/password/forgot", "/api/password/reset").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/race-track", "/api/race-track/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/race-control/session/*").permitAll()
+                        // the admin list page sits next to the public "/api/sessions/{id}"
+                        .requestMatchers(HttpMethod.GET, "/api/sessions/page").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/sessions/*", "/api/sessions/track/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/competitions", "/api/competitions/*").permitAll()
                         .requestMatchers("/api/chat", "/api/chat/**", "/api/faqs").permitAll()

@@ -9,12 +9,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.examly.springapp.dto.request.FeedbackRequest;
 import com.examly.springapp.dto.request.SuggestionRequest;
 import com.examly.springapp.dto.response.AiLinesResponse;
+import com.examly.springapp.dto.response.FeedbackCountsResponse;
 import com.examly.springapp.dto.response.FeedbackResponse;
+import com.examly.springapp.dto.response.PageResponse;
 import com.examly.springapp.security.annotation.AdminOnly;
 import com.examly.springapp.security.annotation.LoggedIn;
 import com.examly.springapp.security.annotation.UserOnly;
@@ -67,6 +70,26 @@ public class FeedbackController {
     @GetMapping
     public ResponseEntity<List<FeedbackResponse>> getAllFeedbacks() {
         return ResponseEntity.ok(feedbackService.getAllFeedbacks());
+    }
+
+    // one page of the admin list, page counts from 0
+    @AdminOnly
+    @GetMapping("/page")
+    public ResponseEntity<PageResponse<FeedbackResponse>> getFeedbackPage(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String sentiment,
+            @RequestParam(required = false) String rating,
+            @RequestParam(defaultValue = "false") boolean urgent,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(feedbackService.getFeedbackPage(search, sentiment, rating, urgent, page, size));
+    }
+
+    // the counters above the table: all feedback, not one page
+    @AdminOnly
+    @GetMapping("/counts")
+    public ResponseEntity<FeedbackCountsResponse> getCounts() {
+        return ResponseEntity.ok(feedbackService.getCounts());
     }
 
     @UserOnly

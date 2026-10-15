@@ -4,6 +4,9 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -39,4 +42,10 @@ public interface PaymentRepo extends JpaRepository<Payment, Long> {
     @Query("select month(p.paidAt) as month, sum(p.amount) as amount from Payment p"
             + " where p.status = ?1 and year(p.paidAt) = ?2 group by month(p.paidAt)")
     List<MonthAmount> sumPerMonth(PaymentStatus status, int year);
+
+    // admin list page, search: driver name, email or track
+    @EntityGraph(attributePaths = { "user", "session", "session.track", "session.competition" })
+    @Query("select p from Payment p where (?1 is null or p.status = ?1)"
+            + " and lower(concat(p.user.username, ' ', p.user.email, ' ', p.session.track.trackName)) like ?2")
+    Page<Payment> searchPage(PaymentStatus status, String pattern, Pageable pageable);
 }

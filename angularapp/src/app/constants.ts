@@ -14,6 +14,7 @@ export const API_ENDPOINTS = {
   RACE_TRACK_ACTIVATE: (trackId: number) => `/api/race-track/${trackId}/activate`,
   RACE_TRACK_DEACTIVATE: (trackId: number) => `/api/race-track/${trackId}/deactivate`,
   SESSIONS: '/api/sessions',
+  SESSIONS_PAGE: '/api/sessions/page',
   SESSIONS_BY_TRACK: (trackId: number) => `/api/sessions/track/${trackId}`,
   SESSION_CANCEL: (sessionId: number) => `/api/sessions/${sessionId}/cancel`,
   COMPETITIONS: '/api/competitions',
@@ -24,11 +25,13 @@ export const API_ENDPOINTS = {
   COMPETITION_LAP: (raceBookingId: number) => `/api/competition-control/lap/${raceBookingId}`,
   COMPETITION_RETIRE: (raceBookingId: number) => `/api/competition-control/retire/${raceBookingId}`,
   RACE_BOOKING: '/api/race-booking',
+  RACE_BOOKING_PAGE: '/api/race-booking/page',
   RACE_BOOKING_BY_USER: '/api/race-booking/user',
   RACE_BOOKING_CAR_CATEGORIES: '/api/race-booking/car-categories',
   PAYMENT_ORDER: '/api/payments/order',
   PAYMENT_CONFIRM: '/api/payments/confirm',
   PAYMENTS: '/api/payments',
+  PAYMENTS_PAGE: '/api/payments/page',
   PAYMENT_SUMMARY: '/api/payments/summary',
   PAYMENT_AUDIT: '/api/payments/audit',
   PAYMENT_RETRY_REFUND: (paymentId: number) => `/api/payments/${paymentId}/retry-refund`,
@@ -43,6 +46,8 @@ export const API_ENDPOINTS = {
   RACE_CONTROL_RESET: (sessionId: number) => `/api/race-control/session/${sessionId}/reset`,
   RACE_CONTROL_FINISH: (sessionId: number) => `/api/race-control/session/${sessionId}/finish`,
   FEEDBACK: '/api/feedback',
+  FEEDBACK_PAGE: '/api/feedback/page',
+  FEEDBACK_COUNTS: '/api/feedback/counts',
   FEEDBACK_BY_USER: '/api/feedback/user',
   FEEDBACK_SUGGESTIONS: '/api/feedback/suggestions',
   FEEDBACK_SUMMARY: '/api/feedback/summary',
@@ -124,6 +129,9 @@ export const BOOKING_TERMS = 'You pay when you book. If GridPulse rejects your b
   + 'still Pending, the full amount is refunded. You may also cancel an approved booking, but then the amount is not refunded.';
 
 export const LIVE_REFRESH_MS = 4000;
+
+// the admin lists ask the backend once the typing stops
+export const SEARCH_DEBOUNCE_MS = 300;
 
 // the backend sends moments in UTC, the boards show them in this time zone
 export const RACE_TIME_ZONE = 'Asia/Kolkata';

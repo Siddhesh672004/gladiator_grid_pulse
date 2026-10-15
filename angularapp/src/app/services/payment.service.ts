@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Payment, PaymentAudit, PaymentConfirmRequest, PaymentOrder, RazorpayResult, Revenue } from '../models/payment.model';
 import { RaceBooking, RaceBookingRequest } from '../models/race-booking.model';
+import { PageResponse } from '../models/admin-user.model';
 import { environment } from '../../environments/environment';
 import { API_ENDPOINTS } from '../constants';
 
@@ -59,6 +60,16 @@ export class PaymentService {
 
   getAllPayments(): Observable<Payment[]> {
     return this.http.get<Payment[]>(this.apiUrl + API_ENDPOINTS.PAYMENTS);
+  }
+
+  // admin list, page counts from 0
+  getPaymentPage(search: string, status: string, page: number, size: number): Observable<PageResponse<Payment>> {
+    const params = new HttpParams()
+      .set('search', search)
+      .set('status', status)
+      .set('page', page)
+      .set('size', size);
+    return this.http.get<PageResponse<Payment>>(this.apiUrl + API_ENDPOINTS.PAYMENTS_PAGE, { params });
   }
 
   getSummary(): Observable<Revenue> {

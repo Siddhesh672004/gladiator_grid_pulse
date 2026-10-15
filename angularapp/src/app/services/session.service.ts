@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { RaceSession, SessionRequest } from '../models/session.model';
+import { PageResponse } from '../models/admin-user.model';
 import { environment } from '../../environments/environment';
 import { API_ENDPOINTS } from '../constants';
 
@@ -17,6 +18,17 @@ export class SessionService {
 
   getAllSessions(): Observable<RaceSession[]> {
     return this.http.get<RaceSession[]>(this.apiUrl + API_ENDPOINTS.SESSIONS);
+  }
+
+  // admin list, page counts from 0, type = Practice / Competition / All
+  getSessionPage(search: string, status: string, type: string, page: number, size: number): Observable<PageResponse<RaceSession>> {
+    const params = new HttpParams()
+      .set('search', search)
+      .set('status', status)
+      .set('type', type)
+      .set('page', page)
+      .set('size', size);
+    return this.http.get<PageResponse<RaceSession>>(this.apiUrl + API_ENDPOINTS.SESSIONS_PAGE, { params });
   }
 
   getSessionById(sessionId: number): Observable<RaceSession> {

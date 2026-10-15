@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.examly.springapp.dto.request.SessionRequest;
+import com.examly.springapp.dto.response.PageResponse;
 import com.examly.springapp.dto.response.SessionResponse;
 import com.examly.springapp.security.annotation.AdminOnly;
 import com.examly.springapp.service.RaceSessionService;
@@ -54,6 +55,18 @@ public class RaceSessionController {
     @GetMapping
     public ResponseEntity<List<SessionResponse>> getAllSessions() {
         return ResponseEntity.ok(raceSessionService.getAllSessions());
+    }
+
+    // one page of the admin list, page counts from 0, type = Practice / Competition / All
+    @AdminOnly
+    @GetMapping("/page")
+    public ResponseEntity<PageResponse<SessionResponse>> getSessionPage(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String type,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(raceSessionService.getSessionPage(search, status, type, page, size));
     }
 
     @GetMapping("/{sessionId}")

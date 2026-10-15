@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 import com.examly.springapp.dto.request.SessionRequest;
+import com.examly.springapp.dto.response.PageResponse;
 import com.examly.springapp.dto.response.SessionResponse;
 import com.examly.springapp.model.RaceTrack;
 
@@ -20,6 +21,9 @@ public interface RaceSessionService {
     SessionResponse cancelSession(Long sessionId);
 
     List<SessionResponse> getAllSessions();
+
+    // admin list: newest date first, search = track or competition, status / type (Practice, Competition) or All
+    PageResponse<SessionResponse> getSessionPage(String search, String status, String type, int page, int size);
 
     SessionResponse getSessionById(Long sessionId);
 

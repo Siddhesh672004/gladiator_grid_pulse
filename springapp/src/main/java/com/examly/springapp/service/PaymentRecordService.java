@@ -3,6 +3,7 @@ package com.examly.springapp.service;
 import java.time.Instant;
 import java.util.List;
 
+import com.examly.springapp.dto.response.PageResponse;
 import com.examly.springapp.dto.response.PaymentResponse;
 import com.examly.springapp.dto.response.RevenueResponse;
 import com.examly.springapp.model.Payment;
@@ -32,6 +33,9 @@ public interface PaymentRecordService {
     PaymentResponse retryRefund(Long paymentId);
 
     List<PaymentResponse> getAllPayments();
+
+    // admin list: newest first, search = driver name, email or track, status = a PaymentStatus or All
+    PageResponse<PaymentResponse> getPaymentPage(String search, String status, int page, int size);
 
     List<Payment> findRefundPending();
 

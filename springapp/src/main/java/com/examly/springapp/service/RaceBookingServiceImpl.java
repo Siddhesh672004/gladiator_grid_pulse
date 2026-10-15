@@ -1,14 +1,17 @@
 package com.examly.springapp.service;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.examly.springapp.dto.request.BookingStatusRequest;
 import com.examly.springapp.dto.request.RaceBookingRequest;
 import com.examly.springapp.dto.response.CarCategoryResponse;
+import com.examly.springapp.dto.response.PageResponse;
 import com.examly.springapp.dto.response.RaceBookingResponse;
 import com.examly.springapp.event.BookingDecided;
 import com.examly.springapp.exceptions.BookingException;
@@ -31,6 +35,7 @@ import com.examly.springapp.model.RaceSession;
 import com.examly.springapp.model.User;
 import com.examly.springapp.repository.RaceBookingRepo;
 import com.examly.springapp.repository.RaceSessionRepo;
+import com.examly.springapp.repository.SessionCars;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -82,6 +87,16 @@ public class RaceBookingServiceImpl implements RaceBookingService {
     @Override
     public List<RaceBookingResponse> getAllRaceBookings() {
         return toResponses(raceBookingRepo.findAll());
+    }
+
+    @Override
+    public PageResponse<RaceBookingResponse> getBookingPage(String search, String status, int page, int size) {
+        String wanted = Optional.ofNullable(Paging.filter(status))
+                .map(text -> allowedValue(STATUSES, text, "Status"))
+                .orElse(null);
+        return Paging.toResponse(raceBookingRepo.searchPage(wanted, Paging.likePattern(search),
+                Paging.pageable(page, size, Sort.by(Sort.Direction.DESC, "raceBookingId"))),
+                raceBookingMapper::toResponse);
     }
 
     @Override
@@ -216,6 +231,14 @@ public class RaceBookingServiceImpl implements RaceBookingService {
     @Override
     public long countApprovedCars(Long sessionId) {
         return raceBookingRepo.countBySessionSessionIdAndStatus(sessionId, BookingStatus.APPROVED);
+    }
+
+    @Override
+    public Map<Long, Long> countApprovedCars(Collection<Long> sessionIds) {
+        // an empty page needs no query
+        return sessionIds.isEmpty() ? Map.of()
+                : raceBookingRepo.countApprovedPerSession(sessionIds).stream()
+                        .collect(Collectors.toMap(SessionCars::getSessionId, SessionCars::getCars));
     }
 
     @Override

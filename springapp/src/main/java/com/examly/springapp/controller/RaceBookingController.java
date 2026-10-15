@@ -9,10 +9,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.examly.springapp.dto.request.BookingStatusRequest;
 import com.examly.springapp.dto.response.CarCategoryResponse;
+import com.examly.springapp.dto.response.PageResponse;
 import com.examly.springapp.dto.response.RaceBookingResponse;
 import com.examly.springapp.security.annotation.AdminOnly;
 import com.examly.springapp.security.annotation.LoggedIn;
@@ -40,6 +42,17 @@ public class RaceBookingController {
     @GetMapping
     public ResponseEntity<List<RaceBookingResponse>> getAllRaceBookings() {
         return ResponseEntity.ok(raceBookingService.getAllRaceBookings());
+    }
+
+    // one page of the admin list, page counts from 0
+    @AdminOnly
+    @GetMapping("/page")
+    public ResponseEntity<PageResponse<RaceBookingResponse>> getBookingPage(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(raceBookingService.getBookingPage(search, status, page, size));
     }
 
     @UserOnly

@@ -7,11 +7,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.examly.springapp.dto.response.ChartPoint;
+import com.examly.springapp.dto.response.PageResponse;
 import com.examly.springapp.dto.response.PaymentResponse;
 import com.examly.springapp.dto.response.RevenueResponse;
 import com.examly.springapp.exceptions.BookingException;
@@ -177,6 +179,14 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         payment.setStatus(PaymentStatus.REFUND_PENDING);
         log.info("Refund of payment {} will be tried again", paymentId);
         return paymentMapper.toResponse(paymentRepo.save(payment));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<PaymentResponse> getPaymentPage(String search, String status, int page, int size) {
+        return Paging.toResponse(paymentRepo.searchPage(Paging.enumFilter(PaymentStatus.class, status, "Status"),
+                Paging.likePattern(search), Paging.pageable(page, size, Sort.by(Sort.Direction.DESC, "paymentId"))),
+                paymentMapper::toResponse);
     }
 
     @Override

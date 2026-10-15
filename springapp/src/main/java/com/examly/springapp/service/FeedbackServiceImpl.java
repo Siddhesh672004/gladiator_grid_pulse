@@ -1,21 +1,29 @@
 package com.examly.springapp.service;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.examly.springapp.dto.request.FeedbackRequest;
 import com.examly.springapp.dto.request.SuggestionRequest;
 import com.examly.springapp.dto.response.AiLinesResponse;
+import com.examly.springapp.dto.response.FeedbackCountsResponse;
 import com.examly.springapp.dto.response.FeedbackResponse;
+import com.examly.springapp.dto.response.PageResponse;
 import com.examly.springapp.exceptions.ConflictException;
 import com.examly.springapp.exceptions.ResourceNotFoundException;
 import com.examly.springapp.mapper.FeedbackMapper;
 import com.examly.springapp.model.BookingStatus;
 import com.examly.springapp.model.Feedback;
 import com.examly.springapp.model.RaceSession;
+import com.examly.springapp.model.Sentiment;
 import com.examly.springapp.model.SessionStatus;
 import com.examly.springapp.model.User;
 import com.examly.springapp.repository.FeedbackRepo;
@@ -70,6 +78,37 @@ public class FeedbackServiceImpl implements FeedbackService {
     @Override
     public List<FeedbackResponse> getAllFeedbacks() {
         return toAdminResponses(feedbackRepo.findAll());
+    }
+
+    @Override
+    public PageResponse<FeedbackResponse> getFeedbackPage(String search, String sentiment, String rating,
+            boolean urgentOnly, int page, int size) {
+        Sentiment wanted = Paging.enumFilter(Sentiment.class, sentiment, "Sentiment");
+        Integer stars = Optional.ofNullable(Paging.filter(rating))
+                .map(this::starsFilter)
+                .orElse(null);
+        // NOT_ANALYSED also finds the old rows that never got a label
+        return Paging.toResponse(feedbackRepo.searchPage(wanted, wanted == Sentiment.NOT_ANALYSED, stars, urgentOnly,
+                Paging.likePattern(search), Paging.pageable(page, size, Sort.by(Sort.Direction.DESC, "feedbackId"))),
+                feedbackMapper::toAdminResponse);
+    }
+
+    @Override
+    public FeedbackCountsResponse getCounts() {
+        // every label starts at 0, a row without a label counts as NOT_ANALYSED
+        Map<Sentiment, Long> counts = new EnumMap<>(Sentiment.class);
+        Arrays.stream(Sentiment.values()).forEach(label -> counts.put(label, 0L));
+        feedbackRepo.countPerSentiment().forEach(row -> counts.merge(
+                Objects.requireNonNullElse(row.getSentiment(), Sentiment.NOT_ANALYSED), row.getAmount(), Long::sum));
+        long total = counts.values().stream().mapToLong(Long::longValue).sum();
+        return new FeedbackCountsResponse(total, counts, feedbackRepo.countByUrgentTrue());
+    }
+
+    private Integer starsFilter(String rating) {
+        return Optional.of(rating)
+                .filter(text -> text.matches("[1-5]"))
+                .map(Integer::valueOf)
+                .orElseThrow(() -> new IllegalArgumentException("Rating must be 1 to 5 or All"));
     }
 
     @Override

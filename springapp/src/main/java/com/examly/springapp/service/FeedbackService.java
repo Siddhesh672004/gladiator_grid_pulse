@@ -5,7 +5,9 @@ import java.util.List;
 import com.examly.springapp.dto.request.FeedbackRequest;
 import com.examly.springapp.dto.request.SuggestionRequest;
 import com.examly.springapp.dto.response.AiLinesResponse;
+import com.examly.springapp.dto.response.FeedbackCountsResponse;
 import com.examly.springapp.dto.response.FeedbackResponse;
+import com.examly.springapp.dto.response.PageResponse;
 
 // feedback of drivers, the ai part is in FeedbackAiService
 public interface FeedbackService {
@@ -18,6 +20,12 @@ public interface FeedbackService {
 
     // admin lists include the ai label
     List<FeedbackResponse> getAllFeedbacks();
+
+    // admin list: newest first, search = driver, track or text. rating "1" - "5" or All
+    PageResponse<FeedbackResponse> getFeedbackPage(String search, String sentiment, String rating, boolean urgentOnly,
+            int page, int size);
+
+    FeedbackCountsResponse getCounts();
 
     FeedbackResponse deleteFeedback(Long id);
 

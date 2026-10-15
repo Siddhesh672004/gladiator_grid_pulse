@@ -1,16 +1,16 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription, debounceTime } from 'rxjs';
 import { BookingStatusRequest, RaceBooking, raceStatusText } from '../../models/race-booking.model';
 import { RaceSession, sessionLabel, sessionTime } from '../../models/session.model';
 import { RaceService } from '../../services/race.service';
 import { UserStorageService } from '../../services/user-storage.service';
-import { ADMIN_ROLES, BOOKING_STATUS, BOOKING_STATUSES, COMPETITION_PHASE, LIVE_REFRESH_MS, SESSION_STATUS } from '../../constants';
-import { pageOf } from '../../shared/paging';
+import { ADMIN_ROLES, BOOKING_STATUS, BOOKING_STATUSES, COMPETITION_PHASE, LIVE_REFRESH_MS, SEARCH_DEBOUNCE_MS, SESSION_STATUS } from '../../constants';
+import { pageCount } from '../../shared/paging';
 import { paymentLabel } from '../../models/payment.model';
 import { FieldOption, toOptions } from '../field/field.component';
 
 // every booking of every driver: search, status filter, approve / reject (the reason is required), details, delete -> RaceService
-// reloads every 4 s; the approval that fills the last seat rejects everybody still waiting (the backend does that)
+// one page from the backend, reloaded every 4 s; the approval that fills the last seat rejects everybody still waiting (the backend does that)
 const LOAD_ERROR = 'Unable to load registrations';
 const REASON_MIN = 5;
 const REASON_MAX = 500;
@@ -21,7 +21,8 @@ const REASON_MAX = 500;
 })
 export class AdminviewregistrationsComponent implements OnInit, OnDestroy {
 
-  bookings: RaceBooking[] = [];
+  bookings: RaceBooking[] = [];        // the rows of this page only
+  total: number = 0;                   // every booking that matches the search + filter
   statusOptions: FieldOption[] = toOptions(BOOKING_STATUSES);
   searchText: string = '';
   statusFilter: string = 'All';
@@ -39,16 +40,39 @@ export class AdminviewregistrationsComponent implements OnInit, OnDestroy {
   private refreshTimer: number = 0;
   private bookingsRequest?: Subscription;
   private pageClosed: boolean = false;
+  private searchChanges = new Subject<void>();
+  private searchWatch?: Subscription;
 
   constructor(private raceService: RaceService, private userStorage: UserStorageService) { }
 
   ngOnInit(): void {
+    // typing: one request once the typing stops, back to page 1
+    this.searchWatch = this.searchChanges.pipe(debounceTime(SEARCH_DEBOUNCE_MS)).subscribe(() => this.filterChanged());
     this.loadBookings();
   }
 
   ngOnDestroy(): void {
     this.pageClosed = true;
+    this.searchWatch?.unsubscribe();
     this.stopRefresh();
+  }
+
+  searchTyped(): void {
+    this.searchChanges.next();
+  }
+
+  filterChanged(): void {
+    this.page = 1;
+    this.loadBookings();
+  }
+
+  goToPage(page: number): void {
+    this.page = page;
+    this.loadBookings();
+  }
+
+  get hasFilters(): boolean {
+    return this.searchText.trim() !== '' || this.statusFilter !== 'All';
   }
 
   // load the list now, then every 4 s. called again after every action, so the list is fresh at once
@@ -69,8 +93,8 @@ export class AdminviewregistrationsComponent implements OnInit, OnDestroy {
     }
     // an older answer that is still on its way is dropped
     this.bookingsRequest?.unsubscribe();
-    this.bookingsRequest = this.raceService.getAllRaceBookings().subscribe({
-      next: (bookings) => this.showBookings(bookings),
+    this.bookingsRequest = this.raceService.getBookingPage(this.searchText.trim(), this.statusFilter, this.page - 1, this.pageSize).subscribe({
+      next: (result) => this.showBookings(result.content, result.totalElements),
       error: () => {
         this.isLoading = false;
         this.errorMessage = LOAD_ERROR;
@@ -78,30 +102,27 @@ export class AdminviewregistrationsComponent implements OnInit, OnDestroy {
     });
   }
 
-  private showBookings(bookings: RaceBooking[]): void {
-    // newest booking first
-    this.bookings = bookings.sort((a, b) => (b.raceBookingId ?? 0) - (a.raceBookingId ?? 0));
+  private showBookings(bookings: RaceBooking[], total: number): void {
+    // the page got empty (last row deleted, list got shorter): show the new last page
+    const lastPage = pageCount(total, this.pageSize);
+    if (bookings.length === 0 && this.page > lastPage) {
+      this.page = lastPage;
+      this.refreshBookings();
+      return;
+    }
+    // newest booking first (the backend sorts)
+    this.bookings = bookings;
+    this.total = total;
     this.isLoading = false;
-    // the details popup may be open: show the fresh copy of that booking
+    // the details popup may be open: show the fresh copy of that booking (it may sit on another page now)
     if (this.selected) {
       const openId = this.selected.raceBookingId;
-      this.selected = this.bookings.find(booking => booking.raceBookingId === openId) || null;
+      this.selected = this.bookings.find(booking => booking.raceBookingId === openId) || this.selected;
     }
     // loading works again (an action error stays until the next action)
     if (this.errorMessage === LOAD_ERROR) {
       this.errorMessage = '';
     }
-  }
-
-  get filteredBookings(): RaceBooking[] {
-    const text = this.searchText.trim().toLowerCase();
-    return this.bookings.filter(booking =>
-      (booking.session?.trackName || '').toLowerCase().includes(text) &&
-      (this.statusFilter === 'All' || booking.status === this.statusFilter));
-  }
-
-  get pagedBookings(): RaceBooking[] {
-    return pageOf(this.filteredBookings, this.page, this.pageSize);
   }
 
   raceStatus(booking: RaceBooking): string {

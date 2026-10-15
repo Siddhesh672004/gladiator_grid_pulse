@@ -1,14 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Subject, Subscription, debounceTime } from 'rxjs';
 import { User } from '../../models/user.model';
 import { RaceSession, sessionSummary } from '../../models/session.model';
 import { FeedbackService } from '../../services/feedback.service';
-import { FeedbackRow, sentimentLabel, starText } from '../../models/feedback.model';
-import { SENTIMENTS } from '../../constants';
-import { pageOf } from '../../shared/paging';
+import { FeedbackCounts, FeedbackRow, sentimentLabel, starText } from '../../models/feedback.model';
+import { SEARCH_DEBOUNCE_MS, SENTIMENTS } from '../../constants';
+import { pageCount } from '../../shared/paging';
 import { FieldOption, toOptions } from '../field/field.component';
 
 // every driver's feedback: stars, AI label (Positive / Negative / Neutral + Needs attention), counters, filters, Summarise with AI -> FeedbackService
-// when the AI is down a feedback is "Not analysed" and its row gets an Analyse button
+// when the AI is down a feedback is "Not analysed" and its row gets an Analyse button. the table is one page from the backend
 const NOT_ANALYSED = 'NOT_ANALYSED';
 const AI_DOWN = 'The AI is not available right now. Please try again later.';
 
@@ -16,9 +17,11 @@ const AI_DOWN = 'The AI is not available right now. Please try again later.';
   selector: 'app-adminviewfeedback',
   templateUrl: './adminviewfeedback.component.html'
 })
-export class AdminviewfeedbackComponent implements OnInit {
+export class AdminviewfeedbackComponent implements OnInit, OnDestroy {
 
-  feedbacks: FeedbackRow[] = [];
+  feedbacks: FeedbackRow[] = [];       // the rows of this page only
+  total: number = 0;                   // every feedback that matches the search + filters
+  counts: FeedbackCounts | null = null;
   sentiments: string[] = SENTIMENTS;
   sentimentOptions: FieldOption[] = SENTIMENTS.map(sentiment => ({ value: sentiment, text: sentimentLabel(sentiment) }));
   ratingOptions: FieldOption[] = [
@@ -39,13 +42,40 @@ export class AdminviewfeedbackComponent implements OnInit {
   summaryLines: string[] = [];
   profile: User | null = null;
 
+  private pageRequest?: Subscription;
+  private searchChanges = new Subject<void>();
+  private searchWatch?: Subscription;
+
   constructor(private feedbackService: FeedbackService) { }
 
   ngOnInit(): void {
-    this.feedbackService.getFeedbacks().subscribe({
-      next: (feedbacks) => {
-        // newest first
-        this.feedbacks = feedbacks.sort((a, b) => (b.feedbackId ?? 0) - (a.feedbackId ?? 0));
+    // typing: one request once the typing stops, back to page 1
+    this.searchWatch = this.searchChanges.pipe(debounceTime(SEARCH_DEBOUNCE_MS)).subscribe(() => this.filterChanged());
+    this.loadPage();
+    this.loadCounts();
+  }
+
+  ngOnDestroy(): void {
+    this.searchWatch?.unsubscribe();
+    this.pageRequest?.unsubscribe();
+  }
+
+  // search looks at the driver's name, the track and the feedback text (the backend does it)
+  loadPage(): void {
+    // an older answer that is still on its way is dropped
+    this.pageRequest?.unsubscribe();
+    this.pageRequest = this.feedbackService.getFeedbackPage(this.searchText.trim(), this.sentimentFilter, this.ratingFilter,
+      this.urgentOnly, this.page - 1, this.pageSize).subscribe({
+      next: (result) => {
+        // the page got empty (the list got shorter): show the new last page
+        const lastPage = pageCount(result.totalElements, this.pageSize);
+        if (result.content.length === 0 && this.page > lastPage) {
+          this.page = lastPage;
+          this.loadPage();
+          return;
+        }
+        this.feedbacks = result.content;
+        this.total = result.totalElements;
         this.isLoading = false;
       },
       error: () => {
@@ -55,35 +85,29 @@ export class AdminviewfeedbackComponent implements OnInit {
     });
   }
 
-  // the rows left after the search box, the two filters and the "needs attention" tick
-  get filteredFeedbacks(): FeedbackRow[] {
-    const text = this.searchText.trim().toLowerCase();
-    return this.feedbacks.filter(feedback => this.hasText(feedback, text) && this.passesFilters(feedback));
+  private loadCounts(): void {
+    this.feedbackService.getCounts().subscribe({
+      next: (counts) => this.counts = counts,
+      error: () => this.counts = null
+    });
   }
 
-  // search looks at the driver's name, the track and the feedback text
-  private hasText(feedback: FeedbackRow, text: string): boolean {
-    return (feedback.user?.username || '').toLowerCase().includes(text)
-      || (feedback.session?.trackName || '').toLowerCase().includes(text)
-      || (feedback.feedbackText || '').toLowerCase().includes(text);
+  searchTyped(): void {
+    this.searchChanges.next();
   }
 
-  private passesFilters(feedback: FeedbackRow): boolean {
-    if (this.sentimentFilter !== 'All' && this.sentimentOf(feedback) !== this.sentimentFilter) {
-      return false;
-    }
-    // the select gives text ('4'), the rating is a number (4) -> compare both as text
-    if (this.ratingFilter !== 'All' && String(feedback.rating) !== this.ratingFilter) {
-      return false;
-    }
-    if (this.urgentOnly && feedback.urgent !== true) {
-      return false;
-    }
-    return true;
+  filterChanged(): void {
+    this.page = 1;
+    this.loadPage();
   }
 
-  get pagedFeedbacks(): FeedbackRow[] {
-    return pageOf(this.filteredFeedbacks, this.page, this.pageSize);
+  goToPage(page: number): void {
+    this.page = page;
+    this.loadPage();
+  }
+
+  get hasFilters(): boolean {
+    return this.searchText.trim() !== '' || this.sentimentFilter !== 'All' || this.ratingFilter !== 'All' || this.urgentOnly;
   }
 
   // old feedback (from before the AI) has no label -> "not analysed"
@@ -91,13 +115,17 @@ export class AdminviewfeedbackComponent implements OnInit {
     return feedback.sentiment || NOT_ANALYSED;
   }
 
-  // the counters look at ALL feedback, not only the filtered rows
+  // the counters look at ALL feedback, not only this page (GET /api/feedback/counts)
   countOf(sentiment: string): number {
-    return this.feedbacks.filter(feedback => this.sentimentOf(feedback) === sentiment).length;
+    return this.counts?.sentiments[sentiment] ?? 0;
+  }
+
+  get allCount(): number {
+    return this.counts?.total ?? 0;
   }
 
   get urgentCount(): number {
-    return this.feedbacks.filter(feedback => feedback.urgent === true).length;
+    return this.counts?.urgent ?? 0;
   }
 
   label(sentiment: string): string {
@@ -134,6 +162,9 @@ export class AdminviewfeedbackComponent implements OnInit {
         if (this.sentimentOf(updated) === NOT_ANALYSED) {
           this.infoMessage = AI_DOWN;
         }
+        // a new label moves the counters, and with a filter on the row may leave this list
+        this.loadCounts();
+        this.loadPage();
       },
       error: (err) => {
         this.busyId = null;
@@ -146,7 +177,7 @@ export class AdminviewfeedbackComponent implements OnInit {
     this.errorMessage = '';
     this.infoMessage = '';
     this.summaryLines = [];
-    if (this.feedbacks.length === 0) {
+    if (this.counts?.total === 0) {
       this.infoMessage = 'There is no feedback to summarise yet.';
       return;
     }

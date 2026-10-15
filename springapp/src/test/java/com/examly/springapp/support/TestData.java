@@ -79,6 +79,12 @@ public class TestData {
                 LocalTime.of(11, 0), 500.0, maxCars));
     }
 
+    // practice on a given track, some days ahead, 10:00 - 11:00
+    public RaceSession practiceSession(RaceTrack track, int daysAhead, int maxCars) {
+        return raceSessionRepo.save(new RaceSession(track, RaceSession.today().plusDays(daysAhead), LocalTime.of(10, 0),
+                LocalTime.of(11, 0), 500.0, maxCars));
+    }
+
     public List<RaceBooking> bookingsOf(RaceSession session) {
         return raceBookingRepo.findAll().stream()
                 .filter(booking -> booking.getSession().getSessionId().equals(session.getSessionId()))

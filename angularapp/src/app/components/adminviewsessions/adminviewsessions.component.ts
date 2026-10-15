@@ -1,13 +1,13 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription, debounceTime } from 'rxjs';
 import { RaceSession, sessionLabel, sessionTime } from '../../models/session.model';
 import { SessionService } from '../../services/session.service';
-import { COMPETITION_PHASE, SESSION_STATUS, SESSION_TYPE } from '../../constants';
-import { pageOf } from '../../shared/paging';
+import { COMPETITION_PHASE, SEARCH_DEBOUNCE_MS, SESSION_STATUS, SESSION_TYPE } from '../../constants';
+import { pageCount } from '../../shared/paging';
 import { FieldOption, toOptions } from '../field/field.component';
 
-// View Sessions (/admin/view/sessions): every session, newest date first -> SessionService
+// View Sessions (/admin/view/sessions): every session, newest date first, one page from the backend -> SessionService
 // practice session not started yet -> Edit / Cancel, competition session -> Control. ?type=Competition = the navbar's Competitions
 @Component({
   selector: 'app-adminviewsessions',
@@ -15,7 +15,8 @@ import { FieldOption, toOptions } from '../field/field.component';
 })
 export class AdminviewsessionsComponent implements OnInit, OnDestroy {
 
-  sessions: RaceSession[] = [];
+  sessions: RaceSession[] = [];        // the rows of this page only
+  total: number = 0;                   // every session that matches the search + filters
   statusOptions: FieldOption[] = toOptions([SESSION_STATUS.SCHEDULED, SESSION_STATUS.LIVE, SESSION_STATUS.COMPLETED, SESSION_STATUS.CANCELLED]);
   typeOptions: FieldOption[] = toOptions(['Practice', 'Competition']);
   searchText: string = '';
@@ -27,8 +28,10 @@ export class AdminviewsessionsComponent implements OnInit, OnDestroy {
   errorMessage: string = '';
   successMessage: string = '';
   sessionToCancel: RaceSession | null = null;
-  private qualifyingDone: number[] = [];          // competitions whose race grid exists
   private typeParam?: Subscription;
+  private pageRequest?: Subscription;
+  private searchChanges = new Subject<void>();
+  private searchWatch?: Subscription;
 
   constructor(private sessionService: SessionService, private route: ActivatedRoute, private router: Router) { }
 
@@ -36,9 +39,10 @@ export class AdminviewsessionsComponent implements OnInit, OnDestroy {
     // the Type box follows ?type= in the url (the navbar's Competitions link sets it)
     this.typeParam = this.route.queryParamMap.subscribe(params => {
       this.typeFilter = params.get('type') || 'All';
-      this.page = 1;
+      this.filterChanged();
     });
-    this.loadSessions();
+    // typing: one request once the typing stops, back to page 1
+    this.searchWatch = this.searchChanges.pipe(debounceTime(SEARCH_DEBOUNCE_MS)).subscribe(() => this.filterChanged());
   }
 
   // the Type box only changes the url, the lines above do the rest
@@ -48,17 +52,26 @@ export class AdminviewsessionsComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.typeParam?.unsubscribe();
+    this.searchWatch?.unsubscribe();
+    this.pageRequest?.unsubscribe();
   }
 
+  // newest date first, a later start first on the same day (the backend sorts)
   loadSessions(): void {
-    this.sessionService.getAllSessions().subscribe({
-      next: (sessions) => {
-        // newest date first, a later start first on the same day
-        const key = (session: RaceSession) => session.sessionDate + 'T' + session.startTime;
-        this.sessions = sessions.sort((a, b) => key(b).localeCompare(key(a)));
-        this.qualifyingDone = sessions
-          .filter(session => session.phase === COMPETITION_PHASE.QUALIFYING && session.status === SESSION_STATUS.COMPLETED)
-          .map(session => session.competitionId ?? 0);
+    // an older answer that is still on its way is dropped
+    this.pageRequest?.unsubscribe();
+    this.pageRequest = this.sessionService.getSessionPage(this.searchText.trim(), this.statusFilter, this.typeFilter,
+      this.page - 1, this.pageSize).subscribe({
+      next: (result) => {
+        // the page got empty (the list got shorter): show the new last page
+        const lastPage = pageCount(result.totalElements, this.pageSize);
+        if (result.content.length === 0 && this.page > lastPage) {
+          this.page = lastPage;
+          this.loadSessions();
+          return;
+        }
+        this.sessions = result.content;
+        this.total = result.totalElements;
         this.isLoading = false;
       },
       error: () => {
@@ -68,16 +81,22 @@ export class AdminviewsessionsComponent implements OnInit, OnDestroy {
     });
   }
 
-  get filteredSessions(): RaceSession[] {
-    const text = this.searchText.trim().toLowerCase();
-    return this.sessions.filter(session =>
-      (session.trackName.toLowerCase().includes(text) || (session.competitionName || '').toLowerCase().includes(text)) &&
-      (this.statusFilter === 'All' || session.status === this.statusFilter) &&
-      (this.typeFilter === 'All' || session.sessionType === this.typeFilter.toUpperCase()));
+  searchTyped(): void {
+    this.searchChanges.next();
   }
 
-  get pagedSessions(): RaceSession[] {
-    return pageOf(this.filteredSessions, this.page, this.pageSize);
+  filterChanged(): void {
+    this.page = 1;
+    this.loadSessions();
+  }
+
+  goToPage(page: number): void {
+    this.page = page;
+    this.loadSessions();
+  }
+
+  get hasFilters(): boolean {
+    return this.searchText.trim() !== '' || this.statusFilter !== 'All' || this.typeFilter !== 'All';
   }
 
   label(session: RaceSession): string {
@@ -92,10 +111,9 @@ export class AdminviewsessionsComponent implements OnInit, OnDestroy {
     return session.sessionType === SESSION_TYPE.PRACTICE;
   }
 
-  // the race of a competition gets its cars when qualifying is finished, the drivers paid on the qualifying
+  // the race of a competition gets its cars when qualifying is finished (at least one), the drivers paid on the qualifying
   waitsForGrid(session: RaceSession): boolean {
-    return this.isRaceStage(session) && !session.approvedCars
-      && !this.qualifyingDone.includes(session.competitionId ?? 0);
+    return this.isRaceStage(session) && !session.approvedCars;
   }
 
   // a race place costs nothing, the entry fee is on the qualifying row

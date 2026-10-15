@@ -1,10 +1,13 @@
 package com.examly.springapp.service;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import com.examly.springapp.dto.request.BookingStatusRequest;
 import com.examly.springapp.dto.request.RaceBookingRequest;
 import com.examly.springapp.dto.response.CarCategoryResponse;
+import com.examly.springapp.dto.response.PageResponse;
 import com.examly.springapp.dto.response.RaceBookingResponse;
 import com.examly.springapp.model.RaceBooking;
 import com.examly.springapp.model.RaceSession;
@@ -12,6 +15,9 @@ import com.examly.springapp.model.RaceSession;
 public interface RaceBookingService {
 
     List<RaceBookingResponse> getAllRaceBookings();
+
+    // admin list: newest first, search = track name, status Pending / Approved / Rejected / All
+    PageResponse<RaceBookingResponse> getBookingPage(String search, String status, int page, int size);
 
     List<CarCategoryResponse> getCarCategories();
 
@@ -38,6 +44,9 @@ public interface RaceBookingService {
 
     // seats taken = Approved bookings
     long countApprovedCars(Long sessionId);
+
+    // session id -> approved cars, one query for many sessions
+    Map<Long, Long> countApprovedCars(Collection<Long> sessionIds);
 
     // the cars of a session: live boards, race control
     List<RaceBooking> findApprovedCars(Long sessionId);

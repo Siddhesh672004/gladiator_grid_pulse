@@ -7,7 +7,7 @@
   </app-pagehead>
 
   <section class="kpi-row six" aria-label="Counts">
-    <div class="kpi"><span>Total</span><b>{{ feedbacks.length }}</b></div>
+    <div class="kpi"><span>Total</span><b>{{ allCount }}</b></div>
     <div class="kpi" *ngFor="let sentiment of sentiments"><span>{{ label(sentiment) }}</span><b>{{ countOf(sentiment) }}</b></div>
     <div class="kpi"><span>Needs attention</span><b>{{ urgentCount }}</b></div>
   </section>
@@ -19,20 +19,20 @@
   </div>
 
   <div class="toolbar">
-    <app-searchbox label="Search by driver, track or text" [(text)]="searchText" (textChange)="page = 1"></app-searchbox>
-    <app-filterbox label="Sentiment" [options]="sentimentOptions" [(value)]="sentimentFilter" (valueChange)="page = 1"></app-filterbox>
-    <app-filterbox label="Rating" [options]="ratingOptions" [(value)]="ratingFilter" (valueChange)="page = 1"></app-filterbox>
-    <label class="check-filter"><input type="checkbox" id="urgentOnly" [(ngModel)]="urgentOnly" (ngModelChange)="page = 1"> Needs attention only</label>
+    <app-searchbox label="Search by driver, track or text" [(text)]="searchText" (textChange)="searchTyped()"></app-searchbox>
+    <app-filterbox label="Sentiment" [options]="sentimentOptions" [(value)]="sentimentFilter" (valueChange)="filterChanged()"></app-filterbox>
+    <app-filterbox label="Rating" [options]="ratingOptions" [(value)]="ratingFilter" (valueChange)="filterChanged()"></app-filterbox>
+    <label class="check-filter"><input type="checkbox" id="urgentOnly" [(ngModel)]="urgentOnly" (ngModelChange)="filterChanged()"> Needs attention only</label>
   </div>
 
   <div class="server-error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
   <app-loader *ngIf="isLoading" label="Loading feedback"></app-loader>
-  <app-empty *ngIf="!isLoading && filteredFeedbacks.length === 0"
-             [title]="feedbacks.length === 0 ? 'No feedback yet' : 'No feedback matches the filters'"
-             [text]="feedbacks.length === 0 ? 'Drivers can rate a session once it is completed.' : 'Try another word or filter.'"></app-empty>
+  <app-empty *ngIf="!isLoading && total === 0"
+             [title]="!hasFilters ? 'No feedback yet' : 'No feedback matches the filters'"
+             [text]="!hasFilters ? 'Drivers can rate a session once it is completed.' : 'Try another word or filter.'"></app-empty>
 
   <!-- paginator stays after the table, same *ngIf -->
-  <ng-container *ngIf="filteredFeedbacks.length > 0">
+  <ng-container *ngIf="feedbacks.length > 0">
     <div class="table-wrap">
       <table class="gp-table">
         <thead>
@@ -47,7 +47,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let feedback of pagedFeedbacks">
+          <tr *ngFor="let feedback of feedbacks">
             <td><strong>{{ feedback.user?.username }}</strong></td>
             <td data-label="Track / session"><strong>{{ feedback.session?.trackName || '-' }}</strong><small>{{ sessionText(feedback.session) }}</small></td>
             <td data-label="Feedback" class="text-cell">{{ feedback.feedbackText }}</td>
@@ -67,7 +67,7 @@
         </tbody>
       </table>
     </div>
-    <app-paginator [total]="filteredFeedbacks.length" [page]="page" [pageSize]="pageSize" (pageChange)="page = $event"></app-paginator>
+    <app-paginator [total]="total" [page]="page" [pageSize]="pageSize" (pageChange)="goToPage($event)"></app-paginator>
   </ng-container>
 </div>
 

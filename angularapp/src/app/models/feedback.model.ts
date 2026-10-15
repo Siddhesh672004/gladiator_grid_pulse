@@ -19,6 +19,13 @@ export interface FeedbackRow extends Feedback {
   urgent?: boolean;
 }
 
+// the counters above the admin table, over all feedback
+export interface FeedbackCounts {
+  total: number;
+  sentiments: { [sentiment: string]: number };
+  urgent: number;
+}
+
 // answer of the AI helpers, an empty list means the AI is not available
 export interface AiLines {
   lines: string[];

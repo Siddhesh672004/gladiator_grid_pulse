@@ -11,19 +11,19 @@
   </section>
 
   <div class="toolbar">
-    <app-searchbox label="Search by driver or track" [(text)]="searchText" (textChange)="page = 1"></app-searchbox>
-    <app-filterbox label="Status" [options]="statusOptions" [(value)]="statusFilter" (valueChange)="page = 1"></app-filterbox>
-    <span class="muted mono count" *ngIf="!isLoading">{{ filteredPayments.length }} payment{{ filteredPayments.length === 1 ? '' : 's' }}</span>
+    <app-searchbox label="Search by driver or track" [(text)]="searchText" (textChange)="searchTyped()"></app-searchbox>
+    <app-filterbox label="Status" [options]="statusOptions" [(value)]="statusFilter" (valueChange)="filterChanged()"></app-filterbox>
+    <span class="muted mono count" *ngIf="!isLoading">{{ total }} payment{{ total === 1 ? '' : 's' }}</span>
   </div>
 
   <div class="server-error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
   <app-loader *ngIf="isLoading" label="Loading payments"></app-loader>
-  <app-empty *ngIf="!isLoading && filteredPayments.length === 0"
-             [title]="payments.length === 0 ? 'No payments yet' : 'No payment matches the search'"
-             [text]="payments.length === 0 ? 'A payment shows up here as soon as a driver starts to book.' : 'Try another name or status.'"></app-empty>
+  <app-empty *ngIf="!isLoading && total === 0"
+             [title]="!hasFilters ? 'No payments yet' : 'No payment matches the search'"
+             [text]="!hasFilters ? 'A payment shows up here as soon as a driver starts to book.' : 'Try another name or status.'"></app-empty>
 
   <!-- paginator stays after the table, same *ngIf -->
-  <ng-container *ngIf="filteredPayments.length > 0">
+  <ng-container *ngIf="payments.length > 0">
     <div class="table-wrap">
       <table class="gp-table">
         <thead>
@@ -38,7 +38,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let payment of pagedPayments">
+          <tr *ngFor="let payment of payments">
             <td><strong>{{ payment.user.username }}</strong></td>
             <td data-label="Session">{{ sessionText(payment.session) }}</td>
             <td data-label="Amount" class="mono">₹{{ payment.amount }}</td>
@@ -55,7 +55,7 @@
         </tbody>
       </table>
     </div>
-    <app-paginator [total]="filteredPayments.length" [page]="page" [pageSize]="pageSize" (pageChange)="page = $event"></app-paginator>
+    <app-paginator [total]="total" [page]="page" [pageSize]="pageSize" (pageChange)="goToPage($event)"></app-paginator>
   </ng-container>
 </div>
 

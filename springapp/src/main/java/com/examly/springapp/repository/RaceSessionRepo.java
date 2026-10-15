@@ -5,6 +5,9 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -12,6 +15,7 @@ import org.springframework.data.jpa.repository.Query;
 import com.examly.springapp.model.CompetitionPhase;
 import com.examly.springapp.model.RaceSession;
 import com.examly.springapp.model.SessionStatus;
+import com.examly.springapp.model.SessionType;
 
 import jakarta.persistence.LockModeType;
 
@@ -57,4 +61,11 @@ public interface RaceSessionRepo extends JpaRepository<RaceSession, Long> {
     @Query("select month(s.sessionDate) as month, count(s) as amount from RaceSession s"
             + " where year(s.sessionDate) = ?1 and s.status <> ?2 group by month(s.sessionDate)")
     List<MonthAmount> countPerMonth(int year, SessionStatus notThisStatus);
+
+    // admin list page, search: track or competition name
+    @EntityGraph(attributePaths = { "track", "competition" })
+    @Query("select s from RaceSession s left join s.competition c where (?1 is null or s.status = ?1)"
+            + " and (?2 is null or s.sessionType = ?2)"
+            + " and (lower(s.track.trackName) like ?3 or lower(coalesce(c.competitionName, '')) like ?3)")
+    Page<RaceSession> searchPage(SessionStatus status, SessionType type, String pattern, Pageable pageable);
 }
