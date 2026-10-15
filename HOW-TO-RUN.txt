@@ -42,6 +42,11 @@ Needs: Java 17+, Node 20, Docker Desktop (or a local MySQL 8, see "Manual MySQL"
    cd springapp
    ./mvnw spring-boot:run
 
+   health:   http://localhost:8080/actuator/health        {"status":"UP"}, details with an admin token
+   swagger:  http://localhost:8080/swagger-ui.html        (not in prod)
+             log in on /api/admin/login (or /api/login), copy "token", press Authorize, paste it
+   /actuator/info and /actuator/metrics need an Admin / SuperAdmin token
+
 
 3. Frontend (http://localhost:8081)
 -----------------------------------

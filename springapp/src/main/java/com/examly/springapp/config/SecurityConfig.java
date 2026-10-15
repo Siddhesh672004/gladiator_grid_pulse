@@ -42,6 +42,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/competitions", "/api/competitions/*").permitAll()
                         .requestMatchers("/api/chat", "/api/chat/**", "/api/faqs").permitAll()
                         .requestMatchers("/error").permitAll()
+                        // health for docker / the gateway, the other actuator urls are for admins
+                        .requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/health/**").permitAll()
+                        .requestMatchers("/actuator/**").hasAnyRole("Admin", "SuperAdmin")
+                        // api docs, switched off in prod
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         // azure: the angular site comes from the same server, its pages and files are plain GETs outside /api
                         .requestMatchers(this::isSitePage).permitAll()
 
