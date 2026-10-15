@@ -12,7 +12,8 @@ import com.examly.springapp.service.RazorpayService;
 @TestConfiguration(proxyBeanMethods = false)
 public class FakeRazorpayService implements RazorpayService {
 
-    private final AtomicInteger counter = new AtomicInteger();
+    // one counter for the whole test run: a second spring context must not hand out order_test_1 again
+    private static final AtomicInteger COUNTER = new AtomicInteger();
 
     @Override
     public boolean isConfigured() {
@@ -26,7 +27,7 @@ public class FakeRazorpayService implements RazorpayService {
 
     @Override
     public String createOrder(long amountPaise, String receipt) {
-        return "order_test_" + counter.incrementAndGet();
+        return "order_test_" + COUNTER.incrementAndGet();
     }
 
     @Override
@@ -36,7 +37,7 @@ public class FakeRazorpayService implements RazorpayService {
 
     @Override
     public String refund(String paymentId, long amountPaise) {
-        return "rfnd_test_" + counter.incrementAndGet();
+        return "rfnd_test_" + COUNTER.incrementAndGet();
     }
 
     @Override
