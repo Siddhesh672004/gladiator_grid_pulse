@@ -1,4 +1,5 @@
-# gateway: port 8080 = what angular calls. core instances behind it on 8082 (and 8083 / core-2 with the docker profile)
+# gateway: port 8080 = what angular calls. core instances behind it on 8082 (and 8083 / core-2 with the docker profile),
+# payment-service on 8085
 # a new service gets its route here, above the catch-all /api/** route
 server:
   port: ${GATEWAY_PORT:8080}
@@ -17,6 +18,8 @@ spring:
           instances:
             core-service:
               - uri: ${CORE_1_URL:http://localhost:8082}
+            payment-service:
+              - uri: ${PAYMENT_URL:http://localhost:8085}
     loadbalancer:
       configurations: health-check
       health-check:
@@ -62,6 +65,11 @@ spring:
               uri: ${CORE_PRIMARY_URL:http://localhost:8082}
               predicates:
                 - Path=/api/chat,/api/chat/**,/api/faqs
+            # payments, refunds and the revenue summary live in payment-service
+            - id: payments
+              uri: lb://payment-service
+              predicates:
+                - Path=/api/payments,/api/payments/**
             - id: api
               uri: lb://core-service
               predicates:

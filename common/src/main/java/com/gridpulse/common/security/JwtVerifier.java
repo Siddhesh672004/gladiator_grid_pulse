@@ -17,6 +17,11 @@ public class JwtVerifier {
         this.key = secret.getBytes(StandardCharsets.UTF_8);
     }
 
+    // the raw key, e.g. the core's key file on a laptop without JWT_SECRET
+    public JwtVerifier(byte[] key) {
+        this.key = key.clone();
+    }
+
     // wrong signature, expired or not a token -> empty
     public Optional<JwtClaims> verify(String token) {
         try {

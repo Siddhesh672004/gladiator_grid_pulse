@@ -6,11 +6,13 @@ import org.springframework.boot.autoconfigure.AutoConfigurationPackage;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
+import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.ProducerListener;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import com.gridpulse.common.event.EventReader;
@@ -22,7 +24,8 @@ import com.gridpulse.common.outbox.OutboxRepository;
 
 // every service that has this jar gets: outbox (EventPublisher + OutboxRelay), inbox, EventReader
 // the package is added to the scanned ones, so the entities and repositories are found without @EntityScan
-@AutoConfiguration(before = { HibernateJpaAutoConfiguration.class, JpaRepositoriesAutoConfiguration.class })
+@AutoConfiguration(before = { HibernateJpaAutoConfiguration.class, JpaRepositoriesAutoConfiguration.class,
+        KafkaAutoConfiguration.class })
 @AutoConfigurationPackage(basePackages = "com.gridpulse.common")
 @EnableScheduling
 public class CommonAutoConfiguration {
@@ -30,6 +33,19 @@ public class CommonAutoConfiguration {
     @Bean
     public EventReader eventReader() {
         return new EventReader();
+    }
+
+    // spring's default listener logs every failed send WITH its payload (codes, emails): this one stays quiet,
+    // OutboxRelay writes one warning per kafka outage instead
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass(KafkaTemplate.class)
+    static class QuietProducerConfiguration {
+
+        @Bean
+        public ProducerListener<Object, Object> kafkaProducerListener() {
+            return new ProducerListener<>() {
+            };
+        }
     }
 
     @Configuration(proxyBeanMethods = false)

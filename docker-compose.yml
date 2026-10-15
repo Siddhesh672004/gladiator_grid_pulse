@@ -153,6 +153,30 @@ services:
       kafka:
         condition: service_healthy
 
+  # razorpay orders, the confirm saga with the core, refunds (one instance: it runs the refund job)
+  payment:
+    profiles: [apps]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.service
+      args:
+        MODULE: payment-service
+    ports:
+      - "8085:8085"
+    env_file: .env
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DB_HOST: mysql
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      KAFKA_BOOTSTRAP: kafka:29092
+      CORE_1_URL: http://core-1:8082
+      CORE_2_URL: http://core-2:8082
+    depends_on:
+      mysql:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
   # the one address of the site: angular calls http://localhost:8080
   gateway:
     profiles: [apps]
@@ -169,9 +193,11 @@ services:
       CORE_1_URL: http://core-1:8082
       CORE_2_URL: http://core-2:8082
       CORE_PRIMARY_URL: http://core-1:8082
+      PAYMENT_URL: http://payment:8085
     depends_on:
       - core-1
       - core-2
+      - payment
 
 volumes:
   mysql-data:
