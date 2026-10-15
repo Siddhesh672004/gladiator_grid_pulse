@@ -16,6 +16,8 @@ Motorsport track booking with live race control. Drivers book sessions on real c
 - Frontend: Angular 16, Angular Material (dialogs)
 
 ## Run locally
+Full steps (Docker infra, tests, Swagger): see `HOW-TO-RUN.txt`.
+
 1. MySQL on port 3306, login via `DB_USERNAME` / `DB_PASSWORD` (database `appdb` is created on first start).
 2. Backend: put your keys in `springapp/secrets.properties` (`MAIL_USERNAME`, `MAIL_PASSWORD`, `SUPER_ADMIN_EMAIL`, `SUPER_ADMIN_PASSWORD`, `GEMINI_API_KEY`, `GROQ_API_KEY`, `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`), then
    ```

@@ -1,0 +1,37 @@
+GridPulse - how to run
+======================
+
+Needs: Java 17+, Node 20, Docker Desktop (or a local MySQL 8, see "Manual MySQL").
+
+
+1. Infra with Docker (MySQL + Redis + Kafka + Kafka UI)
+-------------------------------------------------------
+   cp .env.example .env            (MYSQL_ROOT_PASSWORD, MYSQL_PORT)
+   docker compose up -d
+   docker compose ps               every container "healthy" after about a minute
+
+   DB_PASSWORD in springapp/secrets.properties = MYSQL_ROOT_PASSWORD in .env (both "examly" by default)
+
+   MySQL     localhost:3306  (schemas appdb, payment_db, ai_db, notification_db)
+   Redis     localhost:6379
+   Kafka     localhost:9092 for apps on this machine, kafka:29092 for containers
+   Kafka UI  http://localhost:8090
+
+   stop:            docker compose down
+   stop + wipe db:  docker compose down -v
+
+   Manual MySQL (alternative): any MySQL 8 on localhost:3306, login DB_USERNAME / DB_PASSWORD
+   (default root / examly). appdb is created on the first backend start.
+
+
+2. Backend (http://localhost:8080)
+----------------------------------
+   cd springapp
+   ./mvnw spring-boot:run
+
+
+3. Frontend (http://localhost:8081)
+-----------------------------------
+   cd angularapp
+   npm install
+   npm start
