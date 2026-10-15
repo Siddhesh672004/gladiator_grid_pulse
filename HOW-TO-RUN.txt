@@ -44,10 +44,11 @@ Needs: Java 17+, Node 20, Docker Desktop (or a local MySQL 8, see "Manual MySQL"
 2. Backend (http://localhost:8080)
 ----------------------------------
    needs MySQL and Redis running (step 1; only these two: docker compose up -d mysql redis)
-   cd springapp
-   ./mvnw spring-boot:run
+   from the repo root (one Maven build for all modules):
+   ./mvnw -q install -DskipTests -pl common        (only after a change in common/)
+   ./mvnw -pl springapp spring-boot:run
 
-   no Redis at hand: CACHE_TYPE=none ./mvnw spring-boot:run   (works the same, only without the cache)
+   no Redis at hand: CACHE_TYPE=none ./mvnw -pl springapp spring-boot:run   (works the same, without the cache)
    check the cache: docker compose exec redis redis-cli keys 'gp:*'
 
    health:   http://localhost:8080/actuator/health        {"status":"UP"}, details with an admin token

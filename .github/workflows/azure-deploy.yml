@@ -46,11 +46,11 @@ jobs:
           java-version: 17
           cache: maven
 
+      # from the root pom: the core needs the common module built first (-am)
       - name: Build the jar
-        working-directory: springapp
         run: |
-          mvn -B package -DskipTests
-          cp target/*.jar ../gridpulse.jar
+          mvn -B -pl springapp -am package -DskipTests
+          cp springapp/target/*.jar gridpulse.jar
 
       - uses: azure/webapps-deploy@v3
         with:
