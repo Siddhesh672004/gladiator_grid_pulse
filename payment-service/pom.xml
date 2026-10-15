@@ -19,6 +19,7 @@
 		<java.version>17</java.version>
 		<spring-cloud.version>2025.0.3</spring-cloud.version>
 		<resilience4j.version>2.4.0</resilience4j.version>
+		<wiremock.version>3.13.2</wiremock.version>
 	</properties>
 
 	<dependencyManagement>
@@ -94,6 +95,29 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- integration tests: a throw-away mysql in docker, wiremock plays the core -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-testcontainers</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>mysql</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- standalone = its own jetty inside, no clash with tomcat -->
+		<dependency>
+			<groupId>org.wiremock</groupId>
+			<artifactId>wiremock-standalone</artifactId>
+			<version>${wiremock.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

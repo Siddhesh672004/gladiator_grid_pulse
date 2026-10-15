@@ -118,11 +118,16 @@ instance where the change was made.
    unit tests, no Docker:   ./mvnw -q -pl common,notification-service test
    integration tests (need Docker: they start their own MySQL, one test also a Kafka):
                             ./mvnw -pl springapp verify
+                            ./mvnw -pl payment-service verify    (wiremock plays the core, razorpay is faked)
 
    the integration tests never touch appdb and send no email: the events stay in the outbox table
-   (logs go to springapp/target/test-logs). Razorpay is faked, the cache and the outbox relay are off.
-   tests: two drivers paying for the same car number at once, one order confirmed twice, two admins approving
+   (logs go to springapp/target/test-logs). Bookings are made the way payment-service makes them
+   (/internal/bookings), the cache and the outbox relay are off.
+   core tests: two paid bookings for the same car number at once, one order sent twice, two admins approving
    the last seat at once, 401 / 403 rules, competition start guard, booking event + e-ticket, admin list pages
-   (paging + query count), admin invite link, circuit breaker, driver stats + leaderboard, outbox relay -> kafka.
+   (paging + query count), admin invite link, circuit breaker, driver stats + leaderboard, outbox relay -> kafka,
+   internal key rules, payment status events applied once.
+   payment-service tests: booked -> PAID, refused -> refund + same error, core too slow -> 202 -> the job finds
+   the booking, core down + no booking -> refund, a refund asked twice changes once.
    one class only:  ./mvnw -pl springapp test -Dtest=StatsIntegrationTest
    skip them:       ./mvnw package -DskipTests

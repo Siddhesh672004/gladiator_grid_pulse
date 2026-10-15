@@ -22,10 +22,12 @@ import com.gridpulse.common.event.EventEnvelope;
 import com.gridpulse.common.event.EventJson;
 import com.gridpulse.common.event.EventReader;
 import com.gridpulse.common.event.OtpRequested;
+import com.gridpulse.common.event.PaymentStatusChanged;
 import com.gridpulse.common.inbox.Inbox;
 import com.gridpulse.notification.email.Attachment;
 import com.gridpulse.notification.email.EmailMessage;
 import com.gridpulse.notification.email.OtpEmail;
+import com.gridpulse.notification.email.RefundDoneEmail;
 import com.gridpulse.notification.service.EmailService;
 
 // the listener without kafka: event text in, email out (mocked), once per event
@@ -70,6 +72,22 @@ class NotificationListenerTest {
 
         verify(emailService).send(eq("a@b.co"), any(OtpEmail.class), eq(List.of()));
         verify(inbox, never()).isNew("e4", NotificationListener.CONSUMER);
+    }
+
+    @Test
+    void onlyAFinishedRefundIsEmailed() throws Exception {
+        when(inbox.isNew("e5", NotificationListener.CONSUMER)).thenReturn(true);
+
+        listener.onPaymentEvent(envelope("e5", new PaymentStatusChanged("order_1", 7L, "REFUNDED", 650.0,
+                "driver@gridpulse.test", "Aarav Rao", "Buddh", LocalDate.of(2026, 10, 20), "Booking rejected")));
+        listener.onPaymentEvent(envelope("e6", new PaymentStatusChanged("order_2", 8L, "REFUND_PENDING", 650.0,
+                "driver@gridpulse.test", "Aarav Rao", "Buddh", LocalDate.of(2026, 10, 20), null)));
+
+        ArgumentCaptor<EmailMessage> email = ArgumentCaptor.forClass(EmailMessage.class);
+        verify(emailService).send(eq("driver@gridpulse.test"), email.capture(), eq(List.of()));
+        assertThat(email.getValue()).isInstanceOf(RefundDoneEmail.class);
+        assertThat(email.getValue().body()).contains("Rs.650 has been refunded");
+        verify(inbox, never()).isNew("e6", NotificationListener.CONSUMER);
     }
 
     private static String envelope(String eventId, Object payload) throws Exception {
