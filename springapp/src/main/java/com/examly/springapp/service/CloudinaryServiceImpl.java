@@ -28,6 +28,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.annotation.PostConstruct;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -57,6 +59,7 @@ public class CloudinaryServiceImpl implements CloudinaryService {
     }
 
     @Override
+    @CircuitBreaker(name = "cloudinary", fallbackMethod = "uploadBusy")
     public String upload(MultipartFile file, String folder) {
         checkPicture(file);
         // no keys in secrets.properties -> 503
@@ -73,6 +76,11 @@ public class CloudinaryServiceImpl implements CloudinaryService {
             Thread.currentThread().interrupt();
             throw new GatewayException(NOT_SAVED, e);
         }
+    }
+
+    // breaker open (cloudinary failed a lot just now): answer at once
+    private String uploadBusy(MultipartFile file, String folder, CallNotPermittedException e) {
+        throw new GatewayException("The picture service is busy. Please try again in a minute.");
     }
 
     // without keys nothing can be uploaded here, so a cloudinary link can only be one that was saved before

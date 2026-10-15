@@ -27,6 +27,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.annotation.PostConstruct;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,6 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 public class RazorpayServiceImpl implements RazorpayService {
 
     private static final String NOT_REACHED = "The payment service cannot be reached right now. Please try again later";
+    private static final String BUSY = "The payment service is busy. Please try again in a minute.";
 
     private final RazorpayProperties razorpay;
     private final ObjectMapper objectMapper;
@@ -65,6 +69,7 @@ public class RazorpayServiceImpl implements RazorpayService {
     }
 
     @Override
+    @CircuitBreaker(name = "razorpay", fallbackMethod = "createOrderBusy")
     public String createOrder(long amountPaise, String receipt) {
         Map<String, Object> body = Map.of("amount", amountPaise, "currency", "INR", "receipt", receipt);
         return send("POST", "/orders", body).path("id").asText();
@@ -83,12 +88,15 @@ public class RazorpayServiceImpl implements RazorpayService {
     }
 
     @Override
+    @CircuitBreaker(name = "razorpay", fallbackMethod = "refundBusy")
     public String refund(String paymentId, long amountPaise) {
         return send("POST", "/payments/" + paymentId + "/refund", Map.of("amount", amountPaise)).path("id").asText();
     }
 
-    // "captured" = the money really reached us
+    // "captured" = the money really reached us. only reads, so a failed try is asked again (RefundJob)
     @Override
+    @Retry(name = "razorpayCheck")
+    @CircuitBreaker(name = "razorpay", fallbackMethod = "findCapturedPaymentBusy")
     public String findCapturedPayment(String orderId) {
         JsonNode payments = send("GET", "/orders/" + orderId + "/payments", null).path("items");
         // the first captured payment of the order, null = nobody paid it
@@ -97,6 +105,19 @@ public class RazorpayServiceImpl implements RazorpayService {
                 .map(payment -> payment.path("id").asText())
                 .findFirst()
                 .orElse(null);
+    }
+
+    // breaker open (razorpay failed a lot just now): answer at once instead of waiting for a timeout
+    private String createOrderBusy(long amountPaise, String receipt, CallNotPermittedException e) {
+        throw new GatewayException(BUSY);
+    }
+
+    private String refundBusy(String paymentId, long amountPaise, CallNotPermittedException e) {
+        throw new GatewayException(BUSY);
+    }
+
+    private String findCapturedPaymentBusy(String orderId, CallNotPermittedException e) {
+        throw new GatewayException(BUSY);
     }
 
     private JsonNode send(String method, String path, Map<String, Object> body) {

@@ -21,6 +21,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.annotation.PostConstruct;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -53,6 +55,7 @@ public class GeminiServiceImpl implements GeminiService {
     }
 
     @Override
+    @CircuitBreaker(name = "gemini", fallbackMethod = "embedResting")
     public float[] embed(String text) {
         Map<String, Object> body = Map.of(
                 "model", "models/" + gemini.embeddingModel(),
@@ -70,6 +73,7 @@ public class GeminiServiceImpl implements GeminiService {
     }
 
     @Override
+    @CircuitBreaker(name = "gemini", fallbackMethod = "generateResting")
     public String generate(String prompt) {
         Map<String, Object> body = Map.of(
                 "contents", List.of(Map.of("role", "user", "parts", List.of(Map.of("text", prompt)))),
@@ -85,6 +89,15 @@ public class GeminiServiceImpl implements GeminiService {
                 .filter(text -> !text.isBlank())
                 .map(String::trim)
                 .orElseThrow(() -> new GeminiException("Gemini returned an empty answer"));
+    }
+
+    // breaker open (gemini failed a lot just now): the callers fall back to word-overlap search at once
+    private float[] embedResting(String text, CallNotPermittedException e) {
+        throw new GeminiException("Gemini is resting after too many failures");
+    }
+
+    private String generateResting(String prompt, CallNotPermittedException e) {
+        throw new GeminiException("Gemini is resting after too many failures");
     }
 
     private JsonNode call(String modelAction, Object body) {

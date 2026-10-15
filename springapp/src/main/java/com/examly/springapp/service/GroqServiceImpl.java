@@ -14,9 +14,11 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.examly.springapp.config.properties.GroqProperties;
+import com.examly.springapp.exceptions.GatewayException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.annotation.PostConstruct;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -47,27 +49,34 @@ public class GroqServiceImpl implements GroqService {
     }
 
     @Override
+    @CircuitBreaker(name = "groq", fallbackMethod = "noAnswer")
     public String ask(String instructions, String text) {
         // no key -> "" without a call
         return isEnabled() ? send(instructions, text) : "";
     }
 
+    // groq failed, or the breaker is open after many failures: "" = the feedback is saved without a label
+    private String noAnswer(String instructions, String text, Exception e) {
+        return "";
+    }
+
+    // a failure throws, so the circuit breaker counts it
     private String send(String instructions, String text) {
         try {
             HttpResponse<String> response = httpClient.send(buildRequest(instructions, text),
                     HttpResponse.BodyHandlers.ofString());
-            // only a 200 has an answer, anything else gives "" and its status in the log
+            // only a 200 has an answer, anything else is a failure with its status in the log
             return response.statusCode() == 200 ? readAnswer(response.body()) : refused(response.statusCode());
         } catch (IOException e) {
             log.warn("Groq could not be reached: {}", e.getMessage());
-            return "";
+            throw new GatewayException("Groq could not be reached", e);
         } catch (IllegalArgumentException e) {
             // a broken key or url in the settings. its message could hold the key, so it stays out of the log
             log.warn("Groq request could not be built: check GROQ_API_KEY and groq.base-url");
-            return "";
+            throw new GatewayException("Groq request could not be built");
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            return "";
+            throw new GatewayException("Groq call was interrupted", e);
         }
     }
 
@@ -98,7 +107,7 @@ public class GroqServiceImpl implements GroqService {
 
     private String refused(int status) {
         log.warn("Groq answered HTTP {}", status);
-        return "";
+        throw new GatewayException("Groq answered HTTP " + status);
     }
 
     private String readAnswer(String json) throws IOException {
