@@ -61,7 +61,7 @@ class CircuitBreakerIntegrationTest extends IntegrationTest {
     void adminsSeeTheBreakers() throws Exception {
         JsonNode breakers = json(get("/actuator/circuitbreakers", data.token(data.admin()))).get("circuitBreakers");
 
-        assertThat(breakers.has("payment") && breakers.has("cloudinary") && breakers.has("groq")).isTrue();
+        assertThat(breakers.has("payment") && breakers.has("cloudinary") && breakers.has("ai")).isTrue();
         assertThat(status(get("/actuator/circuitbreakers", data.token(data.driver())))).isEqualTo(403);
     }
 }

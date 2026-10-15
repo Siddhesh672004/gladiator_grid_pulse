@@ -3,16 +3,16 @@ package com.examly.springapp.service;
 import java.util.List;
 
 import com.examly.springapp.dto.request.FeedbackRequest;
-import com.examly.springapp.dto.request.SuggestionRequest;
-import com.examly.springapp.dto.response.AiLinesResponse;
 import com.examly.springapp.dto.response.FeedbackCountsResponse;
 import com.examly.springapp.dto.response.FeedbackResponse;
 import com.examly.springapp.dto.response.PageResponse;
+import com.examly.springapp.dto.response.RecentFeedbackResponse;
 
 // feedback of drivers, the ai part is in FeedbackAiService
 public interface FeedbackService {
 
-    // COMPLETED session, driver took part, once per session (409). the ai label is set here too
+    // COMPLETED session, driver took part, once per session (409). saved NOT_ANALYSED, ai-service labels it
+    // a moment later (FeedbackSubmitted -> FeedbackLabelled)
     FeedbackResponse createFeedback(FeedbackRequest request);
 
     // own feedback only, admins see everyone's
@@ -35,8 +35,9 @@ public interface FeedbackService {
 
     FeedbackResponse analyseFeedback(Long id);
 
-    // nothing is saved
-    AiLinesResponse suggest(SuggestionRequest request);
+    // ai-service's label (FeedbackLabelled). turning urgent -> UrgentFeedbackReported (the admins get an email)
+    void applyLabel(Long feedbackId, String sentiment, boolean urgent);
 
-    AiLinesResponse summarise();
+    // newest first, for ai-service's admin summary
+    List<RecentFeedbackResponse> getRecentFeedback(int limit);
 }

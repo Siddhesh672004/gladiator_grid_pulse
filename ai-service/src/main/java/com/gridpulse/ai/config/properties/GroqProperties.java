@@ -1,4 +1,4 @@
-package com.examly.springapp.config.properties;
+package com.gridpulse.ai.config.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -15,6 +15,7 @@ public record GroqProperties(
         return apiKey != null && !apiKey.isBlank();
     }
 
+    // the key never goes into a log line
     @Override
     public String toString() {
         return "GroqProperties[model=" + model + ", baseUrl=" + baseUrl + "]";

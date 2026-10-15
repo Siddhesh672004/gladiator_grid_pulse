@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.examly.springapp.dto.request.FeedbackRequest;
-import com.examly.springapp.dto.request.SuggestionRequest;
-import com.examly.springapp.dto.response.AiLinesResponse;
 import com.examly.springapp.dto.response.FeedbackCountsResponse;
 import com.examly.springapp.dto.response.FeedbackResponse;
 import com.examly.springapp.dto.response.PageResponse;
@@ -40,23 +38,10 @@ public class FeedbackController {
         return ResponseEntity.status(201).body(feedbackService.createFeedback(request));
     }
 
-    // "Improve with AI": nothing is saved, an empty list = the ai could not answer (still 200)
-    @UserOnly
-    @PostMapping("/suggestions")
-    public ResponseEntity<AiLinesResponse> suggest(@Valid @RequestBody SuggestionRequest request) {
-        return ResponseEntity.ok(feedbackService.suggest(request));
-    }
-
     @AdminOnly
     @PostMapping("/{id}/analyse")
     public ResponseEntity<FeedbackResponse> analyseFeedback(@PathVariable Long id) {
         return ResponseEntity.ok(feedbackService.analyseFeedback(id));
-    }
-
-    @AdminOnly
-    @GetMapping("/summary")
-    public ResponseEntity<AiLinesResponse> summarise() {
-        return ResponseEntity.ok(feedbackService.summarise());
     }
 
     @LoggedIn

@@ -30,7 +30,7 @@ job finishes it within a minute or two. A rejected / cancelled paid booking is r
    SERVER_PORT                     core port, default 8082
    CORS_ENABLED                    false = core answers no CORS (behind the gateway); default true
    CORE_1_URL                      gateway: where the core runs, default http://localhost:8082
-   AI_URL                          gateway: where ai-service runs, default http://localhost:8086
+   AI_URL                          gateway + core: where ai-service runs, default http://localhost:8086
    AI_PORT / AI_DB_URL             ai-service port (8086) and database (.../ai_db)
    NOTIFICATION_PORT               notification-service port, default 8084
    DB_HOST / DB_PORT               mysql, default localhost / 3306 (core: ignored when DB_URL is set)

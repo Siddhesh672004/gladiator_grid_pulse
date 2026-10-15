@@ -2,39 +2,46 @@ package com.examly.springapp.service;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.examly.springapp.dto.request.FeedbackRequest;
-import com.examly.springapp.dto.request.SuggestionRequest;
-import com.examly.springapp.dto.response.AiLinesResponse;
 import com.examly.springapp.dto.response.FeedbackCountsResponse;
 import com.examly.springapp.dto.response.FeedbackResponse;
+import com.examly.springapp.dto.response.FeedbackLabelResponse;
 import com.examly.springapp.dto.response.PageResponse;
+import com.examly.springapp.dto.response.RecentFeedbackResponse;
 import com.examly.springapp.exceptions.ConflictException;
 import com.examly.springapp.exceptions.ResourceNotFoundException;
 import com.examly.springapp.mapper.FeedbackMapper;
 import com.examly.springapp.model.BookingStatus;
 import com.examly.springapp.model.Feedback;
 import com.examly.springapp.model.RaceSession;
+import com.examly.springapp.model.Role;
 import com.examly.springapp.model.Sentiment;
 import com.examly.springapp.model.SessionStatus;
 import com.examly.springapp.model.User;
 import com.examly.springapp.repository.FeedbackRepo;
 import com.examly.springapp.repository.RaceBookingRepo;
 import com.examly.springapp.repository.RaceSessionRepo;
+import com.examly.springapp.repository.UserRepo;
+import com.gridpulse.common.event.FeedbackSubmitted;
+import com.gridpulse.common.event.UrgentFeedbackReported;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 // feedback is about one session: the driver drove in it and it is over
-// the ai never stops a feedback from being saved
+// the ai never stops a feedback from being saved: it is labelled afterwards by ai-service (kafka)
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -45,9 +52,15 @@ public class FeedbackServiceImpl implements FeedbackService {
     private final RaceBookingRepo raceBookingRepo;
     private final UserService userService;
     private final FeedbackMapper feedbackMapper;
-    private final FeedbackAiService feedbackAiService;
+    private final UserRepo userRepo;
+    private final AiClient aiClient;
+    private final ApplicationEventPublisher eventPublisher;
+
+    private static final int EXCERPT_LENGTH = 300;
+    private static final int MAX_RECENT = 50;
 
     @Override
+    @Transactional
     public FeedbackResponse createFeedback(FeedbackRequest request) {
         User author = userService.getLoggedInUser();
         checkDate(request.date());
@@ -60,9 +73,10 @@ public class FeedbackServiceImpl implements FeedbackService {
         checkFirstFeedback(session, author);
 
         Feedback feedback = feedbackMapper.toEntity(request, author, session);
-        // ai down -> NOT_ANALYSED, saved anyway
-        feedbackAiService.label(feedback);
+        feedback.setSentiment(Sentiment.NOT_ANALYSED);
         Feedback saved = feedbackRepo.save(feedback);
+        // outbox with this transaction: ai-service labels it a moment later
+        eventPublisher.publishEvent(new FeedbackSubmitted(saved.getFeedbackId(), saved.getFeedbackText()));
         log.info("Feedback {} added by user {} for session {}", saved.getFeedbackId(), author.getUserId(),
                 session.getSessionId());
         return feedbackMapper.toResponse(saved);
@@ -131,36 +145,63 @@ public class FeedbackServiceImpl implements FeedbackService {
         return toAdminResponses(feedbackRepo.findBySessionSessionId(sessionId));
     }
 
+    // the admin asks again at once (ai-service down -> NOT_ANALYSED, the row stays as it was)
     @Override
+    @Transactional
     public FeedbackResponse analyseFeedback(Long id) {
         Feedback feedback = findFeedback(id);
-        feedbackAiService.label(feedback);
-        Feedback saved = feedbackRepo.save(feedback);
-        log.info("Feedback {} analysed again -> {}", id, saved.getSentiment());
-        return feedbackMapper.toAdminResponse(saved);
+        FeedbackLabelResponse label = aiClient.label(feedback.getFeedbackText());
+        Optional.of(label)
+                .filter(answer -> !Sentiment.NOT_ANALYSED.name().equals(answer.sentiment()))
+                .ifPresent(answer -> label(feedback, answer.sentiment(), answer.urgent()));
+        log.info("Feedback {} analysed again -> {}", id, feedback.getSentiment());
+        return feedbackMapper.toAdminResponse(feedbackRepo.save(feedback));
+    }
+
+    // a feedback deleted in the meantime: nothing to label
+    @Override
+    @Transactional
+    public void applyLabel(Long feedbackId, String sentiment, boolean urgent) {
+        feedbackRepo.findById(feedbackId)
+                .ifPresentOrElse(feedback -> label(feedback, sentiment, urgent),
+                        () -> log.debug("Feedback {} is gone, its label is skipped", feedbackId));
     }
 
     @Override
-    public AiLinesResponse suggest(SuggestionRequest request) {
-        return new AiLinesResponse(feedbackAiService.suggest(request.feedbackText().trim()));
-    }
-
-    @Override
-    public AiLinesResponse summarise() {
-        List<String> lines = feedbackRepo.findTop50ByOrderByFeedbackIdDesc().stream()
-                .map(this::summaryLine)
+    @Transactional(readOnly = true)
+    public List<RecentFeedbackResponse> getRecentFeedback(int limit) {
+        return feedbackRepo.findTop50ByOrderByFeedbackIdDesc().stream()
+                .limit(Math.max(1, Math.min(limit, MAX_RECENT)))
+                .map(feedback -> new RecentFeedbackResponse(feedback.getRating(), feedback.getFeedbackText()))
                 .toList();
-        // no feedback yet -> no ai call, an empty summary
-        return new AiLinesResponse(lines.isEmpty() ? List.of() : feedbackAiService.summarise(lines));
     }
 
-    private String summaryLine(Feedback feedback) {
-        String text = feedback.getFeedbackText().replace("\r", " ").replace("\n", " ");
-        String cut = text.substring(0, Math.min(text.length(), 200));
-        // the stars first, a feedback without stars says so
-        return Optional.ofNullable(feedback.getRating())
-                .map(rating -> rating + " stars: " + cut)
-                .orElse("no rating: " + cut);
+    // an unknown word counts as NOT_ANALYSED; a feedback that turns urgent tells every admin once
+    private void label(Feedback feedback, String sentiment, boolean urgent) {
+        boolean wasUrgent = feedback.isUrgent();
+        feedback.setSentiment(EnumSet.allOf(Sentiment.class).stream()
+                .filter(known -> known.name().equals(sentiment))
+                .findFirst()
+                .orElse(Sentiment.NOT_ANALYSED));
+        feedback.setUrgent(urgent);
+        feedbackRepo.save(feedback);
+        Optional.of(feedback)
+                .filter(labelled -> urgent && !wasUrgent)
+                .ifPresent(this::reportUrgent);
+    }
+
+    private void reportUrgent(Feedback feedback) {
+        String text = feedback.getFeedbackText();
+        List<String> adminEmails = userRepo.findByUserRoleInAndEnabledTrue(List.of(Role.ADMIN, Role.SUPER_ADMIN))
+                .stream()
+                .map(User::getEmail)
+                .toList();
+        eventPublisher.publishEvent(new UrgentFeedbackReported(feedback.getFeedbackId(),
+                feedback.getUser().getUsername(), feedback.getSession().getTrack().getTrackName(),
+                feedback.getSession().getSessionDate(), feedback.getRating(),
+                text.substring(0, Math.min(text.length(), EXCERPT_LENGTH)), adminEmails));
+        log.warn("Feedback {} reports a safety problem, {} admin(s) are emailed", feedback.getFeedbackId(),
+                adminEmails.size());
     }
 
     // "today" is India's date, also on a server that runs in UTC. no date = today (FeedbackMapper)

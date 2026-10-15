@@ -104,6 +104,16 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<!-- groq speaks the openai api: the feedback labels, suggestions and summary -->
+		<dependency>
+			<groupId>org.springframework.ai</groupId>
+			<artifactId>spring-ai-starter-model-openai</artifactId>
+		</dependency>
+		<!-- http://core-service / http://payment-service = one of the healthy instances (simple discovery, like the gateway) -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-loadbalancer</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>com.mysql</groupId>
 			<artifactId>mysql-connector-j</artifactId>

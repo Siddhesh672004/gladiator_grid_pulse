@@ -1,4 +1,4 @@
-package com.examly.springapp.dto.response;
+package com.gridpulse.ai.dto.response;
 
 import java.util.List;
 

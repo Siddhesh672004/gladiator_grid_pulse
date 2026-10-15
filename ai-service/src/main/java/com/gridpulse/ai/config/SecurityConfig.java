@@ -11,7 +11,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import lombok.RequiredArgsConstructor;
 
-// the faq chat is open for everyone, everything else needs a core token (the role per url is on the methods)
+// the faq chat is open for everyone, /internal/** needs the internal key, everything else a core token
+// (the role per url is on the methods)
 // no CORS here: the browser only talks to the gateway
 @Configuration
 @EnableMethodSecurity
@@ -20,6 +21,7 @@ public class SecurityConfig {
 
     private final JwtTokenFilter jwtTokenFilter;
     private final JwtEntryPoint jwtEntryPoint;
+    private final InternalKeyFilter internalKeyFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -31,7 +33,10 @@ public class SecurityConfig {
                         // health for docker / the gateway
                         .requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/health/**").permitAll()
                         .requestMatchers("/error").permitAll()
+                        // the other services only: InternalKeyFilter checks the key first
+                        .requestMatchers("/internal/**").permitAll()
                         .anyRequest().authenticated())
+                .addFilterBefore(internalKeyFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

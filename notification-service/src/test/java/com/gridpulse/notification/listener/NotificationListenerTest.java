@@ -26,12 +26,14 @@ import com.gridpulse.common.event.EventJson;
 import com.gridpulse.common.event.EventReader;
 import com.gridpulse.common.event.OtpRequested;
 import com.gridpulse.common.event.PaymentStatusChanged;
+import com.gridpulse.common.event.UrgentFeedbackReported;
 import com.gridpulse.common.inbox.Inbox;
 import com.gridpulse.notification.email.Attachment;
 import com.gridpulse.notification.email.EmailMessage;
 import com.gridpulse.notification.email.OtpEmail;
 import com.gridpulse.notification.email.PromotedEmail;
 import com.gridpulse.notification.email.RefundDoneEmail;
+import com.gridpulse.notification.email.UrgentFeedbackEmail;
 import com.gridpulse.notification.service.EmailService;
 
 // the listener without kafka: event text in, email out (mocked), once per event
@@ -110,6 +112,18 @@ class NotificationListenerTest {
         verify(emailService, times(2)).send(eq("driver@gridpulse.test"), emails.capture(), eq(List.of()));
         assertThat(emails.getAllValues().get(0).body()).contains("number 2 on the waitlist");
         assertThat(emails.getAllValues().get(1)).isInstanceOf(PromotedEmail.class);
+    }
+
+    @Test
+    void urgentFeedbackGoesToEveryAdmin() throws Exception {
+        when(inbox.isNew("e9", NotificationListener.CONSUMER)).thenReturn(true);
+
+        listener.onFeedbackEvent(envelope("e9", new UrgentFeedbackReported(5L, "Aarav Rao", "Buddh",
+                LocalDate.of(2026, 10, 20), 1, "The barrier at turn 3 is broken", List.of("a1@gridpulse.test", "a2@gridpulse.test"))));
+
+        verify(emailService).send(eq("a1@gridpulse.test"), any(UrgentFeedbackEmail.class), eq(List.of()));
+        verify(emailService).send(eq("a2@gridpulse.test"), any(UrgentFeedbackEmail.class), eq(List.of()));
+        verify(inbox).markProcessed("e9", NotificationListener.CONSUMER);
     }
 
     private static String envelope(String eventId, Object payload) throws Exception {

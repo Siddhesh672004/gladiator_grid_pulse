@@ -22,6 +22,7 @@ import com.gridpulse.common.event.EventReader;
 import com.gridpulse.common.event.OtpRequested;
 import com.gridpulse.common.event.PaymentStatusChanged;
 import com.gridpulse.common.event.Topics;
+import com.gridpulse.common.event.UrgentFeedbackReported;
 import com.gridpulse.common.inbox.Inbox;
 import com.gridpulse.common.ticket.TicketData;
 import com.gridpulse.common.ticket.TicketPdf;
@@ -33,6 +34,7 @@ import com.gridpulse.notification.email.OtpEmail;
 import com.gridpulse.notification.email.PasswordResetEmail;
 import com.gridpulse.notification.email.PromotedEmail;
 import com.gridpulse.notification.email.RefundDoneEmail;
+import com.gridpulse.notification.email.UrgentFeedbackEmail;
 import com.gridpulse.notification.email.WaitlistEmail;
 import com.gridpulse.notification.ics.IcsBuilder;
 import com.gridpulse.notification.service.EmailService;
@@ -40,7 +42,7 @@ import com.gridpulse.notification.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-// account, booking and payment events -> emails. kafka may deliver an event twice: the inbox makes it one email
+// account, booking, payment and feedback events -> emails. kafka may deliver an event twice: the inbox makes it one email
 // a failed email (gmail down) is tried again after 2 s, 6 s and 18 s, then the event lands on the dead letter topic
 // the retry topics carry this service's name, so another service's retries never mix with ours
 // whoever starts first makes the topics: 3 partitions here too, the same as the core's (KafkaTopicConfig)
@@ -97,6 +99,19 @@ public class NotificationListener {
         }
     }
 
+    // a feedback the ai marked urgent: one email to every admin (the other feedback events are not for us)
+    @RetryableTopic(attempts = "4", backoff = @Backoff(delay = 2000, multiplier = 3), numPartitions = "3",
+            retryTopicSuffix = "-notification-retry", dltTopicSuffix = "-notification-dlt")
+    @KafkaListener(topics = Topics.FEEDBACK, groupId = CONSUMER)
+    public void onFeedbackEvent(String message) {
+        EventEnvelope event = eventReader.read(message);
+        switch (event.type()) {
+            case "UrgentFeedbackReported" -> once(event,
+                    () -> sendUrgent(eventReader.payload(event, UrgentFeedbackReported.class)));
+            default -> log.debug("Event type {} is not for notification-service, skipped", event.type());
+        }
+    }
+
     // every try failed: only the event id and type go to the log, never the payload (codes, links)
     @DltHandler
     public void onDeadLetter(String message, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
@@ -145,6 +160,12 @@ public class NotificationListener {
     private void sendPromoted(BookingPromoted booking) {
         emailService.send(booking.driverEmail(), new PromotedEmail(booking.driverName(), booking.trackName(),
                 booking.sessionDate(), booking.startTime(), booking.endTime(), booking.carNumber()), List.of());
+    }
+
+    private void sendUrgent(UrgentFeedbackReported urgent) {
+        UrgentFeedbackEmail email = new UrgentFeedbackEmail(urgent.feedbackId(), urgent.driverName(), urgent.trackName(),
+                urgent.sessionDate(), urgent.rating(), urgent.excerpt());
+        urgent.adminEmails().forEach(admin -> emailService.send(admin, email, List.of()));
     }
 
     private void sendRefundDone(PaymentStatusChanged refund) {

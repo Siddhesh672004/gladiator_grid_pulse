@@ -1,11 +1,11 @@
-package com.examly.springapp.dto.request;
+package com.gridpulse.ai.dto.request;
 
-import com.examly.springapp.validation.ValidationRules;
+import java.util.Optional;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-// "Improve with AI": same text rules as FeedbackRequest
+// "Improve with AI": same text rules as the core's feedback form
 public record SuggestionRequest(
 
         @NotBlank(message = "Feedback is required")
@@ -14,6 +14,10 @@ public record SuggestionRequest(
         String feedbackText) {
 
     public SuggestionRequest {
-        feedbackText = ValidationRules.clean(feedbackText);
+        // only spaces = nothing typed
+        feedbackText = Optional.ofNullable(feedbackText)
+                .filter(typed -> !typed.isBlank())
+                .map(String::trim)
+                .orElse(null);
     }
 }

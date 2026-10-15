@@ -1,5 +1,6 @@
 package com.examly.springapp.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,6 +23,9 @@ public interface UserRepo extends JpaRepository<User, Integer> {
     boolean existsByDriverLicenseNumber(String driverLicenseNumber);
 
     List<User> findByUserRole(Role userRole);
+
+    // who gets the urgent feedback emails
+    List<User> findByUserRoleInAndEnabledTrue(Collection<Role> userRoles);
 
     // newest account first (the Admins page)
     List<User> findByUserRoleOrderByUserIdDesc(Role userRole);

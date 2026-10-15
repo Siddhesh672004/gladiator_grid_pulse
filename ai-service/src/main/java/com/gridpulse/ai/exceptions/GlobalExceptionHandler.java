@@ -46,6 +46,19 @@ public class GlobalExceptionHandler {
                 request);
     }
 
+    // 503: the core or payment-service did not answer
+    @ExceptionHandler(ServiceDownException.class)
+    public ResponseEntity<ErrorResponse> handleServiceDown(ServiceDownException e, HttpServletRequest request) {
+        return build(HttpStatus.SERVICE_UNAVAILABLE, "That part of GridPulse is unavailable right now.", request);
+    }
+
+    // the other service's own 4xx, passed on as it came
+    @ExceptionHandler(ToolCallException.class)
+    public ResponseEntity<ErrorResponse> handleRefused(ToolCallException e, HttpServletRequest request) {
+        HttpStatus status = Optional.ofNullable(HttpStatus.resolve(e.getStatus())).orElse(HttpStatus.BAD_REQUEST);
+        return build(status, e.getMessage(), request);
+    }
+
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleNotFound(ResourceNotFoundException e, HttpServletRequest request) {
         return build(HttpStatus.NOT_FOUND, e.getMessage(), request);

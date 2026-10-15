@@ -62,6 +62,11 @@ spring:
                 - Path=/api/live/**
               metadata:
                 response-timeout: -1
+            # the feedback ai: suggestions for drivers, the summary for admins
+            - id: feedback-ai
+              uri: lb://ai-service
+              predicates:
+                - Path=/api/feedback/suggestions,/api/feedback/summary
             # the faq chat lives in ai-service
             - id: chat
               uri: lb://ai-service

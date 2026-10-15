@@ -9,8 +9,10 @@ import com.gridpulse.common.event.BookingDecided;
 import com.gridpulse.common.event.BookingPromoted;
 import com.gridpulse.common.event.BookingRefundRequested;
 import com.gridpulse.common.event.BookingWaitlisted;
+import com.gridpulse.common.event.FeedbackSubmitted;
 import com.gridpulse.common.event.OtpRequested;
 import com.gridpulse.common.event.Topics;
+import com.gridpulse.common.event.UrgentFeedbackReported;
 import com.gridpulse.common.outbox.EventPublisher;
 
 import lombok.RequiredArgsConstructor;
@@ -46,6 +48,18 @@ public class DomainEventOutboxListener {
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void onBookingPromoted(BookingPromoted event) {
         eventPublisher.publish(Topics.BOOKING, String.valueOf(event.bookingId()), event);
+    }
+
+    // ai-service labels it
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+    public void onFeedbackSubmitted(FeedbackSubmitted event) {
+        eventPublisher.publish(Topics.FEEDBACK, String.valueOf(event.feedbackId()), event);
+    }
+
+    // notification-service emails the admins
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+    public void onUrgentFeedbackReported(UrgentFeedbackReported event) {
+        eventPublisher.publish(Topics.FEEDBACK, String.valueOf(event.feedbackId()), event);
     }
 
     // payment-service sends the money back

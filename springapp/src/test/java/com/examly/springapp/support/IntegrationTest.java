@@ -46,7 +46,7 @@ import com.gridpulse.common.security.InternalApi;
         "gridpulse.outbox.relay.enabled=false",
         "spring.kafka.admin.auto-create=false",
         "spring.kafka.listener.auto-startup=false",
-        "groq.api-key=",
+        "gridpulse.ai-url=http://localhost:1",
         "cloudinary.cloud-name=",
         "cloudinary.api-key=",
         "cloudinary.api-secret=",
