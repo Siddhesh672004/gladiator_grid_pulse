@@ -69,7 +69,11 @@ Needs: Java 17+, Node 20, Docker Desktop (or a local MySQL 8, see "Manual MySQL"
    ./mvnw verify
 
    the tests start their own throw-away MySQL, never touch appdb and send no email
-   (texts go to springapp/target/test-mails, logs to springapp/target/test-logs). Razorpay is faked.
-   5 tests: two drivers paying for the same car number at once, one order confirmed twice,
-   two admins approving the last seat at once, 401 / 403 rules, competition start guard.
+   (texts go to springapp/target/test-mails, logs to springapp/target/test-logs). Razorpay is faked,
+   the cache is off (no Redis needed for the tests).
+   14 tests: two drivers paying for the same car number at once, one order confirmed twice,
+   two admins approving the last seat at once, 401 / 403 rules, competition start guard,
+   approval email in the background, admin list pages (paging + query count), admin invite link,
+   circuit breaker, driver stats + leaderboard after a full competition.
+   one class only:  ./mvnw test -Dtest=StatsIntegrationTest
    skip them:  ./mvnw package -DskipTests
