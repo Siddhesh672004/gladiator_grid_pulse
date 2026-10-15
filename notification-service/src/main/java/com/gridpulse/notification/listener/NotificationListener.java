@@ -37,6 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 // account + booking events -> emails. kafka may deliver an event twice: the inbox makes it one email
 // a failed email (gmail down) is tried again after 2 s, 6 s and 18 s, then the event lands on the dead letter topic
 // the retry topics carry this service's name, so another service's retries never mix with ours
+// whoever starts first makes the topics: 3 partitions here too, the same as the core's (KafkaTopicConfig)
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -48,7 +49,7 @@ public class NotificationListener {
     private final Inbox inbox;
     private final EmailService emailService;
 
-    @RetryableTopic(attempts = "4", backoff = @Backoff(delay = 2000, multiplier = 3),
+    @RetryableTopic(attempts = "4", backoff = @Backoff(delay = 2000, multiplier = 3), numPartitions = "3",
             retryTopicSuffix = "-notification-retry", dltTopicSuffix = "-notification-dlt")
     @KafkaListener(topics = Topics.ACCOUNT, groupId = CONSUMER)
     public void onAccountEvent(String message) {
@@ -60,7 +61,7 @@ public class NotificationListener {
         }
     }
 
-    @RetryableTopic(attempts = "4", backoff = @Backoff(delay = 2000, multiplier = 3),
+    @RetryableTopic(attempts = "4", backoff = @Backoff(delay = 2000, multiplier = 3), numPartitions = "3",
             retryTopicSuffix = "-notification-retry", dltTopicSuffix = "-notification-dlt")
     @KafkaListener(topics = Topics.BOOKING, groupId = CONSUMER)
     public void onBookingEvent(String message) {
