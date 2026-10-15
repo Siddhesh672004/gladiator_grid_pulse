@@ -77,8 +77,11 @@ services:
       start_period: 30s
 
   # the services, only with --profile apps (a plain "docker compose up -d" stays infra only)
-  core:
+  # JWT_SECRET (.env) is required: both core instances and the gateway must read the same tokens
+  # two core instances from one image, the gateway shares the work between them
+  core-1:
     profiles: [apps]
+    image: gridpulse/core:local
     build:
       context: .
       dockerfile: docker/Dockerfile.service
@@ -94,6 +97,34 @@ services:
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       KAFKA_BOOTSTRAP: kafka:29092
       REDIS_HOST: redis
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
+  core-2:
+    profiles: [apps]
+    image: gridpulse/core:local
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.service
+      args:
+        MODULE: springapp
+    ports:
+      - "8083:8082"
+    env_file: .env
+    environment:
+      SERVER_PORT: 8082
+      CORS_ENABLED: "false"
+      DB_HOST: mysql
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      KAFKA_BOOTSTRAP: kafka:29092
+      REDIS_HOST: redis
+      # only one instance sends the refunds
+      GRIDPULSE_JOBS_REFUND_ENABLED: "false"
     depends_on:
       mysql:
         condition: service_healthy
@@ -134,10 +165,13 @@ services:
       - "8080:8080"
     env_file: .env
     environment:
-      CORE_1_URL: http://core:8082
-      CORE_PRIMARY_URL: http://core:8082
+      SPRING_PROFILES_ACTIVE: docker
+      CORE_1_URL: http://core-1:8082
+      CORE_2_URL: http://core-2:8082
+      CORE_PRIMARY_URL: http://core-1:8082
     depends_on:
-      - core
+      - core-1
+      - core-2
 
 volumes:
   mysql-data:
