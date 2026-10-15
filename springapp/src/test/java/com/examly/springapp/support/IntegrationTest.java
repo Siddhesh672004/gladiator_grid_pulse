@@ -1,5 +1,9 @@
 package com.examly.springapp.support;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -9,6 +13,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,6 +27,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.testcontainers.containers.MySQLContainer;
 
+import com.examly.springapp.config.properties.EmailProperties;
 import com.examly.springapp.dto.request.BookingStatusRequest;
 import com.examly.springapp.dto.request.PaymentConfirmRequest;
 import com.examly.springapp.dto.request.RaceBookingRequest;
@@ -73,6 +79,9 @@ public abstract class IntegrationTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private EmailProperties emailProperties;
 
     protected ResponseEntity<String> get(String url, String token) {
         return call(HttpMethod.GET, url, token, null);
@@ -132,6 +141,27 @@ public abstract class IntegrationTest {
 
     private static RaceBookingRequest booking(RaceSession session, int carNumber) {
         return new RaceBookingRequest(session.getSessionId(), carNumber, "GT3", null, true);
+    }
+
+    // texts of the test-mode email files sent to this address
+    protected List<String> mailsTo(String email) throws IOException {
+        Path folder = Path.of(emailProperties.fileDir());
+        if (!Files.isDirectory(folder)) {
+            return List.of();
+        }
+        try (Stream<Path> files = Files.list(folder)) {
+            return files.filter(file -> file.getFileName().toString().endsWith("_" + email + ".txt"))
+                    .map(IntegrationTest::read)
+                    .toList();
+        }
+    }
+
+    private static String read(Path file) {
+        try {
+            return Files.readString(file);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     // every call waits at the gate, then all go at once; answers come back in the same order

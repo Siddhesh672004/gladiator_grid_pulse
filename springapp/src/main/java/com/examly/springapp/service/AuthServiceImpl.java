@@ -13,7 +13,6 @@ import com.examly.springapp.dto.request.LoginRequest;
 import com.examly.springapp.dto.request.ResetPasswordRequest;
 import com.examly.springapp.dto.response.LoginResponse;
 import com.examly.springapp.dto.response.MessageResponse;
-import com.examly.springapp.exceptions.EmailSendException;
 import com.examly.springapp.exceptions.OtpException;
 import com.examly.springapp.mapper.UserMapper;
 import com.examly.springapp.model.OtpPurpose;
@@ -126,13 +125,9 @@ public class AuthServiceImpl implements AuthService {
         return userMapper.toLoginResponse(user, jwtUtils.generateToken(user));
     }
 
-    // a gmail problem only goes to the log, the answer stays the same
+    // the email goes out in the background, the answer stays the same
     private void sendResetCode(User user) {
-        try {
-            otpService.createAndSend(user, OtpPurpose.RESET_PASSWORD);
-        } catch (EmailSendException e) {
-            log.error("Reset code for {} could not be emailed", user.getEmail());
-        }
+        otpService.createAndSend(user, OtpPurpose.RESET_PASSWORD);
     }
 
     private boolean isBlank(String value) {

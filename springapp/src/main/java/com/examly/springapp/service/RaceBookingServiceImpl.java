@@ -8,6 +8,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,11 +17,10 @@ import com.examly.springapp.dto.request.BookingStatusRequest;
 import com.examly.springapp.dto.request.RaceBookingRequest;
 import com.examly.springapp.dto.response.CarCategoryResponse;
 import com.examly.springapp.dto.response.RaceBookingResponse;
-import com.examly.springapp.email.BookingStatusEmail;
+import com.examly.springapp.event.BookingDecided;
 import com.examly.springapp.exceptions.BookingException;
 import com.examly.springapp.exceptions.ConflictException;
 import com.examly.springapp.exceptions.DuplicateCarNumberException;
-import com.examly.springapp.exceptions.EmailSendException;
 import com.examly.springapp.exceptions.ResourceNotFoundException;
 import com.examly.springapp.mapper.RaceBookingMapper;
 import com.examly.springapp.model.BookingStatus;
@@ -75,7 +75,7 @@ public class RaceBookingServiceImpl implements RaceBookingService {
     private final RaceSessionRepo raceSessionRepo;
     private final UserService userService;
     private final RaceBookingMapper raceBookingMapper;
-    private final EmailService emailService;
+    private final ApplicationEventPublisher eventPublisher;
     private final CloudinaryService cloudinaryService;
     private final PaymentRecordService paymentRecordService;
 
@@ -423,19 +423,14 @@ public class RaceBookingServiceImpl implements RaceBookingService {
                 .ifPresent(this::sendStatusEmail);
     }
 
-    // a mail problem only goes to the log, the admin's click still counts
+    // the email goes out after the commit (event/EmailEventListener), a rollback sends nothing
     private void sendStatusEmail(RaceBooking booking) {
         User driver = booking.getUser();
         RaceSession session = booking.getSession();
-        try {
-            emailService.send(driver.getEmail(), new BookingStatusEmail(driver.getUsername(),
-                    session.getTrack().getTrackName(), session.getSessionDate(), session.getStartTime(),
-                    session.getEndTime(), booking.getCarNumber(), booking.getStatus(), booking.getAdminNote(),
-                    refundAmount(booking)));
-        } catch (EmailSendException e) {
-            log.warn("Booking {} is {} but the email to {} failed", booking.getRaceBookingId(), booking.getStatus(),
-                    driver.getEmail());
-        }
+        eventPublisher.publishEvent(new BookingDecided(booking.getRaceBookingId(), driver.getEmail(),
+                driver.getUsername(), session.getTrack().getTrackName(), session.getTrack().getLocation(),
+                session.getSessionDate(), session.getStartTime(), session.getEndTime(), booking.getCarNumber(),
+                booking.getCarCategory(), booking.getStatus(), booking.getAdminNote(), refundAmount(booking)));
     }
 
     // only money that is on its way back shows in the email

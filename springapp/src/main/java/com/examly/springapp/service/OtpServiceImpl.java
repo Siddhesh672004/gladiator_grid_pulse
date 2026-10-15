@@ -7,14 +7,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.examly.springapp.config.properties.OtpProperties;
-import com.examly.springapp.email.EmailMessage;
-import com.examly.springapp.email.OtpEmail;
-import com.examly.springapp.email.PasswordResetEmail;
+import com.examly.springapp.event.OtpRequested;
 import com.examly.springapp.exceptions.OtpException;
 import com.examly.springapp.model.OtpCode;
 import com.examly.springapp.model.OtpPurpose;
@@ -38,10 +37,10 @@ public class OtpServiceImpl implements OtpService {
 
     private final OtpCodeRepo otpCodeRepo;
     private final PasswordEncoder passwordEncoder;
-    private final EmailService emailService;
+    private final ApplicationEventPublisher eventPublisher;
     private final OtpProperties otpProperties;
 
-    // email fails -> rollback, the new code is not saved and the old ones stay open
+    // the email goes out after the commit (event/EmailEventListener), a gmail problem only reaches the log
     @Override
     @Transactional
     public int createAndSend(User user, OtpPurpose purpose) {
@@ -56,11 +55,9 @@ public class OtpServiceImpl implements OtpService {
         Instant expiresAt = Instant.now().plus(Duration.ofMinutes(minutes));
         otpCodeRepo.save(new OtpCode(user.getEmail(), purpose, passwordEncoder.encode(code), expiresAt));
 
-        EmailMessage email = purpose == OtpPurpose.SIGNUP
-                ? new OtpEmail(user.getUsername(), code, minutes)
-                : new PasswordResetEmail(user.getUsername(), code, minutes);
-        emailService.send(user.getEmail(), email);
-        log.info("{} code sent to {}", purpose, user.getEmail());
+        eventPublisher.publishEvent(
+                new OtpRequested(user.getEmail(), user.getUsername(), code, minutes, purpose.name()));
+        log.info("{} code made for {}", purpose, user.getEmail());
         return minutes * 60;
     }
 

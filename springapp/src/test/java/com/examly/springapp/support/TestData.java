@@ -29,6 +29,8 @@ import lombok.RequiredArgsConstructor;
 public class TestData {
 
     private static final AtomicInteger NEXT = new AtomicInteger();
+    // emails differ from run to run, so a mail file of an older run never counts
+    private static final String RUN = Long.toString(System.currentTimeMillis(), 36);
 
     private final UserRepo userRepo;
     private final RaceTrackRepo raceTrackRepo;
@@ -40,7 +42,7 @@ public class TestData {
     // date of birth + license on file = may book
     public User driver() {
         int n = NEXT.incrementAndGet();
-        User driver = new User("driver" + n + "@gridpulse.test", "hash-" + n, "Driver " + n,
+        User driver = new User("driver" + n + "." + RUN + "@gridpulse.test", "hash-" + n, "Driver " + n,
                 String.format("9%09d", n), Role.USER);
         driver.setDateOfBirth(LocalDate.of(1995, 5, 20));
         driver.setDriverLicenseNumber("DL-TEST-" + n);
@@ -49,7 +51,8 @@ public class TestData {
 
     public User admin() {
         int n = NEXT.incrementAndGet();
-        return userRepo.save(new User("admin" + n + "@gridpulse.test", "hash-" + n, "Admin " + n, null, Role.ADMIN));
+        return userRepo.save(new User("admin" + n + "." + RUN + "@gridpulse.test", "hash-" + n, "Admin " + n, null,
+                Role.ADMIN));
     }
 
     public User disable(User user) {
