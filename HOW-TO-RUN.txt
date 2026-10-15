@@ -3,12 +3,15 @@ GridPulse - how to run
 
 Needs: Java 17+, Node 20, Docker Desktop (or a local MySQL 8, see "Manual MySQL").
 
-The services + the Angular site:
-   gateway                 http://localhost:8080   the one address the site calls: routes /api/** to the core, CORS
-   core (springapp)        http://localhost:8082   the api itself (behind the gateway)
-   notification-service    http://localhost:8084   sends every email (sign-up code, invite, booking decision + e-ticket)
-The core writes events into its outbox table; Kafka carries them to notification-service.
-No Kafka or no notification-service = no emails yet: the events wait and go out once both run.
+Ports:
+   8080   gateway                 the one address the site calls: routes /api/**, CORS, rate limits (429)
+   8081   angular (npm start)     the site
+   8082   core (springapp)        the api itself, behind the gateway (a second core instance: 8083)
+   8084   notification-service    sends every email (sign-up code, invite, booking decision + e-ticket)
+   3306 mysql · 6379 redis · 9092 kafka · 8090 kafka ui
+The core writes events into its outbox table; Kafka carries them to notification-service and to every core
+instance (live boards). No Kafka = no emails yet (the events wait), and a live board only updates on the
+instance where the change was made.
 
 
 0. Secrets
@@ -58,10 +61,17 @@ No Kafka or no notification-service = no emails yet: the events wait and go out 
 
 2. Services - terminal mode (infra in Docker, services from the repo root)
 ---------------------------------------------------------------------------
+   start order: infra (step 1) -> install common -> core -> notification -> gateway
    ./mvnw -q install -DskipTests -pl common                 (first time + after a change in common/)
    CORS_ENABLED=false ./mvnw -pl springapp spring-boot:run  core, http://localhost:8082
    ./mvnw -pl notification-service spring-boot:run          second terminal, http://localhost:8084
    ./mvnw -pl gateway spring-boot:run                       third terminal, http://localhost:8080 (what angular calls)
+   (set the same JWT_SECRET for all of them in secrets.properties: the gateway reads tokens for the rate limits)
+
+   two core instances (load balancing): a second core + the gateway's docker profile
+   SERVER_PORT=8083 CORS_ENABLED=false GRIDPULSE_JOBS_REFUND_ENABLED=false ./mvnw -pl springapp spring-boot:run
+   SPRING_PROFILES_ACTIVE=docker CORE_2_URL=http://localhost:8083 ./mvnw -pl gateway spring-boot:run
+   which instance answered: the X-Served-By header (dev only), e.g. curl -I http://localhost:8080/api/race-track
 
    no Redis at hand: CACHE_TYPE=none ./mvnw -pl springapp spring-boot:run   (works the same, without the cache)
    check the cache: docker compose exec redis redis-cli keys 'gp:*'
@@ -74,10 +84,11 @@ No Kafka or no notification-service = no emails yet: the events wait and go out 
    the gmail check of notification-service: its log line "EMAIL: ..." (notification-service/logs)
 
 
-2b. Services - full Docker (everything in containers; heavy: builds both images)
+2b. Services - full Docker (everything in containers; heavy: builds the images)
 --------------------------------------------------------------------------------
-   fill the service keys in .env (JWT_SECRET, TICKET_SECRET, MAIL_*, SUPER_ADMIN_* ... see .env.example)
-   docker compose --profile apps up -d --build
+   fill the service keys in .env (JWT_SECRET is required, TICKET_SECRET, MAIL_*, SUPER_ADMIN_* ... see .env.example)
+   docker compose --profile apps up -d --build      gateway :8080, core-1 :8082, core-2 :8083, notification :8084
+   docker compose stop core-2                       the site keeps working on core-1
    docker compose --profile apps down
 
 
