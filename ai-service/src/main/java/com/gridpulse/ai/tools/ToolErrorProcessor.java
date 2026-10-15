@@ -18,7 +18,8 @@ import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import lombok.extern.slf4j.Slf4j;
 
 // a failed tool call becomes one sentence for the model (and for the Confirm results):
-// the service's own 4xx message, "not allowed" for 401 / 403, "unavailable" when a service did not answer
+// the service's own 4xx message (or a tool's own 400 for a wrong argument), "not allowed" for 401 / 403,
+// "unavailable" when a service did not answer
 @Slf4j
 @Component
 public class ToolErrorProcessor implements ToolExecutionExceptionProcessor {

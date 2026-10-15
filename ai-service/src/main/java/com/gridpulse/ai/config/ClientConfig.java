@@ -21,6 +21,7 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gridpulse.ai.client.CoreClient;
+import com.gridpulse.ai.client.PaymentClient;
 import com.gridpulse.ai.config.properties.InternalApiProperties;
 import com.gridpulse.ai.dto.response.ErrorResponse;
 import com.gridpulse.ai.exceptions.ServiceDownException;
@@ -55,6 +56,13 @@ public class ClientConfig {
             CircuitBreakerRegistry breakers, ObjectMapper objectMapper) {
         return client(loadBalancedRestClientBuilder, "http://core-service", breakers.circuitBreaker("core"), internal,
                 objectMapper, CoreClient.class);
+    }
+
+    @Bean
+    public PaymentClient paymentClient(RestClient.Builder loadBalancedRestClientBuilder, InternalApiProperties internal,
+            CircuitBreakerRegistry breakers, ObjectMapper objectMapper) {
+        return client(loadBalancedRestClientBuilder, "http://payment-service", breakers.circuitBreaker("payment"),
+                internal, objectMapper, PaymentClient.class);
     }
 
     static <T> T client(RestClient.Builder builder, String baseUrl, CircuitBreaker breaker,
