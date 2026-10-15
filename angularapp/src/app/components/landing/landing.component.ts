@@ -2,6 +2,8 @@ import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit } from '@angula
 import { AuthService } from '../../services/auth.service';
 import { RaceService } from '../../services/race.service';
 import { CompetitionService } from '../../services/competition.service';
+import { StatsService } from '../../services/stats.service';
+import { LeaderboardEntry } from '../../models/stats.model';
 import { RaceTrack } from '../../models/race-track.model';
 import { raceToday } from '../../models/session.model';
 import { COMPETITION_STATUS } from '../../constants';
@@ -17,7 +19,8 @@ const SECTIONS: SiteSection[] = [
   { id: 'tracks', label: 'Tracks' },
   { id: 'raceday', label: 'Race day' },
   { id: 'control', label: 'Race control' },
-  { id: 'rules', label: 'Rulebook' }
+  { id: 'rules', label: 'Rulebook' },
+  { id: 'leaderboard', label: 'Leaderboard' }
 ];
 
 // same numbers as CompetitionRuleServiceImpl in spring
@@ -64,6 +67,8 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
   trackCount: string = LOADING;
   sessionCount: string = LOADING;
   competitionCount: string = LOADING;
+  leaders: LeaderboardEntry[] = [];  // top 5 drivers (public api)
+  leadersLoaded: boolean = false;
 
   loggedIn: boolean = false;
   isDriver: boolean = false;
@@ -73,12 +78,14 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
   private observer?: IntersectionObserver;
 
   constructor(private authService: AuthService, private raceService: RaceService,
-              private competitionService: CompetitionService, private host: ElementRef<HTMLElement>) { }
+              private competitionService: CompetitionService, private statsService: StatsService,
+              private host: ElementRef<HTMLElement>) { }
 
   ngOnInit(): void {
     this.setStartButton();
     this.loadTracks();
     this.loadCompetitions();
+    this.loadLeaders();
   }
 
   // the main button: a visitor signs up, a driver goes to the tracks, an admin to the dashboard
@@ -145,6 +152,17 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
         this.competitionCount = String(coming.length);
       },
       error: () => this.competitionCount = NO_DATA
+    });
+  }
+
+  // wins first, then podiums, then laps (the backend sorts)
+  private loadLeaders(): void {
+    this.statsService.getLeaderboard(5).subscribe({
+      next: (leaders) => {
+        this.leaders = leaders;
+        this.leadersLoaded = true;
+      },
+      error: () => this.leadersLoaded = true
     });
   }
 

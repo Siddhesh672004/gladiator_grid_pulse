@@ -55,6 +55,8 @@ export const API_ENDPOINTS = {
   FEEDBACK_SUMMARY: '/api/feedback/summary',
   FEEDBACK_ANALYSE: (feedbackId: number) => `/api/feedback/${feedbackId}/analyse`,
   CHAT: '/api/chat',
+  STATS_ME: '/api/stats/me',
+  STATS_LEADERBOARD: '/api/stats/leaderboard',
   CHAT_MEMORY: '/api/chat/memory'
 };
 
@@ -65,6 +67,7 @@ export const PUBLIC_ENDPOINTS: { method: string; pattern: RegExp }[] = [
   { method: 'GET', pattern: /\/api\/race-control\/session\/\d+$/ },
   { method: 'GET', pattern: /\/api\/sessions\/(track\/)?\d+$/ },
   { method: 'GET', pattern: /\/api\/competitions(\/\d+)?$/ },
+  { method: 'GET', pattern: /\/api\/stats\/leaderboard$/ },
   // POST /api/chat is not listed: a logged-in driver's token must go along, the assistant books for them
   { method: '*', pattern: /\/api\/chat\/.+$/ },
   { method: 'GET', pattern: /\/api\/faqs$/ }

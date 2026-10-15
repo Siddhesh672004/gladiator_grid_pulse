@@ -10,7 +10,9 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import com.examly.springapp.model.CompetitionPhase;
 import com.examly.springapp.model.RaceBooking;
+import com.examly.springapp.model.SessionStatus;
 
 public interface RaceBookingRepo extends JpaRepository<RaceBooking, Long> {
 
@@ -46,6 +48,35 @@ public interface RaceBookingRepo extends JpaRepository<RaceBooking, Long> {
     @Query("select b from RaceBooking b where (?1 is null or b.status = ?1)"
             + " and lower(b.session.track.trackName) like ?2")
     Page<RaceBooking> searchPage(String status, String pattern, Pageable pageable);
+
+    // driver stats: the approved cars of completed sessions, ?2 = QUALIFYING, ?3 = RACING, ?4 = COMPLETED
+    @Query("select count(b) as sessions, coalesce(sum(b.lapCount), 0) as laps,"
+            + " coalesce(sum(case when s.phase = ?2 then 1 else 0 end), 0) as competitions,"
+            + " coalesce(sum(case when s.phase = ?3 and b.finalPosition = 1 then 1 else 0 end), 0) as wins,"
+            + " coalesce(sum(case when s.phase = ?3 and b.finalPosition <= 3 then 1 else 0 end), 0) as podiums,"
+            + " coalesce(sum(case when b.raceState = 'RETIRED' then 1 else 0 end), 0) as dnfs,"
+            + " min(case when s.phase = ?3 then b.finalPosition end) as bestRace,"
+            + " min(case when s.phase = ?2 then b.finalPosition end) as bestQualifying"
+            + " from RaceBooking b join b.session s"
+            + " where b.user.userId = ?1 and b.status = 'Approved' and s.status = ?4")
+    DriverTotals driverTotals(int userId, CompetitionPhase qualifying, CompetitionPhase racing, SessionStatus completed);
+
+    @Query("select month(s.sessionDate) as month, coalesce(sum(b.lapCount), 0) as amount"
+            + " from RaceBooking b join b.session s"
+            + " where b.user.userId = ?1 and b.status = 'Approved' and s.status = ?2 and year(s.sessionDate) = ?3"
+            + " group by month(s.sessionDate)")
+    List<MonthAmount> lapsPerMonth(int userId, SessionStatus completed, int year);
+
+    // wins first, then podiums, then laps. ?1 = RACING, ?2 = COMPLETED, the page size is the limit
+    @Query("select b.user.username as username,"
+            + " coalesce(sum(case when s.phase = ?1 and b.finalPosition = 1 then 1 else 0 end), 0) as wins,"
+            + " coalesce(sum(case when s.phase = ?1 and b.finalPosition <= 3 then 1 else 0 end), 0) as podiums,"
+            + " coalesce(sum(b.lapCount), 0) as laps"
+            + " from RaceBooking b join b.session s"
+            + " where b.status = 'Approved' and s.status = ?2"
+            + " group by b.user.userId, b.user.username"
+            + " order by wins desc, podiums desc, laps desc, b.user.username")
+    List<LeaderboardRow> leaderboard(CompetitionPhase racing, SessionStatus completed, Pageable limit);
 
     // approved cars of every session on a page in one query
     @Query("select b.session.sessionId as sessionId, count(b) as cars from RaceBooking b"

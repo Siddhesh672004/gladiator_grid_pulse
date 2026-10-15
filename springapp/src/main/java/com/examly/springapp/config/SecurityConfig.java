@@ -43,6 +43,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/sessions/page").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/sessions/*", "/api/sessions/track/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/competitions", "/api/competitions/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/stats/leaderboard").permitAll()
                         .requestMatchers("/api/chat", "/api/chat/**", "/api/faqs").permitAll()
                         .requestMatchers("/error").permitAll()
                         // health for docker / the gateway, the other actuator urls are for admins

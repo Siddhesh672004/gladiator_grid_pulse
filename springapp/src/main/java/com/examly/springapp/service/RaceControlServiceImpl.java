@@ -94,7 +94,7 @@ public class RaceControlServiceImpl implements RaceControlService {
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = { CacheConfig.TRACKS, CacheConfig.TRACK }, allEntries = true)
+    @CacheEvict(cacheNames = { CacheConfig.TRACKS, CacheConfig.TRACK, CacheConfig.LEADERBOARD }, allEntries = true)
     public List<LiveStandingResponse> finishSession(Long sessionId) {
         RaceSession session = findSession(sessionId);
         checkPracticeStillOpen(session);

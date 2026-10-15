@@ -97,8 +97,12 @@ public class TestData {
     }
 
     public List<RaceBooking> bookingsOf(RaceSession session) {
+        return bookingsOf(session.getSessionId());
+    }
+
+    public List<RaceBooking> bookingsOf(Long sessionId) {
         return raceBookingRepo.findAll().stream()
-                .filter(booking -> booking.getSession().getSessionId().equals(session.getSessionId()))
+                .filter(booking -> booking.getSession().getSessionId().equals(sessionId))
                 .toList();
     }
 

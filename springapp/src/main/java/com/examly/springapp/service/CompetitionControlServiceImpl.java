@@ -69,7 +69,8 @@ public class CompetitionControlServiceImpl implements CompetitionControlService 
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = { CacheConfig.TRACKS, CacheConfig.TRACK, CacheConfig.COMPETITIONS }, allEntries = true)
+    @CacheEvict(cacheNames = { CacheConfig.TRACKS, CacheConfig.TRACK, CacheConfig.COMPETITIONS,
+            CacheConfig.LEADERBOARD }, allEntries = true)
     public CompetitionResponse finishQualifying(Long competitionId) {
         Competition competition = competitionService.findCompetition(competitionId);
         checkStatus(competition, CompetitionStatus.QUALIFYING, "Finish Qualifying");
@@ -112,7 +113,8 @@ public class CompetitionControlServiceImpl implements CompetitionControlService 
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = { CacheConfig.TRACKS, CacheConfig.TRACK, CacheConfig.COMPETITIONS }, allEntries = true)
+    @CacheEvict(cacheNames = { CacheConfig.TRACKS, CacheConfig.TRACK, CacheConfig.COMPETITIONS,
+            CacheConfig.LEADERBOARD }, allEntries = true)
     public CompetitionResponse finishRace(Long competitionId) {
         Competition competition = competitionService.findCompetition(competitionId);
         checkStatus(competition, CompetitionStatus.RACING, "Finish Race");

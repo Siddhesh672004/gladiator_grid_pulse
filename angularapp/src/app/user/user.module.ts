@@ -9,6 +9,7 @@ import { UserviewmyregistrationsComponent } from '../components/userviewmyregist
 import { UseraddfeedbackComponent } from '../components/useraddfeedback/useraddfeedback.component';
 import { UserviewfeedbackComponent } from '../components/userviewfeedback/userviewfeedback.component';
 import { UserlivetimingComponent } from '../components/userlivetiming/userlivetiming.component';
+import { UserstatsComponent } from '../components/userstats/userstats.component';
 
 // lazy loaded driver pages, the component files stay in app/components
 @NgModule({
@@ -18,7 +19,8 @@ import { UserlivetimingComponent } from '../components/userlivetiming/userliveti
     UserviewmyregistrationsComponent,
     UseraddfeedbackComponent,
     UserviewfeedbackComponent,
-    UserlivetimingComponent
+    UserlivetimingComponent,
+    UserstatsComponent
   ],
   imports: [
     CommonModule,

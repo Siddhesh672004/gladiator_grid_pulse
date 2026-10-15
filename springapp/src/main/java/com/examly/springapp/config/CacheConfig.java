@@ -18,6 +18,7 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext.SerializationPair;
 
 import com.examly.springapp.dto.response.CompetitionResponse;
+import com.examly.springapp.dto.response.LeaderboardEntry;
 import com.examly.springapp.dto.response.TrackResponse;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,6 +36,7 @@ public class CacheConfig implements CachingConfigurer {
     public static final String TRACKS = "tracks";
     public static final String TRACK = "track";
     public static final String COMPETITIONS = "competitions";
+    public static final String LEADERBOARD = "leaderboard";
 
     // CACHE_TYPE=none (tests, a server without redis) -> spring's no-op cache, nothing is stored
     @Bean
@@ -46,7 +48,9 @@ public class CacheConfig implements CachingConfigurer {
                         Duration.ofSeconds(30)),
                 TRACK, cache(objectMapper, types.constructType(TrackResponse.class), Duration.ofSeconds(30)),
                 COMPETITIONS, cache(objectMapper, types.constructCollectionType(List.class, CompetitionResponse.class),
-                        Duration.ofSeconds(60)));
+                        Duration.ofSeconds(60)),
+                LEADERBOARD, cache(objectMapper, types.constructCollectionType(List.class, LeaderboardEntry.class),
+                        Duration.ofMinutes(5)));
         return RedisCacheManager.builder(connectionFactory)
                 .withInitialCacheConfigurations(caches)
                 // a cache that is not listed above is a typo, not something to store blindly

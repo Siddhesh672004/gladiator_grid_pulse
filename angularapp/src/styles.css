@@ -2967,6 +2967,29 @@ app-admindashboard .quick-grid a:hover {
   }
 }
 
+/* ==== driver stats ==== */
+app-userstats .kpi-row {
+  margin-bottom: 18px;
+}
+
+app-userstats .chart-box {
+  position: relative;
+  height: 300px;
+}
+
+/* "No laps yet this year", in the middle of the empty chart */
+app-userstats .chart-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  font-size: 14px;
+  color: var(--gp-muted);
+  pointer-events: none;
+}
+
 /* ==== add / edit session ==== */
 app-adminaddsession .panel > .sub-title:not(:first-child) {
   margin-top: 18px;

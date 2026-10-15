@@ -19,6 +19,7 @@
         </div>
       </div>
       <a routerLink="/user/live-timing" routerLinkActive="active" (click)="closeMenus()">Live Timing</a>
+      <a routerLink="/user/stats" routerLinkActive="active" (click)="closeMenus()">My Stats</a>
       <div class="nav-menu" [class.active]="isOn('/feedback')">
         <button type="button" (click)="toggleMenu('feedback')" [attr.aria-expanded]="openMenu === 'feedback'">Feedback<app-icon name="expand_more"></app-icon></button>
         <div class="nav-menu-list" *ngIf="openMenu === 'feedback'">

@@ -1,0 +1,25 @@
+<div class="page">
+  <app-pagehead title="My Stats" subtitle="Your sessions once they are completed. Live and upcoming sessions count after the finish."></app-pagehead>
+
+  <div class="server-error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+  <app-loader *ngIf="isLoading" label="Loading your stats"></app-loader>
+
+  <section class="kpi-row" *ngIf="stats" aria-label="Your numbers">
+    <div class="kpi"><span>Sessions driven</span><b>{{ stats.sessionsDriven }}</b></div>
+    <div class="kpi"><span>Total laps</span><b>{{ stats.totalLaps }}</b></div>
+    <div class="kpi"><span>Competitions</span><b>{{ stats.competitionsEntered }}</b></div>
+    <div class="kpi"><span>Wins</span><b>{{ stats.wins }}</b></div>
+    <div class="kpi"><span>Podiums</span><b>{{ stats.podiums }}</b><small>top 3 in a race</small></div>
+    <div class="kpi"><span>DNFs</span><b>{{ stats.dnfs }}</b><small>retired</small></div>
+    <div class="kpi"><span>Best race finish</span><b>{{ place(stats.bestRaceFinish) }}</b></div>
+    <div class="kpi"><span>Best qualifying</span><b>{{ place(stats.bestQualifying) }}</b></div>
+  </section>
+
+  <section class="panel">
+    <h2 class="sub-title">Laps per Month <small class="muted">(this year)</small></h2>
+    <div class="chart-box">
+      <canvas #lapsChart aria-label="Laps per month"></canvas>
+      <p class="chart-empty" *ngIf="stats && !hasLaps">No laps yet this year</p>
+    </div>
+  </section>
+</div>
