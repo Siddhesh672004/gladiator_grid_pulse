@@ -7,6 +7,8 @@ import org.hibernate.type.SqlTypes;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -59,6 +61,16 @@ public class RaceBooking {
 
     @JdbcTypeCode(SqlTypes.TIMESTAMP_UTC)
     private Instant termsAcceptedAt;
+
+    // the razorpay order of this booking + a copy of its payment status (payment-service owns the payment itself)
+    // varchar, not a mysql enum: a new status needs no table change
+    @Column(length = 40, unique = true)
+    private String paymentOrderId;
+
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
+    @Column(length = 20)
+    private PaymentStatus paymentStatus;
 
     private Integer lapCount = 0;
     @JdbcTypeCode(SqlTypes.TIMESTAMP_UTC)

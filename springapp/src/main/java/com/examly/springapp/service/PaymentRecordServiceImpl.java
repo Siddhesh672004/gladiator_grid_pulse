@@ -26,6 +26,7 @@ import com.examly.springapp.model.RaceSession;
 import com.examly.springapp.model.User;
 import com.examly.springapp.repository.MonthAmount;
 import com.examly.springapp.repository.PaymentRepo;
+import com.examly.springapp.repository.RaceBookingRepo;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
@@ -39,6 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PaymentRecordServiceImpl implements PaymentRecordService {
 
     private final PaymentRepo paymentRepo;
+    private final RaceBookingRepo raceBookingRepo;
     private final PaymentAuditService paymentAuditService;
     private final PaymentMapper paymentMapper;
     private final EntityManager entityManager;
@@ -134,6 +136,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
                     payment.setRazorpayRefundId(razorpayRefundId);
                     payment.setRefundedAt(Instant.now());
                     paymentRepo.save(payment);
+                    raceBookingRepo.updatePaymentStatus(payment.getRazorpayOrderId(), PaymentStatus.REFUNDED);
                     paymentAuditService.record(payment.getRazorpayOrderId(), PaymentAuditService.REFUND_DONE,
                             rupees(payment.getAmount()) + " refunded, Razorpay refund " + razorpayRefundId);
                 });
@@ -149,6 +152,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
                     payment.setStatus(PaymentStatus.REFUND_FAILED);
                     payment.setNote(reason);
                     paymentRepo.save(payment);
+                    raceBookingRepo.updatePaymentStatus(payment.getRazorpayOrderId(), PaymentStatus.REFUND_FAILED);
                     paymentAuditService.record(payment.getRazorpayOrderId(), PaymentAuditService.REFUND_FAILED,
                             reason);
                 });
@@ -177,6 +181,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
                 .orElseThrow(() -> new BookingException("Only a failed refund can be tried again (this payment is "
                         + payment.getStatus() + ")"));
         payment.setStatus(PaymentStatus.REFUND_PENDING);
+        raceBookingRepo.updatePaymentStatus(payment.getRazorpayOrderId(), PaymentStatus.REFUND_PENDING);
         log.info("Refund of payment {} will be tried again", paymentId);
         return paymentMapper.toResponse(paymentRepo.save(payment));
     }

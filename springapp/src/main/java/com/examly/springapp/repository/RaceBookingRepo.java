@@ -8,9 +8,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import com.examly.springapp.model.CompetitionPhase;
+import com.examly.springapp.model.PaymentStatus;
 import com.examly.springapp.model.RaceBooking;
 import com.examly.springapp.model.SessionStatus;
 
@@ -77,6 +79,11 @@ public interface RaceBookingRepo extends JpaRepository<RaceBooking, Long> {
             + " group by b.user.userId, b.user.username"
             + " order by wins desc, podiums desc, laps desc, b.user.username")
     List<LeaderboardRow> leaderboard(CompetitionPhase racing, SessionStatus completed, Pageable limit);
+
+    // the booking's copy of its payment status follows the payment
+    @Modifying
+    @Query("update RaceBooking b set b.paymentStatus = ?2 where b.paymentOrderId = ?1")
+    int updatePaymentStatus(String paymentOrderId, PaymentStatus status);
 
     // approved cars of every session on a page in one query
     @Query("select b.session.sessionId as sessionId, count(b) as cars from RaceBooking b"

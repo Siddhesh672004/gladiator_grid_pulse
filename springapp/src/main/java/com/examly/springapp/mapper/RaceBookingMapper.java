@@ -1,13 +1,11 @@
 package com.examly.springapp.mapper;
 
-import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
 import com.examly.springapp.dto.request.RaceBookingRequest;
 import com.examly.springapp.dto.response.LiveStandingResponse;
 import com.examly.springapp.dto.response.RaceBookingResponse;
-import com.examly.springapp.model.Payment;
 import com.examly.springapp.model.RaceBooking;
 import com.examly.springapp.model.RaceSession;
 import com.examly.springapp.model.User;
@@ -45,8 +43,8 @@ public class RaceBookingMapper {
                 booking.getRaceState(),
                 booking.getFinalPosition(),
                 booking.getGridPosition(),
-                // a free race place of a competition has no payment
-                Optional.ofNullable(booking.getPayment()).map(Payment::getStatus).orElse(null));
+                // the booking's own copy; a free race place of a competition has no payment
+                booking.getPaymentStatus());
     }
 
     // public board: only the driver's name, nothing private

@@ -151,6 +151,8 @@ public class RaceBookingServiceImpl implements RaceBookingService {
         checkBookingRules(booking);
 
         booking.setPayment(payment);
+        booking.setPaymentOrderId(payment.getRazorpayOrderId());
+        booking.setPaymentStatus(payment.getStatus());
         booking.setTotalPrice(payment.getAmount());
         booking.setStatus(BookingStatus.PENDING);
         booking.setTermsAcceptedAt(Instant.now());
@@ -207,7 +209,7 @@ public class RaceBookingServiceImpl implements RaceBookingService {
                 .filter(Map.Entry::getKey)
                 .map(Map.Entry::getValue)
                 .findFirst()
-                .ifPresent(reason -> paymentRecordService.requestRefund(booking.getPayment(), reason));
+                .ifPresent(reason -> refund(booking, reason));
         raceBookingRepo.delete(booking);
         log.info("Booking {} deleted", bookingId);
     }
@@ -280,8 +282,7 @@ public class RaceBookingServiceImpl implements RaceBookingService {
         // a rejected driver gets the money back
         Optional.of(booking)
                 .filter(rejected -> rejecting)
-                .ifPresent(rejected -> paymentRecordService.requestRefund(rejected.getPayment(),
-                        "Booking rejected: " + note));
+                .ifPresent(rejected -> refund(rejected, "Booking rejected: " + note));
 
         log.info("Booking {} status {} -> {}", booking.getRaceBookingId(), oldStatus, newStatus);
         emailIfDecided(saved);
@@ -436,8 +437,15 @@ public class RaceBookingServiceImpl implements RaceBookingService {
         booking.setStatus(BookingStatus.REJECTED);
         booking.setAdminNote(note);
         raceBookingRepo.save(booking);
-        paymentRecordService.requestRefund(booking.getPayment(), "Booking rejected: " + note);
+        refund(booking, "Booking rejected: " + note);
         emailIfDecided(booking);
+    }
+
+    // money back, and the booking's own copy of the payment status follows
+    private void refund(RaceBooking booking, String reason) {
+        paymentRecordService.requestRefund(booking.getPayment(), reason);
+        Optional.ofNullable(booking.getPayment())
+                .ifPresent(payment -> booking.setPaymentStatus(payment.getStatus()));
     }
 
     // a still Pending booking gets no email yet
