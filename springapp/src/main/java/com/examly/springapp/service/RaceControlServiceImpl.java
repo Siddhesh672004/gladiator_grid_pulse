@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 // first Start -> session LIVE, Finish -> COMPLETED, Reset -> back to SCHEDULED
 @Slf4j
 @Service
-@RequiredArgsConstructor
+@RequiredArgsConstructor 
 public class RaceControlServiceImpl implements RaceControlService {
 
     private final RaceBookingRepo raceBookingRepo;
