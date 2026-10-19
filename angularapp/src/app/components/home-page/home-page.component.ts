@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { Observable, finalize } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { UserStorageService } from '../../services/user-storage.service';
 import { RaceService } from '../../services/race.service';
@@ -46,6 +47,8 @@ export class HomePageComponent implements OnInit {
   bookingCount: string = LOADING;
   approvedCount: string = LOADING;
   nextBooking: RaceBooking | null = null;
+  isLoading: boolean = true;
+  private waiting: number = 0;      // answers still on their way
 
   readonly byIndex = byIndex;
 
@@ -68,7 +71,7 @@ export class HomePageComponent implements OnInit {
 
   // counts the same tracks as View Tracks: active and with a session still open
   private loadTracks(): void {
-    this.raceService.getAllTracks().subscribe({
+    this.counted(this.raceService.getAllTracks()).subscribe({
       next: (tracks) => {
         const open = tracks.filter(track => track.active && (track.upcomingSessions ?? 0) > 0);
         this.trackCount = String(open.length);
@@ -85,7 +88,7 @@ export class HomePageComponent implements OnInit {
       this.feedbackCount = NO_DATA;
       return;
     }
-    this.raceService.getRaceBookingsByUserId(userId).subscribe({
+    this.counted(this.raceService.getRaceBookingsByUserId(userId)).subscribe({
       next: (bookings) => {
         this.bookingCount = String(bookings.length);
         const approved = bookings.filter(booking => booking.status === BOOKING_STATUS.APPROVED);
@@ -97,10 +100,19 @@ export class HomePageComponent implements OnInit {
         this.approvedCount = NO_DATA;
       }
     });
-    this.feedbackService.getAllfeedbacksByUserId(userId).subscribe({
+    this.counted(this.feedbackService.getAllfeedbacksByUserId(userId)).subscribe({
       next: (feedbacks) => this.feedbackCount = String(feedbacks.length),
       error: () => this.feedbackCount = NO_DATA
     });
+  }
+
+  // the loader stays until every answer is in, so "Nothing booked yet" is never shown before the bookings came
+  private counted<T>(request: Observable<T>): Observable<T> {
+    this.waiting++;
+    return request.pipe(finalize(() => {
+      this.waiting--;
+      this.isLoading = this.waiting > 0;
+    }));
   }
 
   // the earliest booking (not rejected) whose session is live or still to come

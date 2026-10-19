@@ -9,6 +9,10 @@ export const PHOTOS: { [name: string]: string } = {
   cup: COMMONS + '5/53/Carl_Cavers_Porsche_Carrera_Cup_GB_Race_2_Thruxton_2026.jpg/1280px-Carl_Cavers_Porsche_Carrera_Cup_GB_Race_2_Thruxton_2026.jpg'
 };
 
+// their real height at the 1280px width above, for <img width height> (the browser keeps their room before they arrive)
+export const PHOTO_WIDTH = 1280;
+export const PHOTO_HEIGHTS: { [name: string]: number } = { race: 720, paddock: 853, karting: 853, cup: 720 };
+
 export const PHOTO_CREDITS = [
   { photo: 'GT race', author: '35mmMan', licence: 'CC BY 2.0', link: 'https://commons.wikimedia.org/wiki/File:GT_Race_2_-_British_GT_Championship_-_Lamborghini_(51372322792).jpg' },
   { photo: 'Le Mans Series car', author: 'Trailers of the East Coast', licence: 'CC BY 2.0', link: 'https://commons.wikimedia.org/wiki/File:American_Le_Mans_Series_Oak_Tree_Grand_Prix_at_VIR_October_2013_(10295514404).jpg' },

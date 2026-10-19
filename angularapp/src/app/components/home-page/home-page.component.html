@@ -11,24 +11,28 @@
       </div>
     </div>
 
-    <!-- the next session this driver has a place in -->
-    <a class="next-card cut" *ngIf="nextBooking as booking" routerLink="/user/view/registrations">
-      <span class="tag">Your next session</span>
-      <strong>{{ booking.session.trackName }}</strong>
-      <span class="mono">{{ booking.session.sessionDate }} · {{ time(booking) }}</span>
-      <span class="next-foot">
-        <app-flag [status]="booking.status"></app-flag>
-        <span class="mono">Car #{{ booking.carNumber }}</span>
-      </span>
-    </a>
-    <div class="next-card cut" *ngIf="!nextBooking">
-      <span class="tag">Your next session</span>
-      <strong>Nothing booked yet</strong>
-      <span>Pick a track and take your first slot on the grid.</span>
-    </div>
+    <!-- the next session this driver has a place in (once the numbers are in, never a guess) -->
+    <ng-container *ngIf="!isLoading">
+      <a class="next-card cut" *ngIf="nextBooking as booking" routerLink="/user/view/registrations">
+        <span class="tag">Your next session</span>
+        <strong>{{ booking.session.trackName }}</strong>
+        <span class="mono">{{ booking.session.sessionDate }} · {{ time(booking) }}</span>
+        <span class="next-foot">
+          <app-flag [status]="booking.status"></app-flag>
+          <span class="mono">Car #{{ booking.carNumber }}</span>
+        </span>
+      </a>
+      <div class="next-card cut" *ngIf="!nextBooking">
+        <span class="tag">Your next session</span>
+        <strong>Nothing booked yet</strong>
+        <span>Pick a track and take your first slot on the grid.</span>
+      </div>
+    </ng-container>
   </section>
 
-  <section class="kpi-row" aria-label="Overview">
+  <app-loader *ngIf="isLoading" label="Loading your numbers"></app-loader>
+
+  <section class="kpi-row" aria-label="Overview" *ngIf="!isLoading">
     <a class="kpi" routerLink="/user/view/registrations">
       <span>My registrations</span><b>{{ bookingCount }}</b><small>cars you booked</small>
     </a>

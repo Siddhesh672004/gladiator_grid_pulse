@@ -1,6 +1,6 @@
 <section class="auth">
   <aside class="auth-art">
-    <img [src]="photoLink" alt="">
+    <img [src]="photoLink" alt="" [width]="photoWidth" [height]="photoHeight" fetchpriority="high">
     <a class="auth-logo" routerLink="/" aria-label="GridPulse start page"><app-logo></app-logo></a>
     <div class="auth-pitch cut">
       <h1 class="display">{{ title }}</h1>

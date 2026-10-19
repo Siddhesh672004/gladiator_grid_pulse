@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { PHOTOS } from '../../shared/photos';
+import { PHOTOS, PHOTO_HEIGHTS, PHOTO_WIDTH } from '../../shared/photos';
 import { byIndex } from '../../shared/track-by';
 
 // the split screen of the four login pages: picture + a few words on the left, the page's own form on the right
@@ -16,8 +16,13 @@ export class AuthshellComponent {
   @Input() photo: string = 'race';     // a name from shared/photos.ts
 
   readonly byIndex = byIndex;
+  readonly photoWidth = PHOTO_WIDTH;
 
   get photoLink(): string {
     return PHOTOS[this.photo];
+  }
+
+  get photoHeight(): number {
+    return PHOTO_HEIGHTS[this.photo];
   }
 }
