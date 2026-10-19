@@ -23,4 +23,12 @@ public record GeminiProperties(
                 .map(String::trim)
                 .toList();
     }
+
+    // the keys never go into a log line, only how many are filled in
+    @Override
+    public String toString() {
+        return "GeminiProperties[keys=" + keys().size() + " set, embeddingModel=" + embeddingModel
+                + ", generationModel=" + generationModel + ", baseUrl=" + baseUrl + ", timeoutSeconds="
+                + timeoutSeconds + "]";
+    }
 }
