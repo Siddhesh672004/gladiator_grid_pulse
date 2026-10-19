@@ -1,6 +1,6 @@
 import { AbstractControl, FormGroup, ValidationErrors, ValidatorFn } from '@angular/forms';
 
-// form rules of the whole app, twin of validation/ValidationRules.java (keep the two the same)
+// form rules of the whole app, twin of core-service platform/validation/ValidationRules.java (keep the two the same)
 // a rule returns null when the value is fine, or an object that says what is wrong
 
 export const EMAIL_MAX = 100;
