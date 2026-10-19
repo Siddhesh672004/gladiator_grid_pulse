@@ -4,21 +4,21 @@ app-userprofile .next-part {
 }
 
 app-userprofile .profile-note {
-  margin: 0 0 18px;
-  padding: 10px 12px;
+  margin: 0 0 var(--space-4);
+  padding: var(--space-2) var(--space-3);
   border-left: 3px solid var(--gp-accent);
-  border-radius: var(--gp-radius);
+  border-radius: var(--radius-sm);
   background: var(--gp-accent-soft);
-  font-size: 13.5px;
+  font-size: var(--text-sm);
 }
 
 app-userprofile .update-btn {
-  margin-top: 18px;
+  margin-top: var(--space-4);
 }
 
 app-userprofile .panel > .server-error,
 app-userprofile .panel > .success-text {
-  margin: 14px 0 0;
+  margin: var(--space-4) 0 0;
 }
 
 /* the account drawn as a paddock pass */
@@ -30,14 +30,14 @@ app-userprofile .pass {
 
 app-userprofile .pass-body {
   display: grid;
-  gap: 18px;
-  padding: 20px 22px 28px;
+  gap: var(--space-4);
+  padding: 20px var(--space-5) 28px;
 }
 
 app-userprofile .pass-who {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: var(--space-4);
 }
 
 app-userprofile .pass-who img,
@@ -45,7 +45,7 @@ app-userprofile .pass-initial {
   flex: none;
   width: 64px;
   height: 64px;
-  border-radius: 50%;
+  border-radius: var(--radius-pill);
   object-fit: cover;
 }
 
@@ -54,7 +54,7 @@ app-userprofile .pass-initial {
   place-items: center;
   background: var(--gp-accent);
   color: var(--gp-ink);
-  font-size: 26px;
+  font-size: var(--text-4xl);
   font-weight: 800;
 }
 
@@ -64,13 +64,13 @@ app-userprofile .pass-who .mono {
 }
 
 app-userprofile .pass-who strong {
-  font-size: 18px;
+  font-size: var(--text-lg);
   color: var(--gp-ink);
   overflow-wrap: anywhere;
 }
 
 app-userprofile .pass-who .mono {
-  font-size: 12px;
+  font-size: var(--text-xs);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--gp-muted);

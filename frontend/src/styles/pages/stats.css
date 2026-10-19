@@ -1,6 +1,6 @@
 /* ==== driver stats ==== */
 app-userstats .kpi-row {
-  margin-bottom: 18px;
+  margin-bottom: var(--space-4);
 }
 
 app-userstats .chart-box {
@@ -16,7 +16,7 @@ app-userstats .chart-empty {
   align-items: center;
   justify-content: center;
   margin: 0;
-  font-size: 14px;
+  font-size: var(--text-sm);
   color: var(--gp-muted);
   pointer-events: none;
 }

@@ -1,24 +1,24 @@
 /* ==== add / edit session ==== */
 app-adminaddsession .panel > .sub-title:not(:first-child) {
-  margin-top: 18px;
+  margin-top: var(--space-4);
 }
 
 /* the two big choices: Practice or Competition */
 app-adminaddsession .type-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 8px;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
 }
 
 app-adminaddsession .type-option {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  padding: 12px 14px;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
   border: 1px solid var(--gp-border);
-  border-radius: var(--gp-radius);
-  font-size: 13.5px;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
   color: var(--gp-muted);
   cursor: pointer;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -26,7 +26,7 @@ app-adminaddsession .type-option {
 
 app-adminaddsession .type-option strong {
   display: block;
-  font-size: 15px;
+  font-size: var(--text-base);
   color: var(--gp-ink);
 }
 
@@ -37,11 +37,11 @@ app-adminaddsession .type-option.chosen {
 }
 
 app-adminaddsession .type-option input {
-  margin-top: 4px;
+  margin-top: var(--space-1);
 }
 
 app-adminaddsession .slot-facts {
-  margin-top: 12px;
+  margin-top: var(--space-3);
 }
 
 @media (max-width: 560px) {
@@ -52,12 +52,12 @@ app-adminaddsession .slot-facts {
 
 /* ==== check ticket (admin) ==== */
 app-admincheckticket .check-form {
-  margin-bottom: 18px;
+  margin-bottom: var(--space-4);
 }
 
 app-admincheckticket .check-row {
   display: flex;
-  gap: 10px;
+  gap: var(--space-2);
 }
 
 app-admincheckticket .ticket-result {
@@ -86,7 +86,7 @@ app-admincheckticket .ticket-result.invalid .sub-title {
 app-adminmanageusers .search-form {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   width: min(480px, 100%);
 }
 
@@ -102,7 +102,7 @@ app-adminviewpayments .kpi-row {
 
 .gp-table .small-id,
 .facts .small-id {
-  font-size: 12px;
+  font-size: var(--text-xs);
   font-weight: 500;
 }
 
@@ -112,30 +112,30 @@ app-adminviewpayments .kpi-row {
 }
 
 .trail-title {
-  margin: 4px 0 16px;
-  font-size: 26px;
+  margin: var(--space-1) 0 var(--space-4);
+  font-size: var(--text-4xl);
 }
 
 .trail-head {
-  margin: 22px 0 10px;
+  margin: var(--space-5) 0 var(--space-2);
 }
 
 .trail {
   margin: 0;
   padding: 0;
   list-style: none;
-  font-size: 13px;
+  font-size: var(--text-xs);
   text-align: left;
 }
 
 .trail li {
-  padding: 8px 0 8px 14px;
+  padding: var(--space-2) 0 var(--space-2) var(--space-4);
   border-left: 2px solid var(--gp-line);
 }
 
 .trail-time {
-  margin-right: 8px;
-  font: 500 12px var(--gp-mono);
+  margin-right: var(--space-2);
+  font: 500 var(--text-xs) var(--gp-mono);
   color: var(--gp-muted);
 }
 

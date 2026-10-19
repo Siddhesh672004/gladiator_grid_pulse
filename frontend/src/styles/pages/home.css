@@ -10,11 +10,11 @@ app-home-page .welcome {
   grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
   gap: 28px;
   align-items: center;
-  padding: 30px 32px;
+  padding: var(--space-6);
 }
 
 app-home-page .welcome h1 {
-  margin: 8px 0 10px;
+  margin: var(--space-2) 0;
   font-size: clamp(22px, 2.8vw, 32px);
   overflow-wrap: anywhere;
 }
@@ -26,14 +26,14 @@ app-home-page .welcome p {
 app-home-page .welcome-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 22px;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
 }
 
 app-home-page .next-card {
   display: grid;
-  gap: 4px;
-  padding: 20px 22px 24px;
+  gap: var(--space-1);
+  padding: 20px var(--space-5) var(--space-5);
   background: var(--gp-field);
   border-left: 4px solid var(--gp-accent);
   color: var(--gp-text);
@@ -42,12 +42,12 @@ app-home-page .next-card {
 }
 
 app-home-page .next-card strong {
-  font-size: 19px;
+  font-size: var(--text-xl);
   color: var(--gp-ink);
 }
 
 app-home-page .next-card .mono {
-  font-size: 13px;
+  font-size: var(--text-xs);
   color: var(--gp-ink);
 }
 
@@ -55,23 +55,23 @@ app-home-page .next-foot {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px 16px;
-  margin-top: 10px;
+  gap: var(--space-2) var(--space-4);
+  margin-top: var(--space-2);
 }
 
 /* one line per page of the driver */
 app-home-page .action {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 13px 4px;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-1);
   border-top: 1px solid var(--gp-line);
   color: var(--gp-text);
   text-decoration: none;
 }
 
 app-home-page .action > .mono {
-  font-size: 12px;
+  font-size: var(--text-xs);
   color: var(--gp-accent-text);
 }
 
@@ -90,7 +90,7 @@ app-home-page .action strong {
 }
 
 app-home-page .action small {
-  font-size: 13px;
+  font-size: var(--text-xs);
   color: var(--gp-muted);
 }
 
@@ -103,8 +103,8 @@ app-home-page .action app-icon {
 
 app-home-page .light-steps {
   display: grid;
-  gap: 10px;
-  margin: 0 0 16px;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-4);
   padding: 0;
   list-style: none;
 }
@@ -112,13 +112,13 @@ app-home-page .light-steps {
 app-home-page .light-steps li {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   font-weight: 600;
   color: var(--gp-ink);
 }
 
 app-home-page .contact p {
-  margin: 4px 0 0;
+  margin: var(--space-1) 0 0;
 }
 
 @media (hover: hover) {
@@ -135,6 +135,6 @@ app-home-page .contact p {
 @media (max-width: 900px) {
   app-home-page .welcome {
     grid-template-columns: minmax(0, 1fr);
-    padding: 22px 20px;
+    padding: var(--space-5) 20px;
   }
 }

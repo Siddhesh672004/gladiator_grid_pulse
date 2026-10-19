@@ -12,7 +12,7 @@ body {
 
 body {
   font-family: var(--gp-font);
-  font-size: 15px;
+  font-size: var(--text-base);
   line-height: 1.5;
   color: var(--gp-text);
   background: var(--gp-page);
@@ -73,7 +73,7 @@ button:focus-visible {
 .page {
   max-width: 1240px;
   margin: 0 auto;
-  padding: 32px 24px 56px;
+  padding: var(--space-6) var(--space-5) 56px;
 }
 
 /* pages with a wide table (registrations, feedback, payments) */
@@ -96,22 +96,22 @@ button:focus-visible {
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: flex-end;
-  gap: 12px 24px;
-  padding-bottom: 16px;
-  margin-bottom: 24px;
+  gap: var(--space-3) var(--space-5);
+  padding-bottom: var(--space-4);
+  margin-bottom: var(--space-5);
   border-bottom: 1px solid var(--gp-line);
 }
 
 .page-head h1 {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   margin: 0;
-  font-size: 26px;
+  font-size: var(--text-4xl);
 }
 
 .page-head p {
-  margin: 6px 0 0;
+  margin: var(--space-2) 0 0;
   max-width: 70ch;
   color: var(--gp-muted);
 }
@@ -119,20 +119,20 @@ button:focus-visible {
 .page-head .actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: var(--space-2);
 }
 
 /* section title with the grid-slot bracket, small label above a title, white box */
 .sec-title {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin: 0 0 12px;
-  font-size: 22px;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-2xl);
 }
 
 .tag {
-  font: 700 11px var(--gp-mono);
+  font: 700 var(--text-xs) var(--gp-mono);
   letter-spacing: 0.09em;
   text-transform: uppercase;
   color: var(--gp-accent-text);
@@ -142,5 +142,5 @@ button:focus-visible {
   padding: 20px;
   background: var(--gp-surface);
   border: 1px solid var(--gp-line);
-  border-radius: var(--gp-radius);
+  border-radius: var(--radius-sm);
 }

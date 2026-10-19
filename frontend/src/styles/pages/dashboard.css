@@ -1,7 +1,7 @@
 /* ==== admin dashboard ==== */
 app-admindashboard .dash {
   display: grid;
-  gap: 18px;
+  gap: var(--space-4);
 }
 
 app-admindashboard .dash > app-pagehead {
@@ -16,7 +16,7 @@ app-admindashboard .kpi.live {
 app-admindashboard .dash-row {
   display: grid;
   grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr);
-  gap: 18px;
+  gap: var(--space-4);
   align-items: stretch;
 }
 
@@ -24,7 +24,7 @@ app-admindashboard .side-stack,
 app-admindashboard .pies {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 18px;
+  gap: var(--space-4);
   align-content: start;
 }
 
@@ -49,7 +49,7 @@ app-admindashboard .chart-empty {
   align-items: center;
   justify-content: center;
   margin: 0;
-  font-size: 14px;
+  font-size: var(--text-sm);
   color: var(--gp-muted);
   pointer-events: none;
 }
@@ -71,8 +71,8 @@ app-admindashboard .monitor .quiet {
 app-admindashboard .panel-link {
   display: inline-block;
   align-self: flex-start;
-  margin-top: 14px;
-  font-size: 13.5px;
+  margin-top: var(--space-4);
+  font-size: var(--text-sm);
   font-weight: 600;
 }
 
@@ -82,20 +82,20 @@ app-admindashboard .sub-title .live-dot {
 }
 
 app-admindashboard .live-race {
-  padding: 10px 0;
+  padding: var(--space-2) 0;
   border-top: 1px solid var(--gp-line);
 }
 
 app-admindashboard .live-race p {
-  margin: 4px 0;
-  font-size: 13px;
+  margin: var(--space-1) 0;
+  font-size: var(--text-xs);
 }
 
 app-admindashboard .live-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: var(--space-2);
 }
 
 app-admindashboard .progress {
@@ -119,16 +119,16 @@ app-admindashboard .money {
 app-admindashboard .quick-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 app-admindashboard .quick-grid a {
-  padding: 9px 12px;
+  padding: var(--space-2) var(--space-3);
   background: var(--gp-surface);
   border: 1px solid var(--gp-line);
-  border-radius: var(--gp-radius);
+  border-radius: var(--radius-sm);
   color: var(--gp-ink);
-  font-size: 14px;
+  font-size: var(--text-sm);
   font-weight: 600;
   text-decoration: none;
   transition: border-color 0.15s ease;

@@ -1,11 +1,11 @@
 /* ==== track form: pictures + preview ==== */
 app-trackform .pictures-title {
-  margin: 10px 0 4px;
+  margin: var(--space-2) 0 var(--space-1);
 }
 
 app-trackform .pictures-hint {
-  margin: 0 0 12px;
-  font-size: 13px;
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-xs);
 }
 
 app-trackform .cover-empty {
@@ -13,22 +13,22 @@ app-trackform .cover-empty {
   inset: 0;
   display: grid;
   place-items: center;
-  padding: 16px;
+  padding: var(--space-4);
   text-align: center;
-  font-size: 13px;
+  font-size: var(--text-xs);
   color: var(--gp-muted);
 }
 
 app-trackform .preview-note {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--text-xs);
 }
 
 /* ==== picture picker ==== */
 app-imagepicker .thumbs {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: var(--space-2);
 }
 
 app-imagepicker .thumb,
@@ -36,7 +36,7 @@ app-imagepicker .add-tile {
   position: relative;
   width: 120px;
   height: 80px;
-  border-radius: var(--gp-radius);
+  border-radius: var(--radius-sm);
   overflow: hidden;
 }
 
@@ -56,7 +56,7 @@ app-imagepicker .thumb.uploading {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: var(--text-xs);
   color: var(--gp-muted);
 }
 
@@ -64,11 +64,11 @@ app-imagepicker .cover-tag {
   position: absolute;
   left: 6px;
   bottom: 6px;
-  padding: 2px 7px;
-  border-radius: 999px;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
   background: rgba(20, 23, 31, 0.75);
   color: #fff;
-  font-size: 11px;
+  font-size: var(--text-xs);
   font-weight: 600;
 }
 
@@ -79,10 +79,10 @@ app-imagepicker .thumb-remove {
   width: 24px;
   height: 24px;
   border: 0;
-  border-radius: 50%;
+  border-radius: var(--radius-pill);
   background: rgba(20, 23, 31, 0.75);
   color: #fff;
-  font-size: 16px;
+  font-size: var(--text-md);
   line-height: 24px;
   cursor: pointer;
 }
@@ -100,7 +100,7 @@ app-imagepicker .add-tile {
   border: 1px dashed var(--gp-border);
   background: var(--gp-surface);
   color: var(--gp-muted);
-  font-size: 12px;
+  font-size: var(--text-xs);
   font-weight: 600;
   cursor: pointer;
   transition: border-color 0.15s ease, color 0.15s ease;
@@ -112,7 +112,7 @@ app-imagepicker .add-tile:hover {
 }
 
 app-imagepicker .add-plus {
-  font-size: 22px;
+  font-size: var(--text-2xl);
   line-height: 1;
 }
 
@@ -122,8 +122,8 @@ app-imagepicker .file-box {
 }
 
 app-imagepicker .picker-hint {
-  margin: 8px 0 0;
-  font-size: 12px;
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-xs);
   color: var(--gp-muted);
 }
 
@@ -133,7 +133,7 @@ app-carousel .carousel {
   position: relative;
   aspect-ratio: 16 / 9;
   overflow: hidden;
-  border-radius: var(--gp-radius-lg);
+  border-radius: var(--radius);
   background: var(--gp-ink);
 }
 
@@ -158,10 +158,10 @@ app-carousel .arrow {
   height: 40px;
   margin-top: -20px;
   border: 0;
-  border-radius: 50%;
+  border-radius: var(--radius-pill);
   background: rgba(20, 23, 31, 0.55);
   color: #fff;
-  font-size: 26px;
+  font-size: var(--text-4xl);
   line-height: 38px;
   cursor: pointer;
   transition: background-color 0.15s ease;
@@ -183,11 +183,11 @@ app-carousel .counter {
   position: absolute;
   top: 12px;
   right: 12px;
-  padding: 3px 10px;
-  border-radius: 999px;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-pill);
   background: rgba(20, 23, 31, 0.6);
   color: #fff;
-  font-size: 12px;
+  font-size: var(--text-xs);
   font-weight: 600;
 }
 
@@ -198,7 +198,7 @@ app-carousel .dots {
   bottom: 12px;
   display: flex;
   justify-content: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 app-carousel .dot {
@@ -206,7 +206,7 @@ app-carousel .dot {
   height: 9px;
   padding: 0;
   border: 0;
-  border-radius: 50%;
+  border-radius: var(--radius-pill);
   background: rgba(255, 255, 255, 0.5);
   cursor: pointer;
 }
@@ -229,5 +229,5 @@ app-carousel .carousel.empty {
   background: var(--gp-field);
   border: 1px dashed var(--gp-border);
   color: var(--gp-muted);
-  font-size: 14px;
+  font-size: var(--text-sm);
 }

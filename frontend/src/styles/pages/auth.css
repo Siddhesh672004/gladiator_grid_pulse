@@ -8,17 +8,17 @@
 }
 
 .auth-box h2 {
-  margin: 6px 0 22px;
-  font-size: 30px;
+  margin: var(--space-2) 0 var(--space-5);
+  font-size: var(--text-4xl);
 }
 
 /* "step 1 of 2" line with the start lights */
 .auth-step {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin: 0 0 14px;
-  font: 700 12px var(--gp-mono);
+  gap: var(--space-2);
+  margin: 0 0 var(--space-4);
+  font: 700 var(--text-xs) var(--gp-mono);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--gp-muted);
@@ -31,18 +31,18 @@
 }
 
 .auth-box .server-error {
-  margin: 0 0 14px;
+  margin: 0 0 var(--space-4);
 }
 
 .auth-links {
   margin-top: 20px;
-  padding-top: 6px;
+  padding-top: var(--space-2);
   border-top: 1px solid var(--gp-line);
 }
 
 .auth-switch {
-  margin: 10px 0 0;
-  font-size: 14px;
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-sm);
   color: var(--gp-muted);
 }
 
@@ -58,6 +58,6 @@
 
 @media (max-width: 560px) {
   .auth-box h2 {
-    font-size: 25px;
+    font-size: var(--text-3xl);
   }
 }

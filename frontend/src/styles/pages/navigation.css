@@ -11,7 +11,7 @@
   display: flex;
   align-items: center;
   height: var(--gp-nav-h);
-  padding: 0 24px;
+  padding: 0 var(--space-5);
 }
 
 .navbar .brand {
@@ -41,7 +41,7 @@
   border: 0;
   background: transparent;
   color: var(--gp-muted);
-  font-size: 14px;
+  font-size: var(--text-sm);
   font-weight: 600;
   line-height: 1;
   white-space: nowrap;
@@ -91,20 +91,20 @@
   left: 0;
   z-index: 2;
   min-width: 190px;
-  padding: 8px 0;
+  padding: var(--space-2) 0;
   background: var(--gp-surface);
   border: 1px solid var(--gp-line);
-  border-radius: var(--gp-radius);
-  box-shadow: var(--gp-shadow);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-1);
 }
 
 .nav-menu-list a {
   display: flex;
   align-items: center;
   min-height: 42px;
-  padding: 0 16px;
+  padding: 0 var(--space-4);
   color: var(--gp-ink);
-  font-size: 14px;
+  font-size: var(--text-sm);
   font-weight: 600;
   white-space: nowrap;
   text-decoration: none;
@@ -118,7 +118,7 @@
 .menu-toggle {
   display: none;
   order: 3;
-  margin-left: 4px;
+  margin-left: var(--space-1);
   color: var(--gp-ink);
 }
 
@@ -132,7 +132,7 @@
 /* small screens: the links drop down under the bar, a group's list opens inside it */
 @media (max-width: 1140px) {
   .navbar {
-    padding: 0 14px;
+    padding: 0 var(--space-4);
   }
 
   .menu-toggle {
@@ -149,11 +149,11 @@
     flex-direction: column;
     max-height: calc(100vh - var(--gp-nav-h));
     overflow-y: auto;
-    padding: 8px 14px 14px;
+    padding: var(--space-2) var(--space-4) var(--space-4);
     background: var(--gp-surface);
     border-top: 1px solid var(--gp-line);
     border-bottom: 1px solid var(--gp-line);
-    box-shadow: 0 16px 28px rgba(23, 24, 28, 0.14);
+    box-shadow: var(--shadow-2);
   }
 
   .nav-links.open {
@@ -172,7 +172,7 @@
     width: 100%;
     height: 46px;
     padding: 0 14px;
-    font-size: 15px;
+    font-size: var(--text-base);
   }
 
   .nav-links > a.active,
@@ -192,7 +192,7 @@
   .nav-menu-list {
     position: static;
     min-width: 0;
-    padding: 0 0 6px 14px;
+    padding: 0 0 var(--space-2) var(--space-4);
     border: 0;
     box-shadow: none;
   }
@@ -212,10 +212,10 @@ app-profilemenu .profile-icon {
   height: 38px;
   padding: 0;
   border: 0;
-  border-radius: 50%;
+  border-radius: var(--radius-pill);
   background: var(--gp-accent);
   color: var(--gp-ink);
-  font-size: 15px;
+  font-size: var(--text-base);
   font-weight: 800;
   cursor: pointer;
   overflow: hidden;
@@ -245,24 +245,24 @@ app-profilemenu .profile-list {
   right: 0;
   z-index: 2;
   min-width: 220px;
-  padding: 8px 0;
+  padding: var(--space-2) 0;
   background: var(--gp-surface);
   border: 1px solid var(--gp-line);
-  border-radius: var(--gp-radius);
-  box-shadow: var(--gp-shadow);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-1);
 }
 
 app-profilemenu .profile-list > button {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   width: 100%;
   min-height: 42px;
-  padding: 0 16px;
+  padding: 0 var(--space-4);
   border: 0;
   background: transparent;
   color: var(--gp-ink);
-  font-size: 14px;
+  font-size: var(--text-sm);
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
@@ -282,11 +282,11 @@ app-profilemenu .profile-list app-icon {
 app-profilemenu .user-badge {
   display: block;
   max-width: 260px;
-  padding: 8px 16px 10px;
-  margin-bottom: 4px;
+  padding: var(--space-2) var(--space-4);
+  margin-bottom: var(--space-1);
   border-bottom: 1px solid var(--gp-line);
   color: var(--gp-muted);
-  font: 700 12px var(--gp-mono);
+  font: 700 var(--text-xs) var(--gp-mono);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -294,15 +294,15 @@ app-profilemenu .user-badge {
 
 /* Log Out asks first, in place of the two buttons */
 app-profilemenu .logout-confirm {
-  padding: 6px 16px 8px;
+  padding: var(--space-2) var(--space-4);
   text-align: center;
   outline: 0;
   animation: gp-pop 0.2s var(--ease-out);
 }
 
 app-profilemenu .logout-confirm p {
-  margin: 0 0 12px;
-  font-size: 14px;
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-sm);
   color: var(--gp-ink);
 }
 
@@ -310,7 +310,7 @@ app-profilemenu .logout-actions {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 /* ==== public top bar ==== */
@@ -326,16 +326,16 @@ app-sitehead {
 app-sitehead .bar {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-2);
   max-width: 1240px;
   height: var(--gp-nav-h);
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 var(--space-5);
 }
 
 app-sitehead .brand {
   display: flex;
-  margin-right: 14px;
+  margin-right: var(--space-4);
   color: var(--gp-ink);
   text-decoration: none;
 }
@@ -350,11 +350,11 @@ app-sitehead .link {
   position: relative;
   display: inline-flex;
   align-items: center;
-  padding: 0 12px;
+  padding: 0 var(--space-3);
   border: 0;
   background: transparent;
   color: var(--gp-muted);
-  font-size: 14px;
+  font-size: var(--text-sm);
   font-weight: 600;
   white-space: nowrap;
   text-decoration: none;
@@ -393,7 +393,7 @@ app-sitehead .short {
 
 @media (max-width: 640px) {
   app-sitehead .bar {
-    gap: 8px;
+    gap: var(--space-2);
     padding: 0 14px;
   }
 
@@ -412,7 +412,7 @@ app-sitehead .short {
 
   app-sitehead .bar .btn-main {
     height: 36px;
-    padding: 0 12px;
+    padding: 0 var(--space-3);
   }
 }
 
@@ -424,10 +424,10 @@ app-sitehead .short {
   }
 
   app-sitehead app-logo {
-    font-size: 16px;
+    font-size: var(--text-md);
   }
 
   app-sitehead .bar .btn-main {
-    padding: 0 9px;
+    padding: 0 var(--space-2);
   }
 }

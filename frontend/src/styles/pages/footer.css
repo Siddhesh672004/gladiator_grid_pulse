@@ -9,7 +9,7 @@ app-sitefoot {
 app-sitefoot .foot {
   max-width: 1240px;
   margin: 0 auto;
-  padding: 40px 24px 0;
+  padding: 40px var(--space-5) 0;
 }
 
 app-sitefoot .foot-top {
@@ -20,7 +20,7 @@ app-sitefoot .foot-top {
 
 app-sitefoot .about {
   display: grid;
-  gap: 14px;
+  gap: var(--space-4);
   justify-items: start;
   align-content: start;
   color: #fff;
@@ -33,15 +33,15 @@ app-sitefoot .about p {
 
 app-sitefoot .tag {
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: var(--space-1);
   color: var(--gp-accent);
 }
 
 app-sitefoot p,
 app-sitefoot a {
   display: block;
-  margin: 7px 0 0;
-  font-size: 14px;
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-sm);
   color: #c9ccd2;
   text-decoration: none;
   transition: color 0.15s ease;
@@ -56,21 +56,21 @@ app-sitefoot .foot-end {
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  gap: 10px;
-  margin-top: 32px;
-  padding: 14px 0 16px;
+  gap: var(--space-2);
+  margin-top: var(--space-6);
+  padding: var(--space-4) 0;
   border-top: 1px solid #2f3138;
-  font-size: 12px;
+  font-size: var(--text-xs);
 }
 
 app-sitefoot .foot-end button {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-2);
   border: 0;
   background: transparent;
   color: #fff;
-  font-size: 13px;
+  font-size: var(--text-xs);
   font-weight: 600;
   cursor: pointer;
 }
@@ -94,7 +94,7 @@ app-sitefoot .foot-end button:hover app-icon {
 
 @media (max-width: 480px) {
   app-sitefoot .foot {
-    padding: 32px 16px 0;
+    padding: var(--space-6) var(--space-4) 0;
   }
 
   app-sitefoot .foot-top {

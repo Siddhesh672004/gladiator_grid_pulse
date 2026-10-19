@@ -13,7 +13,7 @@ app-howitworks .chapter-bar {
   z-index: 800;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-2);
   height: var(--bar);
   padding: 0 max(24px, calc((100% - 1240px) / 2));
   background: var(--gp-surface);
@@ -28,7 +28,7 @@ app-howitworks .chapter-bar .group {
 
 app-howitworks .chapter-bar .group {
   margin-left: 20px;
-  font: 700 11px var(--gp-mono);
+  font: 700 var(--text-xs) var(--gp-mono);
   letter-spacing: 0.09em;
   text-transform: uppercase;
   color: var(--gp-muted);
@@ -39,10 +39,10 @@ app-howitworks .chapter-bar button {
   min-width: 34px;
   height: 30px;
   border: 1px solid var(--gp-line);
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
   background: var(--gp-surface);
   color: var(--gp-muted);
-  font: 700 12px var(--gp-mono);
+  font: 700 var(--text-xs) var(--gp-mono);
   cursor: pointer;
   transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
@@ -80,47 +80,47 @@ app-howitworks .wrap {
 }
 
 app-howitworks .slide h2 {
-  margin: 10px 0 14px;
+  margin: var(--space-2) 0 var(--space-4);
   font-size: clamp(26px, 3.2vw, 42px);
 }
 
 app-howitworks .say {
   max-width: 40ch;
-  margin: 0 0 22px;
-  font-size: 18px;
+  margin: 0 0 var(--space-5);
+  font-size: var(--text-lg);
 }
 
 app-howitworks .points {
-  font-size: 16px;
+  font-size: var(--text-md);
 }
 
 /* the drawn screen: a small window with a title bar */
 app-howitworks .window {
   background: var(--gp-surface);
   border: 1px solid var(--gp-line);
-  border-radius: var(--gp-radius-lg);
+  border-radius: var(--radius);
   overflow: hidden;
-  box-shadow: var(--gp-shadow);
+  box-shadow: var(--shadow-1);
 }
 
 app-howitworks .window-bar {
-  padding: 9px 16px;
+  padding: var(--space-2) var(--space-4);
   background: var(--gp-ink);
   color: #c9ccd2;
-  font-size: 11.5px;
+  font-size: var(--text-xs);
   font-weight: 500;
 }
 
 app-howitworks .window-body {
   display: grid;
-  gap: 12px;
-  padding: 22px;
+  gap: var(--space-3);
+  padding: var(--space-5);
 }
 
 app-howitworks .window-body small {
   display: block;
   font-family: var(--gp-font);
-  font-size: 12px;
+  font-size: var(--text-xs);
   font-weight: 500;
   color: var(--gp-muted);
 }
@@ -139,9 +139,9 @@ app-howitworks .box,
 app-howitworks .chip,
 app-howitworks .code span,
 app-howitworks .kpis span {
-  padding: 9px 12px;
+  padding: var(--space-2) var(--space-3);
   border: 1px solid var(--gp-border);
-  border-radius: var(--gp-radius);
+  border-radius: var(--radius-sm);
   color: var(--gp-ink);
   font-weight: 500;
 }
@@ -149,7 +149,7 @@ app-howitworks .kpis span {
 app-howitworks .pair {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 app-howitworks .row {
@@ -157,8 +157,8 @@ app-howitworks .row {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  padding-top: 12px;
+  gap: var(--space-2);
+  padding-top: var(--space-3);
   border-top: 1px solid var(--gp-line);
 }
 
@@ -173,18 +173,18 @@ app-howitworks .row > :first-child {
 
 app-howitworks .acts {
   display: flex;
-  gap: 6px;
+  gap: var(--space-2);
 }
 
 app-howitworks .note {
   margin: 0;
-  font-size: 12.5px;
+  font-size: var(--text-xs);
   color: var(--gp-muted);
 }
 
 app-howitworks .code {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 app-howitworks .code span {
@@ -194,19 +194,19 @@ app-howitworks .code span {
   min-width: 0;
   height: 46px;
   padding: 0;
-  font-size: 18px;
+  font-size: var(--text-lg);
 }
 
 app-howitworks .chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 app-howitworks .chip {
   flex: 1;
   min-width: 150px;
-  font-size: 13.5px;
+  font-size: var(--text-sm);
 }
 
 app-howitworks .chip.on {
@@ -216,17 +216,17 @@ app-howitworks .chip.on {
 
 app-howitworks .stars.big {
   margin: 0;
-  font-size: 24px;
+  font-size: var(--text-3xl);
 }
 
 app-howitworks .bubble {
   justify-self: start;
   max-width: 85%;
   margin: 0;
-  padding: 8px 12px;
-  border-radius: var(--gp-radius);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
   background: var(--gp-field);
-  font-size: 14px;
+  font-size: var(--text-sm);
 }
 
 app-howitworks .bubble.me {
@@ -238,7 +238,7 @@ app-howitworks .bubble.me {
 app-howitworks .kpis {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 app-howitworks .kpis span {
@@ -248,13 +248,13 @@ app-howitworks .kpis span {
 app-howitworks .bars {
   display: flex;
   align-items: flex-end;
-  gap: 6px;
+  gap: var(--space-2);
   height: 90px;
 }
 
 app-howitworks .bars i {
   flex: 1;
-  border-radius: 2px 2px 0 0;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
   background: var(--gp-ink);
 }
 
@@ -265,9 +265,9 @@ app-howitworks .bars i:last-child {
 app-howitworks .phase-line {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   margin: 0;
-  font: 700 13px var(--gp-mono);
+  font: 700 var(--text-xs) var(--gp-mono);
   color: var(--gp-ink);
 }
 
@@ -279,7 +279,7 @@ app-howitworks .window-body .tower-row {
 /* phones: words above the drawing */
 @media (max-width: 960px) {
   app-howitworks .chapter-bar {
-    padding: 0 16px;
+    padding: 0 var(--space-4);
   }
 
   app-howitworks .slide {
@@ -289,7 +289,7 @@ app-howitworks .window-body .tower-row {
 
   app-howitworks .wrap {
     grid-template-columns: 1fr;
-    gap: 24px;
+    gap: var(--space-5);
     width: calc(100% - 32px);
   }
 

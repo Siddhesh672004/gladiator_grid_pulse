@@ -1,6 +1,6 @@
 /* ==== booking page ==== */
 app-userregisterrace .session-list {
-  margin: 0 0 6px;
+  margin: 0 0 var(--space-2);
 }
 
 app-userregisterrace .session-chip {
@@ -10,8 +10,8 @@ app-userregisterrace .session-chip {
 app-userregisterrace .session-chip .seat-line,
 app-userregisterrace .session-chip .join-label {
   display: block;
-  margin-top: 4px;
-  font-size: 12px;
+  margin-top: var(--space-1);
+  font-size: var(--text-xs);
 }
 
 app-userregisterrace .session-chip .seat-line {
@@ -26,8 +26,8 @@ app-userregisterrace .session-chip .join-label {
 /* car category tiles: the whole tile is the radio button */
 app-userregisterrace .tiles-label {
   display: block;
-  margin: 4px 0 8px;
-  font-size: 13px;
+  margin: var(--space-1) 0 var(--space-2);
+  font-size: var(--text-xs);
   font-weight: 600;
   color: var(--gp-muted);
 }
@@ -35,7 +35,7 @@ app-userregisterrace .tiles-label {
 app-userregisterrace .car-tiles {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
+  gap: var(--space-2);
   margin-bottom: 20px;
 }
 
@@ -44,7 +44,7 @@ app-userregisterrace .car-tile {
   flex-direction: column;
   overflow: hidden;
   border: 1px solid var(--gp-border);
-  border-radius: var(--gp-radius);
+  border-radius: var(--radius-sm);
   background: var(--gp-surface);
   cursor: pointer;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -77,9 +77,9 @@ app-userregisterrace .car-tile img {
 }
 
 app-userregisterrace .car-name {
-  padding: 8px 6px;
+  padding: var(--space-2);
   text-align: center;
-  font-size: 13px;
+  font-size: var(--text-xs);
   font-weight: 600;
   color: var(--gp-ink);
 }
@@ -87,8 +87,8 @@ app-userregisterrace .car-name {
 app-userregisterrace .terms-label {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  font-size: 14px;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
   cursor: pointer;
 }
 
@@ -102,7 +102,7 @@ app-userregisterrace .terms-label input {
 /* what the driver is about to pay for */
 app-userregisterrace .summary {
   display: grid;
-  gap: 16px;
+  gap: var(--space-4);
   border-top: 4px solid var(--gp-accent);
 }
 
@@ -110,22 +110,22 @@ app-userregisterrace .summary-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-2);
 }
 
 app-userregisterrace .amount {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  gap: 10px;
+  gap: var(--space-2);
   margin: 0;
-  padding-top: 14px;
+  padding-top: var(--space-4);
   border-top: 1px solid var(--gp-line);
   color: var(--gp-muted);
 }
 
 app-userregisterrace .amount b {
-  font-size: 24px;
+  font-size: var(--text-3xl);
   color: var(--gp-ink);
 }
 
@@ -135,11 +135,11 @@ app-userregisterrace .summary .server-error {
 
 app-userregisterrace .pay-note {
   margin: 0;
-  font-size: 12.5px;
+  font-size: var(--text-xs);
 }
 
 .modal-box .modal-hint {
-  font-size: 13px;
+  font-size: var(--text-xs);
   color: var(--gp-muted);
 }
 
@@ -161,8 +161,8 @@ app-userregisterrace .pay-note {
 }
 
 .details-title {
-  margin: 4px 0 16px;
-  font-size: 19px;
+  margin: var(--space-1) 0 var(--space-4);
+  font-size: var(--text-xl);
 }
 
 .wide-confirm {
@@ -175,5 +175,5 @@ app-userregisterrace .pay-note {
 
 /* ==== registrations (admin) ==== */
 .reject-actions {
-  margin-top: 16px;
+  margin-top: var(--space-4);
 }

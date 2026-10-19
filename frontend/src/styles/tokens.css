@@ -50,12 +50,37 @@
   --gp-contact: #17181c;
 
   /* sizes */
-  --gp-radius: 4px;
-  --gp-radius-lg: 6px;
   --gp-cut: 22px;
-  --gp-shadow: 0 1px 2px rgba(23, 24, 28, 0.05), 0 6px 18px rgba(23, 24, 28, 0.06);
-  --gp-shadow-lg: 0 14px 36px rgba(23, 24, 28, 0.2);
   --gp-nav-h: 64px;
+
+  /* spacing: paddings, margins and gaps use these steps (a few tuned layout values stay in px) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  /* text sizes: 13px is the smallest. the big page headings use clamp() in their page file */
+  --text-xs: 13px;
+  --text-sm: 14px;
+  --text-base: 15px;
+  --text-md: 16px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --text-2xl: 22px;
+  --text-3xl: 24px;
+  --text-4xl: 28px;
+
+  /* corners: small for boxes and buttons, normal for popups and windows, pill for round things */
+  --radius-sm: 4px;
+  --radius: 6px;
+  --radius-pill: 999px;
+
+  /* shadows: 1 = a list or card that lifts a little, 2 = a layer above the page (popup, chat, phone menu) */
+  --shadow-1: 0 1px 2px rgba(23, 24, 28, 0.05), 0 6px 18px rgba(23, 24, 28, 0.06);
+  --shadow-2: 0 14px 36px rgba(23, 24, 28, 0.2);
 
   /* web fonts come from the link in index.html, without internet the system fonts take over */
   --gp-font: "Archivo", "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
