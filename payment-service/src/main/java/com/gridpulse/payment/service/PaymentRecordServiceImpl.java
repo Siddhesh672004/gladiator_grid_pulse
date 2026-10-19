@@ -151,7 +151,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
     public void refundForBooking(BookingRefundRequested request) {
         paymentRepo.findWithLockByRazorpayOrderId(request.orderId())
                 .ifPresentOrElse(payment -> refundBooked(payment, request),
-                        // a booking paid before phase 5: its payment is still in appdb (docker/sql/phase5-copy-payments.sql)
+                        // a booking paid before payments moved here: its payment row was never copied to payment_db
                         () -> log.warn("Refund asked for order {} (booking {}), but there is no such payment here",
                                 request.orderId(), request.bookingId()));
     }
