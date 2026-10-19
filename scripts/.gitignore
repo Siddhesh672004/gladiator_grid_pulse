@@ -1,0 +1,2 @@
+# smoke test output (mails, session tokens, screenshots, the recorded api list) is ci output, never committed
+smoke/out/
