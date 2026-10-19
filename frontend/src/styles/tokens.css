@@ -11,7 +11,7 @@
   --gp-text: #2f3137;
   --gp-muted: #696c74;
   --gp-grey: #5d6068;
-  --gp-border: #b9bbc0;
+  --gp-border: #84878e; /* box and button outlines: 3.2:1 or more on white and the greys */
   --gp-line: #e1e1dc;
   --gp-field: #f5f5f2;
   --gp-page: #f2f2ef;

@@ -79,9 +79,11 @@
   background: var(--gp-accent);
 }
 
+/* bar links and list items fill their row: the ring goes inside, where nothing cuts it off */
 .nav-links > a:focus-visible,
-.nav-menu > button:focus-visible {
-  outline-offset: -3px;
+.nav-menu > button:focus-visible,
+.nav-menu-list a:focus-visible {
+  outline-offset: -2px;
 }
 
 /* the list of a group, under its button */
@@ -273,6 +275,10 @@ app-profilemenu .profile-list > button:hover {
   background: var(--gp-field);
 }
 
+app-profilemenu .profile-list > button:focus-visible {
+  outline-offset: -2px;
+}
+
 app-profilemenu .profile-list app-icon {
   width: 22px;
   height: 22px;
@@ -411,7 +417,7 @@ app-sitehead .short {
   }
 
   app-sitehead .bar .btn-main {
-    height: 36px;
+    min-height: 40px;
     padding: 0 var(--space-3);
   }
 }

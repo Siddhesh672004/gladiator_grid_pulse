@@ -204,7 +204,7 @@ app-chatbot .action-cancel {
 app-chatbot .action-confirm:disabled,
 app-chatbot .action-cancel:disabled {
   opacity: 0.45;
-  cursor: default;
+  cursor: not-allowed;
 }
 
 app-chatbot .action-state {
@@ -254,12 +254,10 @@ app-chatbot .chat-input input {
   border-radius: var(--radius-sm);
   background: var(--gp-surface);
   color: var(--gp-ink);
-  outline: none;
 }
 
 app-chatbot .chat-input input:focus {
   border-color: var(--gp-ink);
-  box-shadow: inset 0 0 0 1px var(--gp-ink);
 }
 
 app-chatbot .chat-send {
@@ -278,7 +276,7 @@ app-chatbot .chat-send:active:not(:disabled) {
 
 app-chatbot .chat-send:disabled {
   opacity: 0.45;
-  cursor: default;
+  cursor: not-allowed;
 }
 
 /* under the text box, only when it is full */

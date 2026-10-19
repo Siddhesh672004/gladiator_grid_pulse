@@ -43,8 +43,12 @@ input[type="radio"] {
   accent-color: var(--gp-ink);
 }
 
+/* one focus ring for everything you can tab to (boxes with an input inside draw it themselves) */
 a:focus-visible,
-button:focus-visible {
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
   outline: 2px solid var(--gp-accent);
   outline-offset: 2px;
 }
