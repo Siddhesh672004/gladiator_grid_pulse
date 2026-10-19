@@ -42,6 +42,19 @@ class PaymentEventIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    void aLateRefundPendingDoesNotUndoRefunded() throws Exception {
+        RaceSession session = data.practiceSession(5);
+        Long bookingId = book(data.driver(), session, 43);
+        String order = data.booking(bookingId).getPaymentOrderId();
+
+        paymentEventListener.onPaymentEvent(event(order, bookingId, "REFUNDED"));
+        // a retry topic delivers the older REFUND_PENDING afterwards (its own event id, so not a duplicate)
+        paymentEventListener.onPaymentEvent(event(order, bookingId, "REFUND_PENDING"));
+
+        assertThat(paymentStatusOf(bookingId)).isEqualTo(PaymentStatus.REFUNDED);
+    }
+
+    @Test
     void otherStatusesAndOrdersChangeNothing() throws Exception {
         RaceSession session = data.practiceSession(5);
         Long bookingId = book(data.driver(), session, 42);

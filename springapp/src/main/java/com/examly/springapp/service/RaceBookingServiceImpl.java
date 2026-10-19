@@ -214,6 +214,8 @@ public class RaceBookingServiceImpl implements RaceBookingService {
                 .filter(COPIED_PAYMENT_STATUSES::contains)
                 .findFirst()
                 .ifPresent(copied -> raceBookingRepo.findByPaymentOrderId(razorpayOrderId)
+                        // REFUNDED is final: retry topics can bring a late REFUND_PENDING / REFUND_FAILED after it
+                        .filter(booking -> booking.getPaymentStatus() != PaymentStatus.REFUNDED)
                         .ifPresent(booking -> booking.setPaymentStatus(copied)));
     }
 
