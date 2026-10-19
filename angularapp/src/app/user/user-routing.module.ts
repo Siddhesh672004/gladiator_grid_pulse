@@ -6,9 +6,9 @@ import { UserviewmyregistrationsComponent } from '../components/userviewmyregist
 import { UseraddfeedbackComponent } from '../components/useraddfeedback/useraddfeedback.component';
 import { UserviewfeedbackComponent } from '../components/userviewfeedback/userviewfeedback.component';
 import { UserlivetimingComponent } from '../components/userlivetiming/userlivetiming.component';
-import { UserstatsComponent } from '../components/userstats/userstats.component';
 
 // /user/** (the guard and the User role check are on the parent route in app.routes.ts)
+// My Stats has its own download (chart.js)
 const routes: Routes = [
   { path: 'view/tracks', component: UserviewtracksComponent },
   { path: 'register/:trackId', component: UserregisterraceComponent },
@@ -16,7 +16,7 @@ const routes: Routes = [
   { path: 'add/feedback', component: UseraddfeedbackComponent },
   { path: 'view/feedback', component: UserviewfeedbackComponent },
   { path: 'live-timing', component: UserlivetimingComponent },
-  { path: 'stats', component: UserstatsComponent },
+  { path: 'stats', loadComponent: () => import('../components/userstats/userstats.component').then((m) => m.UserstatsComponent) },
   { path: '**', redirectTo: '/error' }
 ];
 

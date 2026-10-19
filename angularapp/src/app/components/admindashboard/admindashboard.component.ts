@@ -1,12 +1,19 @@
+import { CommonModule } from '@angular/common';
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { Chart, ChartConfiguration, registerables } from 'chart.js';
+import {
+  ArcElement, BarController, BarElement, CategoryScale, Chart, ChartConfiguration, DoughnutController, Legend, LinearScale,
+  LineController, LineElement, PieController, PointElement, Tooltip
+} from 'chart.js';
 import { AdminDashboard, LiveRace } from '../../models/admin-dashboard.model';
 import { AdminDashboardService } from '../../services/admin-dashboard.service';
+import { SharedModule } from '../../shared/shared.module';
 import { LIVE_REFRESH_MS } from '../../constants';
 
-// chart.js needs its chart types switched on once, and gets our font
-Chart.register(...registerables);
+// chart.js needs the chart types and parts of this page switched on once (only these are downloaded), and gets our font
+Chart.register(DoughnutController, PieController, LineController, BarController, ArcElement, LineElement, PointElement,
+  BarElement, CategoryScale, LinearScale, Legend, Tooltip);
 Chart.defaults.font.family = 'Archivo, "Segoe UI", sans-serif';
 Chart.defaults.color = '#696c74';
 
@@ -19,8 +26,11 @@ const YELLOW = '#ffd60a';
 const SLICES = [INK, ORANGE, GREY, YELLOW, GREEN, '#1d5fd6'];
 
 // admin home (/admin/dashboard): cards, charts, recent registrations, live race monitor, statement -> AdminDashboardService
+// standalone + its own lazy route, so chart.js is only downloaded for this page (and My Stats)
 @Component({
   selector: 'app-admindashboard',
+  standalone: true,
+  imports: [CommonModule, RouterModule, SharedModule],
   templateUrl: './admindashboard.component.html'
 })
 export class AdmindashboardComponent implements OnInit, OnDestroy {

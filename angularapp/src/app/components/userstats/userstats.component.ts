@@ -1,17 +1,22 @@
+import { CommonModule } from '@angular/common';
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Chart, registerables } from 'chart.js';
+import { BarController, BarElement, CategoryScale, Chart, Legend, LinearScale, Tooltip } from 'chart.js';
 import { DriverStats } from '../../models/stats.model';
 import { StatsService } from '../../services/stats.service';
+import { SharedModule } from '../../shared/shared.module';
 
-// chart.js needs its chart types switched on once (the admin pages do the same in their own bundle)
-Chart.register(...registerables);
+// chart.js needs the bar chart switched on once (the admin dashboard does the same for its charts)
+Chart.register(BarController, BarElement, CategoryScale, LinearScale, Legend, Tooltip);
 Chart.defaults.font.family = 'Archivo, "Segoe UI", sans-serif';
 Chart.defaults.color = '#696c74';
 const ORANGE = '#ff5b14';
 
 // My Stats (/user/stats): number tiles + laps per month of this year -> StatsService. completed sessions only
+// standalone + its own lazy route, so chart.js is only downloaded for this page (and the admin dashboard)
 @Component({
   selector: 'app-userstats',
+  standalone: true,
+  imports: [CommonModule, SharedModule],
   templateUrl: './userstats.component.html'
 })
 export class UserstatsComponent implements OnInit, OnDestroy {

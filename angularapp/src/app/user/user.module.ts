@@ -9,9 +9,8 @@ import { UserviewmyregistrationsComponent } from '../components/userviewmyregist
 import { UseraddfeedbackComponent } from '../components/useraddfeedback/useraddfeedback.component';
 import { UserviewfeedbackComponent } from '../components/userviewfeedback/userviewfeedback.component';
 import { UserlivetimingComponent } from '../components/userlivetiming/userlivetiming.component';
-import { UserstatsComponent } from '../components/userstats/userstats.component';
 
-// lazy loaded driver pages, the component files stay in app/components
+// lazy loaded driver pages, the component files stay in app/components (My Stats is standalone, see the routing)
 @NgModule({
   declarations: [
     UserviewtracksComponent,
@@ -19,8 +18,7 @@ import { UserstatsComponent } from '../components/userstats/userstats.component'
     UserviewmyregistrationsComponent,
     UseraddfeedbackComponent,
     UserviewfeedbackComponent,
-    UserlivetimingComponent,
-    UserstatsComponent
+    UserlivetimingComponent
   ],
   imports: [
     CommonModule,

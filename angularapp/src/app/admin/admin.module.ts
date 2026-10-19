@@ -15,11 +15,10 @@ import { AdminviewfeedbackComponent } from '../components/adminviewfeedback/admi
 import { AdminracecontrolComponent } from '../components/adminracecontrol/adminracecontrol.component';
 import { SuperadminmanageadminsComponent } from '../components/superadminmanageadmins/superadminmanageadmins.component';
 import { AdminviewpaymentsComponent } from '../components/adminviewpayments/adminviewpayments.component';
-import { AdmindashboardComponent } from '../components/admindashboard/admindashboard.component';
 import { AdminmanageusersComponent } from '../components/adminmanageusers/adminmanageusers.component';
 import { AdmincheckticketComponent } from '../components/admincheckticket/admincheckticket.component';
 
-// lazy loaded admin pages, the component files stay in app/components
+// lazy loaded admin pages, the component files stay in app/components (the dashboard is standalone, see the routing)
 @NgModule({
   declarations: [
     AdminaddtrackComponent,
@@ -34,7 +33,6 @@ import { AdmincheckticketComponent } from '../components/admincheckticket/adminc
     AdminracecontrolComponent,
     SuperadminmanageadminsComponent,
     AdminviewpaymentsComponent,
-    AdmindashboardComponent,
     AdminmanageusersComponent,
     AdmincheckticketComponent
   ],

@@ -11,15 +11,17 @@ import { AdminviewfeedbackComponent } from '../components/adminviewfeedback/admi
 import { AdminracecontrolComponent } from '../components/adminracecontrol/adminracecontrol.component';
 import { SuperadminmanageadminsComponent } from '../components/superadminmanageadmins/superadminmanageadmins.component';
 import { AdminviewpaymentsComponent } from '../components/adminviewpayments/adminviewpayments.component';
-import { AdmindashboardComponent } from '../components/admindashboard/admindashboard.component';
 import { AdminmanageusersComponent } from '../components/adminmanageusers/adminmanageusers.component';
 import { AdmincheckticketComponent } from '../components/admincheckticket/admincheckticket.component';
 import { ROLES } from '../constants';
 
 // /admin/** (the guard and the Admin role check are on the parent route in app.routes.ts)
-// manage-admins is for the SuperAdmin only
+// manage-admins is for the SuperAdmin only. the dashboard has its own download (chart.js)
 const routes: Routes = [
-  { path: 'dashboard', component: AdmindashboardComponent },
+  {
+    path: 'dashboard',
+    loadComponent: () => import('../components/admindashboard/admindashboard.component').then((m) => m.AdmindashboardComponent)
+  },
   { path: 'manage-users', component: AdminmanageusersComponent },
   { path: 'add/track', component: AdminaddtrackComponent },
   { path: 'view/tracks', component: AdminviewtracksComponent },
