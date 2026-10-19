@@ -14,9 +14,9 @@
         <div class="facts">
           <span class="fact-name">Date</span><span class="fact-value mono">{{ competition.competitionDate }}</span>
           <span class="fact-name">Qualifying</span>
-          <span class="fact-value mono">{{ time(competition.qualifyingSession) }} · {{ competition.qualifyingLaps }} lap{{ competition.qualifyingLaps === 1 ? '' : 's' }}</span>
+          <span class="fact-value mono">{{ competition.qualifyingSession | sessionTime }} · {{ competition.qualifyingLaps }} lap{{ competition.qualifyingLaps === 1 ? '' : 's' }}</span>
           <span class="fact-name">Race</span>
-          <span class="fact-value mono">{{ time(competition.raceSession) }} · {{ competition.raceLaps }} lap{{ competition.raceLaps === 1 ? '' : 's' }}</span>
+          <span class="fact-value mono">{{ competition.raceSession | sessionTime }} · {{ competition.raceLaps }} lap{{ competition.raceLaps === 1 ? '' : 's' }}</span>
           <span class="fact-name">Grid</span><span class="fact-value mono">Max {{ competition.maxCars }} cars</span>
           <span class="fact-name">Entry fee</span><span class="fact-value mono">₹{{ competition.qualifyingSession.price }}</span>
         </div>
@@ -48,7 +48,7 @@
           <h2 class="board-title">{{ boardTitle }}</h2>
           <p class="board-sub">
             <span class="live-dot" title="live, refreshes every 4 seconds"></span>
-            <span class="board-meta">{{ time(selectedSession) }}</span>
+            <span class="board-meta">{{ selectedSession | sessionTime }}</span>
             <span class="board-meta">{{ selectedSession.status }}</span>
             <span class="board-meta">{{ lapLimit }} lap{{ lapLimit === 1 ? '' : 's' }}</span>
             <span class="board-meta">{{ standings.length }} car{{ standings.length === 1 ? '' : 's' }}</span>

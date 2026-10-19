@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { TicketCheck } from '../models/ticket.model';
 import { TicketService } from '../services/ticket.service';
+import { errorMessage } from '../../shared/utils/error-message';
 
 // Check Ticket (/admin/check-ticket): the code under the QR of an e-ticket -> valid or not + the booking -> TicketService
 @Component({
@@ -32,7 +33,7 @@ export class AdminCheckTicketComponent {
       },
       error: (err) => {
         this.isChecking = false;
-        this.errorMessage = err.error?.message || 'Unable to check the ticket';
+        this.errorMessage = errorMessage(err, 'Unable to check the ticket');
       }
     });
   }

@@ -29,8 +29,8 @@
         <div class="session-list" *ngIf="sessions.length > 0">
           <button type="button" class="session-chip" *ngFor="let session of sessions; trackBy: bySession"
                   [class.selected]="selectedSession === session" (click)="selectSession(session)">
-            <strong class="mono">{{ time(session) }}</strong>
-            {{ label(session) }} · <span class="mono">₹{{ session.price }}</span>
+            <strong class="mono">{{ session | sessionTime }}</strong>
+            {{ session | sessionLabel }} · <span class="mono">₹{{ session.price }}</span>
             <span class="seat-line">{{ session.approvedCars }} of {{ session.maxCars }} seats taken</span>
             <span class="join-label">{{ chipText(session) }}</span>
           </button>
@@ -81,8 +81,8 @@
         <div class="facts">
           <span class="fact-name">Track</span><span class="fact-value">{{ track.trackName }}</span>
           <span class="fact-name">Date</span><span class="fact-value mono">{{ bookingForm.get('raceDate')?.value || '-' }}</span>
-          <span class="fact-name">Session</span><span class="fact-value">{{ selectedSession ? label(selectedSession) : '-' }}</span>
-          <span class="fact-name">Time</span><span class="fact-value mono">{{ selectedSession ? time(selectedSession) : '-' }}</span>
+          <span class="fact-name">Session</span><span class="fact-value">{{ selectedSession ? (selectedSession | sessionLabel) : '-' }}</span>
+          <span class="fact-name">Time</span><span class="fact-value mono">{{ selectedSession ? (selectedSession | sessionTime) : '-' }}</span>
           <span class="fact-name">Car</span>
           <span class="fact-value">{{ bookingForm.get('carCategory')?.value }}<span class="mono" *ngIf="bookingForm.get('carNumber')?.value"> · #{{ bookingForm.get('carNumber')?.value }}</span></span>
         </div>

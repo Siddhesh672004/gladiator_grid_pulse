@@ -11,16 +11,19 @@ import { PageHeadComponent } from './ui/page-head/page-head.component';
 import { FlagComponent } from './ui/flag/flag.component';
 import { StartLightsComponent } from './ui/start-lights/start-lights.component';
 import { EmptyComponent } from './ui/empty/empty.component';
+import { SessionLabelPipe } from './ui/session-label.pipe';
+import { SessionTimePipe } from './ui/session-time.pipe';
 
 const PIECES = [
   FieldErrorComponent, FieldComponent, SearchBoxComponent, PaginatorComponent, ImagePickerComponent,
   PageHeadComponent, FlagComponent, StartLightsComponent, EmptyComponent
 ];
+const PIPES = [SessionLabelPipe, SessionTimePipe];
 
-// used by every page module (site, admin, user): the reusable pieces + BasicModule
+// used by every page module (site, admin, user): the reusable pieces, the session pipes + BasicModule
 @NgModule({
   declarations: PIECES,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, BasicModule],
-  exports: [...PIECES, BasicModule]
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, BasicModule, ...PIPES],
+  exports: [...PIECES, ...PIPES, BasicModule]
 })
 export class SharedModule { }

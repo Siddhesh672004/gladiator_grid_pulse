@@ -4,6 +4,7 @@ import { BarController, BarElement, CategoryScale, Chart, Legend, LinearScale, T
 import { DriverStats } from '../../shared/models/stats.model';
 import { StatsService } from '../../core/services/stats.service';
 import { SharedModule } from '../../shared/shared.module';
+import { errorMessage } from '../../shared/utils/error-message';
 
 // chart.js needs the bar chart switched on once (the admin dashboard does the same for its charts)
 Chart.register(BarController, BarElement, CategoryScale, LinearScale, Legend, Tooltip);
@@ -40,7 +41,7 @@ export class UserStatsComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.isLoading = false;
-        this.errorMessage = err.error?.message || 'Unable to load your stats';
+        this.errorMessage = errorMessage(err, 'Unable to load your stats');
       }
     });
   }

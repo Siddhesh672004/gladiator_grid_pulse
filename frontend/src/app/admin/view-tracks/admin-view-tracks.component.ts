@@ -5,6 +5,7 @@ import { RaceService } from '../../core/services/race.service';
 import { pageOf } from '../../shared/utils/paging';
 import { FieldOption, toOptions } from '../../shared/utils/field-option';
 import { byKey } from '../../shared/utils/track-by';
+import { errorMessage } from '../../shared/utils/error-message';
 
 // admin track table: search, indoor / outdoor filter, edit, activate / deactivate, delete -> RaceService
 // a track that ever had a session keeps its history: it can only be deactivated, not deleted
@@ -107,7 +108,7 @@ export class AdminViewTracksComponent implements OnInit {
 
   // 409 -> the track still has upcoming sessions, the backend explains it
   private showChangeError(err: any): void {
-    this.errorMessage = err.error?.message || 'Unable to change the track';
+    this.errorMessage = errorMessage(err, 'Unable to change the track');
   }
 
   askDelete(track: RaceTrack): void {
@@ -130,7 +131,7 @@ export class AdminViewTracksComponent implements OnInit {
       },
       error: (err) => {
         // 409 -> the track has sessions (history), the backend says "deactivate it instead"
-        this.errorMessage = err.error?.message || 'Unable to delete the track';
+        this.errorMessage = errorMessage(err, 'Unable to delete the track');
       }
     });
   }

@@ -5,6 +5,7 @@ import { FeedbackService } from '../../core/services/feedback.service';
 import { UserStorageService } from '../../core/services/user-storage.service';
 import { pageOf } from '../../shared/utils/paging';
 import { byKey } from '../../shared/utils/track-by';
+import { errorMessage } from '../../shared/utils/error-message';
 
 // the logged-in driver's own feedback, delete with a confirmation popup
 @Component({
@@ -64,7 +65,7 @@ export class UserViewFeedbackComponent implements OnInit {
     }
     this.feedbackService.deleteFeedback(feedback.feedbackId).subscribe({
       next: () => this.feedbacks = this.feedbacks.filter(f => f.feedbackId !== feedback.feedbackId),
-      error: (err) => this.errorMessage = err.error?.message || 'Unable to delete the feedback'
+      error: (err) => this.errorMessage = errorMessage(err, 'Unable to delete the feedback')
     });
   }
 }

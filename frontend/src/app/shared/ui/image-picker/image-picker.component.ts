@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ImageService } from '../../services/image.service';
 import { PICTURE_MAX_MB, pictureProblem } from '../../utils/validation';
 import { byIndex } from '../../utils/track-by';
+import { errorMessage } from '../../utils/error-message';
 
 // "add pictures" box: each chosen file goes to cloudinary at once (ImageService), the page saves the links with its form
 @Component({
@@ -73,7 +74,7 @@ export class ImagePickerComponent {
       },
       error: (err) => {
         this.uploading--;
-        this.errorMessage = err.error?.message || 'The picture could not be uploaded. Please try again.';
+        this.errorMessage = errorMessage(err, 'The picture could not be uploaded. Please try again.');
       }
     });
   }

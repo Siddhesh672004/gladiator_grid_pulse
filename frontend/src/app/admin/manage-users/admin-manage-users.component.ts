@@ -3,6 +3,7 @@ import { AdminUser } from '../models/admin-user.model';
 import { AdminUserService } from '../services/admin-user.service';
 import { FieldOption, toOptions } from '../../shared/utils/field-option';
 import { byKey } from '../../shared/utils/track-by';
+import { errorMessage } from '../../shared/utils/error-message';
 
 // Manage Users (/admin/manage-users): driver accounts, search + Active / Inactive filter, Activate / Deactivate -> AdminUserService
 // paged by the database (10 rows per request); a deactivated driver cannot log in, their bookings stay
@@ -42,7 +43,7 @@ export class AdminManageUsersComponent implements OnInit {
       },
       error: (err) => {
         this.isLoading = false;
-        this.errorMessage = err.error?.message || 'Unable to load the users';
+        this.errorMessage = errorMessage(err, 'Unable to load the users');
       }
     });
   }
@@ -75,7 +76,7 @@ export class AdminManageUsersComponent implements OnInit {
       },
       error: (err) => {
         this.busyId = null;
-        this.errorMessage = err.error?.message || 'Unable to change the user';
+        this.errorMessage = errorMessage(err, 'Unable to change the user');
       }
     });
   }

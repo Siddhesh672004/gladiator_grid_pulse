@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { RaceService } from '../../core/services/race.service';
 import { buildTrackForm, toTrack } from '../track-form/track-form';
+import { errorMessage } from '../../shared/utils/error-message';
 
 // "Create New Track" page: the boxes are in <app-trackform>, Submit -> RaceService.addTrack -> popup -> track list
 @Component({
@@ -35,7 +36,7 @@ export class AdminAddTrackComponent {
       error: (err) => {
         this.isSaving = false;
         // 409 duplicate name (or a 400 rule) -> shown inline under the form
-        this.errorMessage = err.error?.message || 'Unable to add the track. Please try again.';
+        this.errorMessage = errorMessage(err, 'Unable to add the track. Please try again.');
       }
     });
   }

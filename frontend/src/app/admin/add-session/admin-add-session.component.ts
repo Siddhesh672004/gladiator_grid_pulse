@@ -11,6 +11,7 @@ import { SESSION_TYPE } from '../../core/constants';
 import { DIGITS_PATTERN, HAS_LETTER_PATTERN, PRICE_MAX, after, matches, maxChars, minChars, minMinutesAfter, monthsAheadIso,
   notBefore, notInPast, notPassedToday, recheckWhenChanged, required, todayIso, withinMonths } from '../../shared/utils/validation';
 import { byKey } from '../../shared/utils/track-by';
+import { errorMessage } from '../../shared/utils/error-message';
 
 const DATE_RANGE = 'Date must be within the next 12 months';
 const START_PASSED = 'Start Time has already passed';
@@ -178,7 +179,7 @@ export class AdminAddSessionComponent implements OnInit {
     }
     this.competitionService.getRuleForTrack(this.selectedTrackId).subscribe({
       next: (rule) => this.rule = rule,
-      error: (err) => this.errorMessage = err.error?.message || 'Unable to load the competition rule'
+      error: (err) => this.errorMessage = errorMessage(err, 'Unable to load the competition rule')
     });
   }
 
@@ -275,7 +276,7 @@ export class AdminAddSessionComponent implements OnInit {
 
   private onFailed(err: any): void {
     this.isSaving = false;
-    this.errorMessage = err.error?.message || 'Unable to save. Please try again.';
+    this.errorMessage = errorMessage(err, 'Unable to save. Please try again.');
   }
 
   // a new competition opens its Competition Control, everything else goes back to the list

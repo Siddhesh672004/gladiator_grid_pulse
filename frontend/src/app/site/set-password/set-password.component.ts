@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { newPasswordRules, recheckWhenChanged, required, sameAs } from '../../shared/utils/validation';
+import { errorMessage } from '../../shared/utils/error-message';
 
 // /set-password?email=..&token=.. : the link in a new admin's invite email -> choose a password -> Admin Login
 @Component({
@@ -51,7 +52,7 @@ export class SetPasswordComponent {
       },
       error: (err) => {
         this.isSaving = false;
-        this.errorMessage = err.error?.message || 'Unable to reach the server. Please try again later.';
+        this.errorMessage = errorMessage(err, 'Unable to reach the server. Please try again later.');
       }
     });
   }

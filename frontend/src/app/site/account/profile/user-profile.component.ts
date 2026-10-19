@@ -4,6 +4,7 @@ import { Profile } from '../../../shared/models/profile.model';
 import { ProfileService } from '../../../core/services/profile.service';
 import { ROLES } from '../../../core/constants';
 import { DOB_EARLIEST, MIN_AGE, birthDateRules, licenseRules, yearsAgoIso } from '../../../shared/utils/validation';
+import { errorMessage } from '../../../shared/utils/error-message';
 
 // /profile for every role -> ProfileService. a driver fills date of birth + license once, then they are locked
 @Component({
@@ -40,7 +41,7 @@ export class UserProfileComponent implements OnInit {
       },
       error: (err) => {
         this.isLoading = false;
-        this.errorMessage = err.error?.message || 'Unable to load your profile.';
+        this.errorMessage = errorMessage(err, 'Unable to load your profile.');
       }
     });
   }
@@ -82,7 +83,7 @@ export class UserProfileComponent implements OnInit {
       },
       error: (err) => {
         this.isSaving = false;
-        this.errorMessage = err.error?.message || 'Unable to update your profile.';
+        this.errorMessage = errorMessage(err, 'Unable to update your profile.');
       }
     });
   }

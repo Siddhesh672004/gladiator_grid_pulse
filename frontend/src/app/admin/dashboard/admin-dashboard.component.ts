@@ -11,6 +11,7 @@ import { AdminDashboardService } from '../services/admin-dashboard.service';
 import { SharedModule } from '../../shared/shared.module';
 import { LIVE_REFRESH_MS } from '../../core/constants';
 import { byKey } from '../../shared/utils/track-by';
+import { errorMessage } from '../../shared/utils/error-message';
 
 // chart.js needs the chart types and parts of this page switched on once (only these are downloaded), and gets our font
 Chart.register(DoughnutController, PieController, LineController, BarController, ArcElement, LineElement, PointElement,
@@ -93,7 +94,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.isLoading = false;
-        this.errorMessage = err.error?.message || 'Unable to load the dashboard';
+        this.errorMessage = errorMessage(err, 'Unable to load the dashboard');
       }
     });
   }

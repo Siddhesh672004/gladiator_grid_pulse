@@ -5,6 +5,9 @@ import { SignupRequest } from '../../shared/models/user.model';
 import { AuthService } from '../../core/services/auth.service';
 import { DOB_EARLIEST, MIN_AGE, birthDateRules, codeRules, emailRules, licenseRules, mobileRules, newPasswordRules,
   recheckWhenChanged, required, sameAs, usernameRules, yearsAgoIso } from '../../shared/utils/validation';
+import { errorMessage } from '../../shared/utils/error-message';
+
+const SIGNUP_FAILED = 'Registration failed. Please try again.';
 
 // sign up in two steps: details -> emailed code (no account yet) -> code -> account -> login page (AuthService)
 @Component({
@@ -72,7 +75,7 @@ export class SignupComponent {
       },
       error: (err) => {
         this.isSaving = false;
-        this.errorMessage = this.serverText(err);
+        this.errorMessage = errorMessage(err, SIGNUP_FAILED);
       }
     });
   }
@@ -94,7 +97,7 @@ export class SignupComponent {
       },
       error: (err) => {
         this.isSaving = false;
-        this.errorMessage = this.serverText(err);
+        this.errorMessage = errorMessage(err, SIGNUP_FAILED);
       }
     });
   }
@@ -115,7 +118,7 @@ export class SignupComponent {
       },
       error: (err) => {
         this.isResending = false;
-        this.errorMessage = this.serverText(err);
+        this.errorMessage = errorMessage(err, SIGNUP_FAILED);
       }
     });
   }
@@ -130,9 +133,5 @@ export class SignupComponent {
   closeModal(): void {
     this.showModal = false;
     this.router.navigate(['/login']);
-  }
-
-  private serverText(err: any): string {
-    return err.error?.message || 'Registration failed. Please try again.';
   }
 }

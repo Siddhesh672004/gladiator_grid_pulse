@@ -5,6 +5,7 @@ import { SuperAdminService } from '../services/super-admin.service';
 import { emailRules, optionalMobileRules, usernameRules } from '../../shared/utils/validation';
 import { pageOf } from '../../shared/utils/paging';
 import { byKey } from '../../shared/utils/track-by';
+import { errorMessage } from '../../shared/utils/error-message';
 
 // super admin only (/admin/manage-admins): add (the admin gets a set-password link), resend the link, switch on / off, delete -> SuperAdminService
 @Component({
@@ -79,7 +80,7 @@ export class SuperAdminManageAdminsComponent implements OnInit {
       },
       error: (err) => {
         this.isSaving = false;
-        this.errorMessage = err.error?.message || 'Unable to add the admin';
+        this.errorMessage = errorMessage(err, 'Unable to add the admin');
       }
     });
   }
@@ -95,7 +96,7 @@ export class SuperAdminManageAdminsComponent implements OnInit {
       },
       error: (err) => {
         this.busyId = null;
-        this.errorMessage = err.error?.message || 'Unable to send the invite';
+        this.errorMessage = errorMessage(err, 'Unable to send the invite');
       }
     });
   }
@@ -117,7 +118,7 @@ export class SuperAdminManageAdminsComponent implements OnInit {
       },
       error: (err) => {
         this.busyId = null;
-        this.errorMessage = err.error?.message || 'Unable to delete the admin';
+        this.errorMessage = errorMessage(err, 'Unable to delete the admin');
       }
     });
   }
@@ -137,7 +138,7 @@ export class SuperAdminManageAdminsComponent implements OnInit {
       },
       error: (err) => {
         this.busyId = null;
-        this.errorMessage = err.error?.message || 'Unable to change the admin';
+        this.errorMessage = errorMessage(err, 'Unable to change the admin');
       }
     });
   }

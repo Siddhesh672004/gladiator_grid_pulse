@@ -33,8 +33,8 @@
         </thead>
         <tbody>
           <tr *ngFor="let session of sessions; trackBy: bySession">
-            <td><strong>{{ session.trackName }}</strong><small>{{ label(session) }}</small></td>
-            <td data-label="Date / time" class="mono">{{ session.sessionDate }}<small class="mono">{{ time(session) }}</small></td>
+            <td><strong>{{ session.trackName }}</strong><small>{{ session | sessionLabel }}</small></td>
+            <td data-label="Date / time" class="mono">{{ session.sessionDate }}<small class="mono">{{ session | sessionTime }}</small></td>
             <td data-label="Status"><app-flag [status]="session.status"></app-flag></td>
             <td data-label="Approved / Max" class="mono" *ngIf="!waitsForGrid(session)">{{ session.approvedCars }} / {{ session.maxCars }}</td>
             <td data-label="Approved / Max" class="muted" *ngIf="waitsForGrid(session)">Grid after qualifying</td>

@@ -1,7 +1,6 @@
 import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { RaceBooking, raceStatusText, statusLabel } from '../../shared/models/race-booking.model';
-import { RaceSession, sessionLabel, sessionTime } from '../../shared/models/session.model';
 import { RaceService } from '../../core/services/race.service';
 import { UserStorageService } from '../../core/services/user-storage.service';
 import { BOOKING_STATUS, COMPETITION_PHASE, LIVE_REFRESH_MS, ROLES, SESSION_STATUS } from '../../core/constants';
@@ -9,6 +8,7 @@ import { paymentLabel } from '../../shared/models/payment.model';
 import { pageOf } from '../../shared/utils/paging';
 import { blobErrorMessage, fileNameOf, saveFile } from '../download';
 import { byKey } from '../../shared/utils/track-by';
+import { errorMessage } from '../../shared/utils/error-message';
 
 // the driver's own bookings, reloaded every 4 s -> RaceService
 // cancel while Pending = full refund, cancel an Approved one = no refund. an Approved one has its e-ticket (pdf with qr)
@@ -80,14 +80,6 @@ export class UserViewMyRegistrationsComponent implements OnInit, OnDestroy {
 
   statusText(booking: RaceBooking): string {
     return statusLabel(booking);
-  }
-
-  label(session: RaceSession): string {
-    return sessionLabel(session);
-  }
-
-  time(session: RaceSession): string {
-    return sessionTime(session);
   }
 
   // an approved car can only be cancelled while its session is still to come
@@ -198,7 +190,7 @@ export class UserViewMyRegistrationsComponent implements OnInit, OnDestroy {
         this.loadBookings();
       },
       error: (err) => {
-        this.errorMessage = err.error?.message || 'Unable to cancel the registration';
+        this.errorMessage = errorMessage(err, 'Unable to cancel the registration');
       }
     });
   }

@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { codeRules, emailRules, newPasswordRules, recheckWhenChanged, required, sameAs } from '../../shared/utils/validation';
+import { errorMessage } from '../../shared/utils/error-message';
 
 // /forgot-password for drivers and admins: email -> reset code by mail -> code + new password -> login (AuthService)
 @Component({
@@ -54,7 +55,7 @@ export class ForgotPasswordComponent {
       },
       error: (err) => {
         this.isSaving = false;
-        this.errorMessage = err.error?.message || 'Unable to reach the server. Please try again later.';
+        this.errorMessage = errorMessage(err, 'Unable to reach the server. Please try again later.');
       }
     });
   }
@@ -75,7 +76,7 @@ export class ForgotPasswordComponent {
       },
       error: (err) => {
         this.isSaving = false;
-        this.errorMessage = err.error?.message || 'Unable to reach the server. Please try again later.';
+        this.errorMessage = errorMessage(err, 'Unable to reach the server. Please try again later.');
       }
     });
   }

@@ -1,3 +1,5 @@
+import { errorMessage } from '../shared/utils/error-message';
+
 // files from the api (the e-ticket pdf): save them, read their name, read an error that came as a file
 
 // the browser saves the file under this name
@@ -27,5 +29,5 @@ export async function blobErrorMessage(err: any, fallback: string): Promise<stri
       return fallback;
     }
   }
-  return err?.error?.message || fallback;
+  return errorMessage(err, fallback);
 }

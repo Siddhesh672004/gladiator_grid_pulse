@@ -1,7 +1,6 @@
 import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Subject, Subscription, debounceTime } from 'rxjs';
 import { BookingStatusRequest, RaceBooking, raceStatusText, statusLabel } from '../../shared/models/race-booking.model';
-import { RaceSession, sessionLabel, sessionTime } from '../../shared/models/session.model';
 import { RaceService } from '../../core/services/race.service';
 import { UserStorageService } from '../../core/services/user-storage.service';
 import { ADMIN_ROLES, BOOKING_STATUS, BOOKING_STATUSES, COMPETITION_PHASE, LIVE_REFRESH_MS, SEARCH_DEBOUNCE_MS, SESSION_STATUS } from '../../core/constants';
@@ -9,6 +8,7 @@ import { pageCount } from '../../shared/utils/paging';
 import { paymentLabel } from '../../shared/models/payment.model';
 import { FieldOption, toOptions } from '../../shared/utils/field-option';
 import { byKey } from '../../shared/utils/track-by';
+import { errorMessage } from '../../shared/utils/error-message';
 
 // every booking of every driver: search, status filter, approve / reject (the reason is required), details, delete -> RaceService
 // one page from the backend, reloaded every 4 s; the approval that fills the last seat rejects everybody still waiting (the backend does that)
@@ -152,14 +152,6 @@ export class AdminViewRegistrationsComponent implements OnInit, OnDestroy {
     return paymentLabel(booking.paymentStatus);
   }
 
-  label(session: RaceSession): string {
-    return sessionLabel(session);
-  }
-
-  time(session: RaceSession): string {
-    return sessionTime(session);
-  }
-
   // approve / reject only before the session starts, and never for a race place (those come from qualifying)
   canDecide(booking: RaceBooking): boolean {
     return booking.session.status === SESSION_STATUS.SCHEDULED && booking.session.phase !== COMPETITION_PHASE.RACING;
@@ -228,7 +220,7 @@ export class AdminViewRegistrationsComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.busyId = null;
-        this.errorMessage = err.error?.message || 'Unable to update the registration';
+        this.errorMessage = errorMessage(err, 'Unable to update the registration');
         this.loadBookings();
       }
     });
@@ -246,7 +238,7 @@ export class AdminViewRegistrationsComponent implements OnInit, OnDestroy {
         this.loadBookings();
       },
       error: (err) => {
-        this.errorMessage = err.error?.message || 'Unable to delete the registration';
+        this.errorMessage = errorMessage(err, 'Unable to delete the registration');
         this.loadBookings();
       }
     });

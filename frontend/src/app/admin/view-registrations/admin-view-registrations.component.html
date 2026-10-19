@@ -33,9 +33,9 @@
         <tbody>
           <tr *ngFor="let booking of bookings; trackBy: byBooking">
             <td><strong>{{ booking.user.username }}</strong><small class="mono">ID {{ booking.user.userId }}</small></td>
-            <td data-label="Track / session"><strong>{{ booking.session.trackName }}</strong><small>{{ label(booking.session) }}</small></td>
+            <td data-label="Track / session"><strong>{{ booking.session.trackName }}</strong><small>{{ booking.session | sessionLabel }}</small></td>
             <td data-label="Car" class="mono">#{{ booking.carNumber }}<small>{{ booking.carCategory }}</small></td>
-            <td data-label="Date / time" class="mono nowrap">{{ booking.session.sessionDate }}<small class="mono">{{ time(booking.session) }}</small></td>
+            <td data-label="Date / time" class="mono nowrap">{{ booking.session.sessionDate }}<small class="mono">{{ booking.session | sessionTime }}</small></td>
             <td data-label="Status"><app-flag [status]="booking.status" [label]="statusText(booking)"></app-flag></td>
             <td data-label="Payment"><span *ngIf="booking.paymentStatus" class="pay-badge" [ngClass]="booking.paymentStatus">{{ payment(booking) }}</span></td>
             <td data-label="Race Control">{{ raceStatus(booking) }}</td>
@@ -66,9 +66,9 @@
       <span class="fact-name">Driver</span><span class="fact-value">{{ selected.user.username }} (ID {{ selected.user.userId }})</span>
       <span class="fact-name">Email</span><span class="fact-value">{{ selected.user.email }}</span>
       <span class="fact-name">Mobile</span><span class="fact-value mono">{{ selected.user.mobileNumber }}</span>
-      <span class="fact-name">Session</span><span class="fact-value">{{ label(selected.session) }}</span>
+      <span class="fact-name">Session</span><span class="fact-value">{{ selected.session | sessionLabel }}</span>
       <span class="fact-name">Date</span><span class="fact-value mono">{{ selected.session.sessionDate }}</span>
-      <span class="fact-name">Time Slot</span><span class="fact-value mono">{{ time(selected.session) }}</span>
+      <span class="fact-name">Time Slot</span><span class="fact-value mono">{{ selected.session | sessionTime }}</span>
       <span class="fact-name">Car</span><span class="fact-value">#{{ selected.carNumber }} · {{ selected.carCategory }}</span>
       <span class="fact-name">Driver License #</span><span class="fact-value mono">{{ selected.driverLicenseNumber }}</span>
       <span class="fact-name">Status</span><span class="fact-value"><app-flag [status]="selected.status" [label]="statusText(selected)"></app-flag></span>

@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { RaceTrack } from '../../shared/models/race-track.model';
 import { RaceService } from '../../core/services/race.service';
 import { buildTrackForm, toTrack } from '../track-form/track-form';
+import { errorMessage } from '../../shared/utils/error-message';
 
 // Edit Track (/admin/edit/track/:id): the add-track form filled with the current values -> RaceService.updateTrack
 // a track saved before pictures existed has none, the admin must add 1 - 5 before saving
@@ -37,7 +38,7 @@ export class AdminEditTrackComponent implements OnInit {
         this.isLoading = false;
         // any load problem: show the message, never an empty form that could be saved
         this.notFound = true;
-        this.errorMessage = err.error?.message || 'Unable to load the track.';
+        this.errorMessage = errorMessage(err, 'Unable to load the track.');
       }
     });
   }
@@ -65,7 +66,7 @@ export class AdminEditTrackComponent implements OnInit {
       },
       error: (err) => {
         this.isSaving = false;
-        this.errorMessage = err.error?.message || 'Unable to update the track. Please try again.';
+        this.errorMessage = errorMessage(err, 'Unable to update the track. Please try again.');
       }
     });
   }

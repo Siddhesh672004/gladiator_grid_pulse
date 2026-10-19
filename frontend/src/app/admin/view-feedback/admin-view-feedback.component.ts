@@ -8,6 +8,7 @@ import { SEARCH_DEBOUNCE_MS, SENTIMENTS } from '../../core/constants';
 import { pageCount } from '../../shared/utils/paging';
 import { FieldOption, toOptions } from '../../shared/utils/field-option';
 import { byIndex, byKey } from '../../shared/utils/track-by';
+import { errorMessage } from '../../shared/utils/error-message';
 
 // every driver's feedback: stars, AI label (Positive / Negative / Neutral + Needs attention), counters, filters, Summarise with AI -> FeedbackService
 // when the AI is down a feedback is "Not analysed" and its row gets an Analyse button. the table is one page from the backend
@@ -172,7 +173,7 @@ export class AdminViewFeedbackComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.busyId = null;
-        this.errorMessage = err.error?.message || 'Unable to analyse the feedback';
+        this.errorMessage = errorMessage(err, 'Unable to analyse the feedback');
       }
     });
   }
@@ -197,7 +198,7 @@ export class AdminViewFeedbackComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.isSummarising = false;
-        this.errorMessage = err.error?.message || 'Unable to summarise the feedback';
+        this.errorMessage = errorMessage(err, 'Unable to summarise the feedback');
       }
     });
   }

@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { Login } from '../../shared/models/login.model';
 import { AuthService } from '../../core/services/auth.service';
 import { emailRules, required } from '../../shared/utils/validation';
+import { errorMessage } from '../../shared/utils/error-message';
 
 // admin + super admin login (/admin-login): email + password -> AuthService.adminLogin, no code step
 // a driver here gets "Invalid Email or Password", a disabled admin gets the backend message
@@ -42,7 +43,7 @@ export class AdminLoginComponent {
       },
       error: (err) => {
         this.isSaving = false;
-        this.errorMessage = err.error?.message || 'Unable to reach the server. Please try again later.';
+        this.errorMessage = errorMessage(err, 'Unable to reach the server. Please try again later.');
       }
     });
   }

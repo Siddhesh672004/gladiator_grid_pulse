@@ -1,12 +1,13 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, Subscription, debounceTime } from 'rxjs';
-import { RaceSession, sessionLabel, sessionTime } from '../../shared/models/session.model';
+import { RaceSession } from '../../shared/models/session.model';
 import { SessionService } from '../../core/services/session.service';
 import { COMPETITION_PHASE, SEARCH_DEBOUNCE_MS, SESSION_STATUS, SESSION_TYPE } from '../../core/constants';
 import { pageCount } from '../../shared/utils/paging';
 import { FieldOption, toOptions } from '../../shared/utils/field-option';
 import { byKey } from '../../shared/utils/track-by';
+import { errorMessage } from '../../shared/utils/error-message';
 
 // View Sessions (/admin/view/sessions): every session, newest date first, one page from the backend -> SessionService
 // practice session not started yet -> Edit / Cancel, competition session -> Control. ?type=Competition = the navbar's Competitions
@@ -102,14 +103,6 @@ export class AdminViewSessionsComponent implements OnInit, OnDestroy {
     return this.searchText.trim() !== '' || this.statusFilter !== 'All' || this.typeFilter !== 'All';
   }
 
-  label(session: RaceSession): string {
-    return sessionLabel(session);
-  }
-
-  time(session: RaceSession): string {
-    return sessionTime(session);
-  }
-
   isPractice(session: RaceSession): boolean {
     return session.sessionType === SESSION_TYPE.PRACTICE;
   }
@@ -154,7 +147,7 @@ export class AdminViewSessionsComponent implements OnInit, OnDestroy {
         this.successMessage = 'Session cancelled. Its bookings were rejected, the payments are refunded and the drivers were told by email.';
         this.loadSessions();
       },
-      error: (err) => this.errorMessage = err.error?.message || 'Unable to cancel the session'
+      error: (err) => this.errorMessage = errorMessage(err, 'Unable to cancel the session')
     });
   }
 }

@@ -4,14 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { CardView, ChatBubble, ChatResponse } from '../models/chat.model';
 import { ActionResult, CopilotReply } from '../models/copilot.model';
-import { PaymentConfirmRequest, PaymentConfirmResult, PaymentOrder, RazorpayResult } from '../../shared/models/payment.model';
-import { RaceBookingRequest } from '../../shared/models/race-booking.model';
+import { PaymentConfirmResult } from '../../shared/models/payment.model';
 import { ChatService } from '../services/chat.service';
 import { CopilotService } from '../services/copilot.service';
-import { PaymentService } from '../../core/services/payment.service';
+import { PaymentFlowService } from '../../core/services/payment-flow.service';
 import { UserStorageService } from '../../core/services/user-storage.service';
 import { CHAT_SESSION_KEY, COPILOT_CHAT_KEY } from '../../core/constants';
 import { byIndex } from '../../shared/utils/track-by';
+import { errorMessage } from '../../shared/utils/error-message';
 
 const GREETING = "Hi! 🏁 I'm the GridPulse assistant. Ask me about tracks, bookings, the Live Race "
   + 'Control Board or feedback. Log in to book or manage things right here.';
@@ -23,7 +23,7 @@ const MESSAGE_MAX = 1000;
 
 // floating assistant on every page, created (open) by the chat button (ChatLauncherComponent) on its first click
 // logged out: the faq chat (ChatService). logged in: the Copilot (CopilotService), whose changes come as cards;
-// a confirmed booking opens the Razorpay window like the booking page (PaymentService)
+// a confirmed booking opens the Razorpay window like the booking page (PaymentFlowService)
 @Component({
   selector: 'app-chatbot',
   standalone: true,
@@ -50,7 +50,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   readonly byIndex = byIndex;
 
   constructor(private chatService: ChatService, private copilotService: CopilotService,
-    private paymentService: PaymentService, private userStorage: UserStorageService) { }
+    private paymentFlow: PaymentFlowService, private userStorage: UserStorageService) { }
 
   ngOnInit(): void {
     // logging in or out switches the mode and starts a fresh chat
@@ -109,7 +109,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
       error: (err) => {
         // used, expired or not yours: the card is done either way
         view.state = 'expired';
-        this.addBotBubble(err.error?.message || NOT_REACHED);
+        this.addBotBubble(errorMessage(err, NOT_REACHED));
       }
     });
   }
@@ -167,7 +167,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
       this.removeChatId(key);
     }
     // our backend says why it refused (400, 500 ...). no sentence at all = it was not reached
-    this.addBotBubble(err.error?.message || NOT_REACHED);
+    this.addBotBubble(errorMessage(err, NOT_REACHED));
   }
 
   private showAnswer(answer: ChatResponse): void {
@@ -197,7 +197,8 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     this.addBotBubble(result.message);
     // a confirmed booking: the payment window opens, then the same confirm as the booking page
     if (result.ok && result.paymentOrder && result.booking) {
-      this.openPaymentWindow(result.paymentOrder, result.booking);
+      this.paymentFlow.pay(result.paymentOrder, result.booking, (confirmed) => this.addBotBubble(this.confirmedText(confirmed)),
+        (err, hasPaid) => this.paymentFailed(err, hasPaid));
     }
   }
 
@@ -225,28 +226,6 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     this.countdown = undefined;
   }
 
-  // same two steps as the booking page: the driver pays in Razorpay's window ...
-  private openPaymentWindow(order: PaymentOrder, booking: RaceBookingRequest): void {
-    this.paymentService.openCheckout(order).subscribe({
-      next: (paid) => this.confirmPayment(paid, booking),
-      error: (err) => this.paymentFailed(err, false)
-    });
-  }
-
-  // ... then our backend checks the payment and saves the booking
-  private confirmPayment(paid: RazorpayResult, booking: RaceBookingRequest): void {
-    const request: PaymentConfirmRequest = {
-      booking: booking,
-      razorpayOrderId: paid.razorpay_order_id,
-      razorpayPaymentId: paid.razorpay_payment_id,
-      razorpaySignature: paid.razorpay_signature
-    };
-    this.paymentService.confirm(request).subscribe({
-      next: (result) => this.addBotBubble(this.confirmedText(result)),
-      error: (err) => this.paymentFailed(err, true)
-    });
-  }
-
   private confirmedText(result: PaymentConfirmResult): string {
     const booking = result.booking;
     if (!booking) {
@@ -261,7 +240,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   }
 
   private paymentFailed(err: any, hasPaid: boolean): void {
-    let text = err.error?.message || 'The payment did not go through. Nothing was booked.';
+    let text = errorMessage(err, 'The payment did not go through. Nothing was booked.');
     // refused after paying: the backend sends the money back
     if (hasPaid && err.error?.message) {
       text += ' Your payment will be refunded.';

@@ -4,17 +4,19 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { RaceTrack } from '../../shared/models/race-track.model';
 import { CarCategory, RaceBookingRequest } from '../../shared/models/race-booking.model';
-import { PaymentConfirmRequest, PaymentConfirmResult, PaymentOrder, RazorpayResult } from '../../shared/models/payment.model';
-import { RaceSession, hasStarted, isBookable, sessionLabel, sessionTime } from '../../shared/models/session.model';
+import { PaymentConfirmResult } from '../../shared/models/payment.model';
+import { RaceSession, hasStarted, isBookable } from '../../shared/models/session.model';
 import { RaceService } from '../../core/services/race.service';
 import { SessionService } from '../../core/services/session.service';
 import { ProfileService } from '../../core/services/profile.service';
 import { PaymentService } from '../../core/services/payment.service';
+import { PaymentFlowService } from '../../core/services/payment-flow.service';
 import { BOOKING_STATUS, BOOKING_TERMS, CAR_CATEGORIES } from '../../core/constants';
 import { DIGITS_PATTERN, matches, maxChars, monthsAheadIso, notInPast, required, todayIso, withinMonths } from '../../shared/utils/validation';
 import { byKey } from '../../shared/utils/track-by';
+import { errorMessage } from '../../shared/utils/error-message';
 
-// /user/register/:trackId -> pick date and session, car, terms, then Razorpay (PaymentService)
+// /user/register/:trackId -> pick date and session, car, terms, then Razorpay (PaymentService + PaymentFlowService)
 // the booking is made only after the payment went through. license comes from the profile
 @Component({
   selector: 'app-userregisterrace',
@@ -52,7 +54,7 @@ export class UserRegisterRaceComponent implements OnInit, OnDestroy {
 
   constructor(private fb: FormBuilder, private raceService: RaceService, private sessionService: SessionService,
               private profileService: ProfileService, private paymentService: PaymentService,
-              private route: ActivatedRoute, private router: Router) {
+              private paymentFlow: PaymentFlowService, private route: ActivatedRoute, private router: Router) {
     // the race date only picks the day whose sessions are listed, the booking itself goes by the session
     this.bookingForm = this.fb.group({
       raceDate: ['', [required, notInPast('Race date cannot be in the past'),
@@ -170,14 +172,6 @@ export class UserRegisterRaceComponent implements OnInit, OnDestroy {
     category.imageUrl = null;
   }
 
-  label(session: RaceSession): string {
-    return sessionLabel(session);
-  }
-
-  time(session: RaceSession): string {
-    return sessionTime(session);
-  }
-
   // one start light per finished part: date, session, car, terms. the fifth is the payment
   get lightsOn(): number {
     let lights = 0;
@@ -253,7 +247,9 @@ export class UserRegisterRaceComponent implements OnInit, OnDestroy {
     };
     this.isSaving = true;
     this.paymentService.createOrder(booking).subscribe({
-      next: (order) => this.openPaymentWindow(order, booking),
+      // steps 2 + 3: the driver pays in Razorpay's window, then our backend checks the payment and saves the booking
+      next: (order) => this.paymentFlow.pay(order, booking, (result) => this.showSuccess(result),
+        (err, hasPaid) => this.paymentFailed(err, hasPaid)),
       error: (err) => this.paymentFailed(err, false)
     });
   }
@@ -265,32 +261,8 @@ export class UserRegisterRaceComponent implements OnInit, OnDestroy {
     this.errorMessage = 'Booking is closed: this session has already started';
   }
 
-  // step 2: the driver pays in Razorpay's window (closing it comes back as an error)
-  private openPaymentWindow(order: PaymentOrder, booking: RaceBookingRequest): void {
-    this.paymentService.openCheckout(order).subscribe({
-      next: (paid) => this.confirmPayment(paid, booking),
-      error: (err) => this.paymentFailed(err, false)
-    });
-  }
-
-  // step 3: our backend checks the payment and saves the booking
-  private confirmPayment(paid: RazorpayResult, booking: RaceBookingRequest): void {
-    const request: PaymentConfirmRequest = {
-      booking: booking,
-      razorpayOrderId: paid.razorpay_order_id,
-      razorpayPaymentId: paid.razorpay_payment_id,
-      razorpaySignature: paid.razorpay_signature
-    };
-    this.paymentService.confirm(request).subscribe({
-      next: (result) => {
-        this.isSaving = false;
-        this.showSuccess(result);
-      },
-      error: (err) => this.paymentFailed(err, true)
-    });
-  }
-
   private showSuccess(result: PaymentConfirmResult): void {
+    this.isSaving = false;
     if (result.pendingMessage) {
       this.modalText = result.pendingMessage;
       this.modalHint = 'If the booking can\'t be saved, the amount is refunded.';
@@ -308,7 +280,7 @@ export class UserRegisterRaceComponent implements OnInit, OnDestroy {
   // window closed, car number taken meanwhile ... "hasPaid" = the money was already taken when it failed
   private paymentFailed(err: any, hasPaid: boolean): void {
     this.isSaving = false;
-    this.errorMessage = err.error?.message || 'Unable to register. Please try again.';
+    this.errorMessage = errorMessage(err, 'Unable to register. Please try again.');
     if (!hasPaid) {
       return;
     }

@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { Login } from '../../shared/models/login.model';
 import { AuthService } from '../../core/services/auth.service';
 import { emailRules, required } from '../../shared/utils/validation';
+import { errorMessage } from '../../shared/utils/error-message';
 
 // driver login: email + password -> AuthService.login -> /home. admins use /admin-login
 @Component({
@@ -42,7 +43,7 @@ export class LoginComponent {
       error: (err) => {
         this.isSaving = false;
         // a wrong login and a deactivated account are both 401, the server's text says which one it is
-        this.errorMessage = err.error?.message || 'Unable to reach the server. Please try again later.';
+        this.errorMessage = errorMessage(err, 'Unable to reach the server. Please try again later.');
       }
     });
   }

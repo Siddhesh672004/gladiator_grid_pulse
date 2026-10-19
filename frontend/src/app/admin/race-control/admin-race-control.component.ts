@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { RaceTrack } from '../../shared/models/race-track.model';
 import { LiveStanding } from '../../shared/models/live-standing.model';
-import { RaceSession, sessionLabel, sessionTime } from '../../shared/models/session.model';
+import { RaceSession } from '../../shared/models/session.model';
 import { RaceService } from '../../core/services/race.service';
 import { SessionService } from '../../core/services/session.service';
 import { RaceControlService } from '../../core/services/race-control.service';
@@ -12,6 +12,7 @@ import { todayIso } from '../../shared/utils/validation';
 import { formatRaceTime } from '../../shared/live/race-time';
 import { carState, isLeaderRow, pickerDateProblem, positionText } from '../../shared/live/live-board';
 import { byKey } from '../../shared/utils/track-by';
+import { errorMessage } from '../../shared/utils/error-message';
 
 // Practice Control (admin): pick track + date + practice session, then Start, +1 Lap, Retire per car and
 // Finish / Reset for the session -> RaceControlService. a competition is run from its own Competition Control page
@@ -126,7 +127,7 @@ export class AdminRaceControlComponent implements OnInit, OnDestroy {
     this.watchedSessionId = this.selectedSession.sessionId;
     this.boardWatch = this.liveBoard.watch(this.watchedSessionId).subscribe({
       next: (rows) => this.showBoard(rows),
-      error: (err) => this.boardError = err.error?.message || 'Live timing is not reachable, retrying...'
+      error: (err) => this.boardError = errorMessage(err, 'Live timing is not reachable, retrying...')
     });
   }
 
@@ -138,7 +139,7 @@ export class AdminRaceControlComponent implements OnInit, OnDestroy {
     this.standingsRequest?.unsubscribe();
     this.standingsRequest = this.raceControlService.getLiveStandings(this.selectedSession.sessionId).subscribe({
       next: (rows) => this.showBoard(rows),
-      error: (err) => this.boardError = err.error?.message || 'Live timing is not reachable, retrying...'
+      error: (err) => this.boardError = errorMessage(err, 'Live timing is not reachable, retrying...')
     });
   }
 
@@ -165,14 +166,6 @@ export class AdminRaceControlComponent implements OnInit, OnDestroy {
   }
 
   // ---- what the table shows ----
-  label(session: RaceSession): string {
-    return sessionLabel(session);
-  }
-
-  time(session: RaceSession): string {
-    return sessionTime(session);
-  }
-
   stateOf(row: LiveStanding): string {
     return carState(row);
   }
@@ -271,7 +264,7 @@ export class AdminRaceControlComponent implements OnInit, OnDestroy {
 
   private carActionFailed(err: any): void {
     this.busyId = null;
-    this.actionError = err.error?.message || 'The action could not be completed';
+    this.actionError = errorMessage(err, 'The action could not be completed');
     this.startPolling();
   }
 
@@ -313,6 +306,6 @@ export class AdminRaceControlComponent implements OnInit, OnDestroy {
 
   private sessionActionFailed(err: any): void {
     this.sessionBusy = false;
-    this.actionError = err.error?.message || 'The session could not be updated';
+    this.actionError = errorMessage(err, 'The session could not be updated');
   }
 }

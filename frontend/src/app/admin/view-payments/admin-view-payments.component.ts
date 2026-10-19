@@ -7,6 +7,7 @@ import { pageCount } from '../../shared/utils/paging';
 import { SEARCH_DEBOUNCE_MS } from '../../core/constants';
 import { FieldOption, toOptions } from '../../shared/utils/field-option';
 import { byIndex, byKey } from '../../shared/utils/track-by';
+import { errorMessage } from '../../shared/utils/error-message';
 
 // Payments (/admin/view/payments): money summary, every payment (newest first, one page from the backend), Show More = details + audit trail -> PaymentService
 // Retry refund is for a refund Razorpay refused; refunds move on by themselves (backend job), Refresh shows the latest state
@@ -82,7 +83,7 @@ export class AdminViewPaymentsComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.isLoading = false;
-        this.errorMessage = err.error?.message || 'Unable to load the payments';
+        this.errorMessage = errorMessage(err, 'Unable to load the payments');
       }
     });
   }
@@ -140,7 +141,7 @@ export class AdminViewPaymentsComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.busyId = null;
-        this.errorMessage = err.error?.message || 'Unable to retry the refund';
+        this.errorMessage = errorMessage(err, 'Unable to retry the refund');
       }
     });
   }

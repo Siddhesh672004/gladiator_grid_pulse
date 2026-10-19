@@ -11,6 +11,7 @@ import { BOOKING_STATUS, SESSION_STATUS } from '../../core/constants';
 import { maxChars, minChars, required } from '../../shared/utils/validation';
 import { FieldOption } from '../../shared/utils/field-option';
 import { byIndex } from '../../shared/utils/track-by';
+import { errorMessage } from '../../shared/utils/error-message';
 
 // add feedback -> FeedbackService. only sessions the driver took part in, that are over and not reviewed yet
 const AI_DOWN = 'AI suggestions are not available right now. You can still send your own text.';
@@ -190,7 +191,7 @@ export class UserAddFeedbackComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.isSaving = false;
-        this.errorMessage = err.error?.message || 'Unable to send feedback. Please try again.';
+        this.errorMessage = errorMessage(err, 'Unable to send feedback. Please try again.');
       }
     });
   }
