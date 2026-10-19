@@ -1,6 +1,15 @@
 GridPulse - how to run
 ======================
 
+Quick start on Windows (2 terminals)
+------------------------------------
+   terminal 1:  powershell -ExecutionPolicy Bypass -File scriptsdevstart-backend.ps1
+                starts mysql (if not running), kafka (if docker is open), builds the jars if missing and runs the
+                5 services with logs in logs<service>.out.log. -Build = rebuild, -Only core,gateway = lighter.
+                Ctrl+C stops the services (mysql and kafka keep running).
+   terminal 2:  cd frontend; npm start          http://localhost:8081
+
+
 Needs: Java 17+, Node 20, and either Docker Desktop or a local MySQL 8 (+ Kafka in Docker for emails / refunds).
 Production (one cloud VM, HTTPS, deploy from CI): docs/DEPLOYMENT.md. How the parts fit together: docs/ARCHITECTURE.md.
 
