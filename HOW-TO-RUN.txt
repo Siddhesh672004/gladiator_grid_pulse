@@ -2,13 +2,14 @@ GridPulse - how to run
 ======================
 
 Needs: Java 17+, Node 20, and either Docker Desktop or a local MySQL 8 (+ Kafka in Docker for emails / refunds).
+Production (one cloud VM, HTTPS, deploy from CI): docs/DEPLOYMENT.md. How the parts fit together: docs/ARCHITECTURE.md.
 
 
 What runs where
 ---------------
    port   service                 what it does
    8080   gateway                 the one address the site calls: routes, CORS, rate limits (429)
-   8081   angular (npm start)     the site
+   8081   frontend (npm start)    the Angular site
    8082   core-service            accounts, tracks, sessions, bookings, waitlist, race control, feedback
                                   (a second core instance: 8083)
    8084   notification-service    every email (codes, invites, booking decisions + e-ticket, refunds, waitlist,
@@ -18,6 +19,9 @@ What runs where
                                   feedback labels / suggestions / summary (groq)
    3306 mysql · 6379 redis · 9092 kafka · 8090 kafka ui
 
+   Maven modules (root pom.xml): common, common-web (shared jars), core-service, notification-service,
+   payment-service, ai-service, gateway.
+
    How they talk: the browser only talks to the gateway. Services call each other's /internal/** with
    INTERNAL_API_KEY (the gateway never routes /internal/**) and pass the user's own token along.
    Changes travel as events (outbox -> Kafka): emails, refunds, payment badges, feedback labels, live boards.
@@ -26,11 +30,13 @@ What runs where
 
 First run (once)
 ----------------
-1. Secrets: cp secrets.properties.example secrets.properties and fill in what you have
-   (empty = that feature is off). One file for every service; an environment variable with the same name wins.
-   Set the same JWT_SECRET and INTERNAL_API_KEY for all services (they are in that one file).
-2. Infra: cp .env.example .env, then  docker compose up -d mysql redis kafka   (kafka-ui optional)
-   or a local MySQL 8 on 3306 (user root, its password goes into secrets.properties as DB_PASSWORD) and only  docker compose up -d kafka.
+1. Secrets: cp secrets.properties.example secrets.properties (repo root) and fill in what you have
+   (empty = that feature is off). DB_PASSWORD is required. One file for every service; an environment
+   variable with the same name wins. Set the same JWT_SECRET and INTERNAL_API_KEY for all services
+   (they are in that one file).
+2. Infra: cp .env.example .env, then  docker compose up -d mysql redis kafka
+   or a local MySQL 8 on 3306 (user root, its password goes into secrets.properties as DB_PASSWORD) and only
+   docker compose up -d kafka.
    DB_PASSWORD in secrets.properties = MYSQL_ROOT_PASSWORD in .env (required, no default).
    The databases appdb, payment_db, ai_db and notification_db are made on the first start.
 3. Shared code: ./mvnw -q install -DskipTests -pl common,common-web   (again after every change in common/ or common-web/)
@@ -46,7 +52,7 @@ Mode A - terminal (light: infra in Docker / local MySQL, services from the repo 
    ./mvnw -pl notification-service spring-boot:run           http://localhost:8084
    ./mvnw -pl payment-service spring-boot:run                http://localhost:8085
    ./mvnw -pl ai-service spring-boot:run                     http://localhost:8086
-   ./mvnw -pl gateway spring-boot:run                        http://localhost:8080 (what angular calls)
+   ./mvnw -pl gateway spring-boot:run                        http://localhost:8080 (what the site calls)
 
    no Redis:            CACHE_TYPE=none for the core and ai-service (no cache, same answers)
    emails to files:     MAIL_TO_FILE=true ./mvnw -pl notification-service spring-boot:run (target/test-mails)
@@ -70,11 +76,13 @@ Mode B - full Docker (everything in containers; heavy: 6 services + the infra)
    docker compose --profile ui up -d  kafka ui on http://localhost:8090 (it only starts with --profile ui)
    docker compose stop core-2         the site keeps working on core-1
    docker compose --profile apps down
+   the site itself still runs from frontend/ (next section) and calls the gateway on 8080
 
 
 Frontend (http://localhost:8081)
 --------------------------------
    cd frontend && npm install && npm start
+   npm run build                      production build in frontend/dist/gridpulse-web (calls /api on its own address)
    logged out the chat bubble answers from the FAQ list; logged in it is the Copilot ("Copilot · <role>"):
    it reads your data and shows every change as a card that only happens when you press Confirm.
 
@@ -87,10 +95,12 @@ Settings (environment variables, all optional; keys live in secrets.properties)
    DB_HOST / DB_PORT               mysql, default localhost / 3306 (core: ignored when DB_URL is set)
    PAYMENT_DB_URL / AI_DB_URL / NOTIFICATION_DB_URL   the other services' databases
    SERVER_PORT                     core port, default 8082
-   PAYMENT_PORT / AI_PORT / NOTIFICATION_PORT         8085 / 8086 / 8084
+   PAYMENT_PORT / AI_PORT / NOTIFICATION_PORT / GATEWAY_PORT   8085 / 8086 / 8084 / 8080
    CORE_1_URL / CORE_2_URL         where the core instances run (gateway, payment-service, ai-service)
    PAYMENT_URL / AI_URL            where payment-service / ai-service run (gateway + core + ai-service)
    CORS_ENABLED                    false = the core answers no CORS (behind the gateway); default true
+   GRIDPULSE_CORS_ALLOWED_ORIGINS  gateway: which sites may call the api, default * (prod: the real site)
+   GRIDPULSE_TRUST_PROXY           gateway: true only behind our own proxy (rate limits use X-Forwarded-For)
    KAFKA_BOOTSTRAP                 default localhost:9092
    REDIS_HOST / REDIS_PORT         default localhost / 6379;  CACHE_TYPE=none = no redis needed
    FRONTEND_URL                    where the site runs (invite links), default http://localhost:8081
@@ -98,17 +108,22 @@ Settings (environment variables, all optional; keys live in secrets.properties)
    MAIL_TO_FILE                    true = emails go to notification-service/target/test-mails
    RAZORPAY_BASE_URL               payment-service: razorpay api, default https://api.razorpay.com/v1
    GRIDPULSE_JOBS_REFUND_ENABLED   payment-service: false = no refund job here (run it on one instance only)
-   GEMINI_GENERATION_MODEL         ai-service: default gemini-flash-latest (google retired gemini-2.5-flash)
+   GEMINI_GENERATION_MODEL         ai-service: default gemini-flash-latest
    GEMINI_TIMEOUT_SECONDS          ai-service: per gemini call, default 25
+   LOG_DIR                         folder of the daily log files, default logs (inside each module)
 
 
 Tests
 -----
-   unit tests, no Docker:   ./mvnw -q -pl common,notification-service test
-   integration tests (need Docker: their own MySQL, some also a Kafka; no real AI or payment is ever called):
+   where they run: GitHub Actions runs every test on every push (.github/workflows/ci.yml), then starts the whole
+   stack in Docker and runs the smoke test below. Locally only what you need:
+
+   no Docker needed (16 tests):  ./mvnw -q -pl common,notification-service,gateway test
+   need Docker (36 tests, Testcontainers start their own MySQL, some also a Kafka; no real AI or payment is called):
                             ./mvnw -pl core-service verify
                             ./mvnw -pl payment-service verify    (wiremock plays the core, razorpay is faked)
                             ./mvnw -pl ai-service verify         (wiremock plays the core + payment, no model)
+   everything at once:      ./mvnw verify
    core: concurrency (car numbers, last seat), internal api rules, payment events once, waitlist, feedback labels
    + urgent event, security, admin pages, e-ticket, stats, circuit breakers, outbox -> kafka.
    payment-service: booked -> PAID, refused -> refund, core too slow -> 202 -> the job finishes, refund once.
@@ -116,3 +131,22 @@ Tests
    caller's token; FeedbackSubmitted -> FeedbackLabelled over kafka, once.
    one class only:  ./mvnw -pl core-service test -Dtest=StatsIntegrationTest
    skip them:       ./mvnw package -DskipTests
+
+
+Smoke test (end to end, against a running Docker stack)
+-------------------------------------------------------
+   node scripts/smoke/smoke.mjs walks through the site like a user: admin login, a track and two sessions, two drivers
+   sign up (code from the email files), pay + register, approve / reject + refund, live board, feedback, faq chat,
+   error shapes and the core's api list (scripts/smoke/baseline). One PASS / FAIL line per step, stops at the first FAIL.
+
+   It needs the stack of Mode B plus a fake Razorpay and emails written to files (scripts/ci/compose.ci.yml):
+   ./mvnw -q package -DskipTests
+   mkdir -p scripts/smoke/out/mails
+   docker compose -f docker-compose.yml -f scripts/ci/compose.ci.yml --profile apps up -d --build --wait
+   SUPER_ADMIN_EMAIL=... SUPER_ADMIN_PASSWORD=... RAZORPAY_KEY_SECRET=... node scripts/smoke/smoke.mjs
+       (the same three values as in .env; RAZORPAY_KEY_ID / _SECRET must be set there, any value works with the fake)
+   docker compose -f docker-compose.yml -f scripts/ci/compose.ci.yml --profile apps down
+
+   a throwaway .env with random secrets: bash scripts/ci/write-env.sh (it REPLACES .env; with a new MySQL password
+   the old mysql volume no longer opens, so only use it for a fresh stack)
+   output (mails, logs, screenshots) goes to scripts/smoke/out/, which git ignores
