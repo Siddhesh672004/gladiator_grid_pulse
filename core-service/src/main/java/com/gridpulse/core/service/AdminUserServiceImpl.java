@@ -10,8 +10,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import com.gridpulse.common.paging.PageResponse;
 import com.gridpulse.core.dto.response.AdminUserResponse;
-import com.gridpulse.core.dto.response.PageResponse;
 import com.gridpulse.core.exceptions.ConflictException;
 import com.gridpulse.core.exceptions.ResourceNotFoundException;
 import com.gridpulse.core.mapper.UserMapper;

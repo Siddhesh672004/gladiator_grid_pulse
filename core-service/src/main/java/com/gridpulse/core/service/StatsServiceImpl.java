@@ -8,8 +8,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.gridpulse.common.paging.ChartPoint;
+import com.gridpulse.common.paging.MonthAmount;
 import com.gridpulse.core.config.CacheConfig;
-import com.gridpulse.core.dto.response.ChartPoint;
 import com.gridpulse.core.dto.response.DriverStatsResponse;
 import com.gridpulse.core.dto.response.LeaderboardEntry;
 import com.gridpulse.core.model.CompetitionPhase;
@@ -18,7 +19,6 @@ import com.gridpulse.core.model.SessionStatus;
 import com.gridpulse.core.model.User;
 import com.gridpulse.core.repository.DriverTotals;
 import com.gridpulse.core.repository.LeaderboardRow;
-import com.gridpulse.core.repository.MonthAmount;
 import com.gridpulse.core.repository.RaceBookingRepo;
 
 import lombok.RequiredArgsConstructor;

@@ -4,8 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
+import com.gridpulse.common.paging.PageResponse;
 import com.gridpulse.core.dto.request.SessionRequest;
-import com.gridpulse.core.dto.response.PageResponse;
 import com.gridpulse.core.dto.response.SessionResponse;
 import com.gridpulse.core.model.RaceTrack;
 

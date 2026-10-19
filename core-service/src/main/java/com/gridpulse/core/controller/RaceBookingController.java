@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.gridpulse.common.paging.PageResponse;
 import com.gridpulse.core.dto.request.BookingStatusRequest;
 import com.gridpulse.core.dto.response.CarCategoryResponse;
-import com.gridpulse.core.dto.response.PageResponse;
 import com.gridpulse.core.dto.response.RaceBookingResponse;
 import com.gridpulse.core.service.RaceBookingService;
 import com.gridpulse.core.service.TicketService;

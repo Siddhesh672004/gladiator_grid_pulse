@@ -2,10 +2,10 @@ package com.gridpulse.core.service;
 
 import java.util.List;
 
+import com.gridpulse.common.paging.PageResponse;
 import com.gridpulse.core.dto.request.FeedbackRequest;
 import com.gridpulse.core.dto.response.FeedbackCountsResponse;
 import com.gridpulse.core.dto.response.FeedbackResponse;
-import com.gridpulse.core.dto.response.PageResponse;
 import com.gridpulse.core.dto.response.RecentFeedbackResponse;
 
 // feedback of drivers, the ai part is in FeedbackAiService

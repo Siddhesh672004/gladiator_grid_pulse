@@ -14,7 +14,7 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>common</name>
 
-	<description>GridPulse shared code: events, outbox / inbox, jwt check, e-ticket</description>
+	<description>GridPulse shared code: events, outbox / inbox, jwt check, e-ticket, paging helpers, log config</description>
 	<properties>
 		<java.version>17</java.version>
 		<!-- 2.0.x is the last openpdf line that runs on java 17 -->

@@ -4,8 +4,8 @@ import java.time.Instant;
 import java.util.List;
 
 import com.gridpulse.common.event.BookingRefundRequested;
+import com.gridpulse.common.paging.PageResponse;
 import com.gridpulse.payment.client.BookingQuote;
-import com.gridpulse.payment.dto.response.PageResponse;
 import com.gridpulse.payment.dto.response.PaymentResponse;
 import com.gridpulse.payment.dto.response.RevenueResponse;
 import com.gridpulse.payment.model.Payment;

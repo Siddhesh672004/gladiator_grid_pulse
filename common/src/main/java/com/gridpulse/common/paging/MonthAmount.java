@@ -1,4 +1,4 @@
-package com.gridpulse.core.repository;
+package com.gridpulse.common.paging;
 
 import java.util.List;
 import java.util.Map;

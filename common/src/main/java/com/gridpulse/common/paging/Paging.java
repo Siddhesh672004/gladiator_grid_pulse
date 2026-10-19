@@ -1,4 +1,4 @@
-package com.gridpulse.core.service;
+package com.gridpulse.common.paging;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -8,8 +8,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-
-import com.gridpulse.core.dto.response.PageResponse;
 
 // shared rules of the admin list pages: page from 0, 1 - 50 rows, empty or "All" = no filter
 public final class Paging {

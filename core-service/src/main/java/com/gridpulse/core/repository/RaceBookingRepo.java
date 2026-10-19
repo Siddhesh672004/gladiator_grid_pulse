@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import com.gridpulse.common.paging.MonthAmount;
 import com.gridpulse.core.model.CompetitionPhase;
 import com.gridpulse.core.model.RaceBooking;
 import com.gridpulse.core.model.SessionStatus;

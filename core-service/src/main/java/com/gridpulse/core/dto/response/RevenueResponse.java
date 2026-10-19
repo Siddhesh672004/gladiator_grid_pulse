@@ -2,6 +2,8 @@ package com.gridpulse.core.dto.response;
 
 import java.util.List;
 
+import com.gridpulse.common.paging.ChartPoint;
+
 // the money summary from payment-service, every number from ONE database snapshot there
 public record RevenueResponse(
         double collected,

@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.gridpulse.common.paging.PageResponse;
 import com.gridpulse.core.dto.request.SessionRequest;
-import com.gridpulse.core.dto.response.PageResponse;
 import com.gridpulse.core.dto.response.SessionResponse;
 import com.gridpulse.core.service.RaceSessionService;
 import com.gridpulse.web.security.AdminOnly;

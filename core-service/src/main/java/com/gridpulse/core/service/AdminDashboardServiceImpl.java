@@ -7,9 +7,10 @@ import java.util.stream.IntStream;
 
 import org.springframework.stereotype.Service;
 
+import com.gridpulse.common.paging.ChartPoint;
+import com.gridpulse.common.paging.MonthAmount;
 import com.gridpulse.core.dto.response.AdminDashboardResponse;
 import com.gridpulse.core.dto.response.BookingRaceStatistic;
-import com.gridpulse.core.dto.response.ChartPoint;
 import com.gridpulse.core.dto.response.DashboardMetrics;
 import com.gridpulse.core.dto.response.LiveRaceResponse;
 import com.gridpulse.core.dto.response.RecentRegistrationResponse;
@@ -21,7 +22,6 @@ import com.gridpulse.core.model.Role;
 import com.gridpulse.core.model.SessionStatus;
 import com.gridpulse.core.model.User;
 import com.gridpulse.core.repository.FeedbackRepo;
-import com.gridpulse.core.repository.MonthAmount;
 import com.gridpulse.core.repository.RaceBookingRepo;
 import com.gridpulse.core.repository.RaceSessionRepo;
 import com.gridpulse.core.repository.RaceTrackRepo;

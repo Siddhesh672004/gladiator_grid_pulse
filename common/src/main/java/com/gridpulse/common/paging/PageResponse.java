@@ -1,4 +1,4 @@
-package com.gridpulse.payment.dto.response;
+package com.gridpulse.common.paging;
 
 import java.util.List;
 

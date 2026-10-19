@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 
+import com.gridpulse.common.paging.MonthAmount;
 import com.gridpulse.core.model.CompetitionPhase;
 import com.gridpulse.core.model.RaceSession;
 import com.gridpulse.core.model.SessionStatus;

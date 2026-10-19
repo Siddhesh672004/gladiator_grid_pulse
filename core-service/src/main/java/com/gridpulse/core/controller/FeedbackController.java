@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.gridpulse.common.paging.PageResponse;
 import com.gridpulse.core.dto.request.FeedbackRequest;
 import com.gridpulse.core.dto.response.FeedbackCountsResponse;
 import com.gridpulse.core.dto.response.FeedbackResponse;
-import com.gridpulse.core.dto.response.PageResponse;
 import com.gridpulse.core.service.FeedbackService;
 import com.gridpulse.web.security.AdminOnly;
 import com.gridpulse.web.security.LoggedIn;

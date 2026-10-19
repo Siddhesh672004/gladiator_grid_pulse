@@ -5,13 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.gridpulse.common.paging.PageResponse;
 import com.gridpulse.core.dto.request.BookingStatusRequest;
 import com.gridpulse.core.dto.request.InternalBookingRequest;
 import com.gridpulse.core.dto.request.RaceBookingRequest;
 import com.gridpulse.core.dto.response.BookingQuote;
 import com.gridpulse.core.dto.response.CarCategoryResponse;
 import com.gridpulse.core.dto.response.InternalBookingResult;
-import com.gridpulse.core.dto.response.PageResponse;
 import com.gridpulse.core.dto.response.RaceBookingResponse;
 import com.gridpulse.core.model.RaceBooking;
 import com.gridpulse.core.model.RaceSession;

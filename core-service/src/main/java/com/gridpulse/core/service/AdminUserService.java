@@ -1,7 +1,7 @@
 package com.gridpulse.core.service;
 
+import com.gridpulse.common.paging.PageResponse;
 import com.gridpulse.core.dto.response.AdminUserResponse;
-import com.gridpulse.core.dto.response.PageResponse;
 
 // Manage Users page: admins look after driver accounts only (admins belong to the super admin)
 public interface AdminUserService {

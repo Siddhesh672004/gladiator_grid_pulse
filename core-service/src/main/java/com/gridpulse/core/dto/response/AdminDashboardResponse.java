@@ -2,6 +2,8 @@ package com.gridpulse.core.dto.response;
 
 import java.util.List;
 
+import com.gridpulse.common.paging.ChartPoint;
+
 // everything the admin dashboard shows in ONE answer, the live monitor has its own endpoint (refreshed every 4 seconds)
 public record AdminDashboardResponse(
         DashboardMetrics metrics,

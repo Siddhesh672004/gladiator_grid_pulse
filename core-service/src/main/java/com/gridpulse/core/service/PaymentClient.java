@@ -13,10 +13,10 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import com.gridpulse.common.paging.ChartPoint;
+import com.gridpulse.common.paging.MonthAmount;
 import com.gridpulse.core.config.properties.PaymentServiceProperties;
-import com.gridpulse.core.dto.response.ChartPoint;
 import com.gridpulse.core.dto.response.RevenueResponse;
-import com.gridpulse.core.repository.MonthAmount;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.extern.slf4j.Slf4j;

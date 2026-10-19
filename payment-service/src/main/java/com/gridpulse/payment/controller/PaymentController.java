@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.gridpulse.common.paging.PageResponse;
 import com.gridpulse.payment.dto.request.PaymentConfirmRequest;
 import com.gridpulse.payment.dto.request.RaceBookingRequest;
 import com.gridpulse.payment.dto.response.ConfirmResult;
-import com.gridpulse.payment.dto.response.PageResponse;
 import com.gridpulse.payment.dto.response.PaymentAuditResponse;
 import com.gridpulse.payment.dto.response.PaymentOrderResponse;
 import com.gridpulse.payment.dto.response.PaymentResponse;

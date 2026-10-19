@@ -15,9 +15,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.gridpulse.common.paging.PageResponse;
+import com.gridpulse.common.paging.Paging;
 import com.gridpulse.core.config.CacheConfig;
 import com.gridpulse.core.dto.request.SessionRequest;
-import com.gridpulse.core.dto.response.PageResponse;
 import com.gridpulse.core.dto.response.SessionResponse;
 import com.gridpulse.core.exceptions.BookingException;
 import com.gridpulse.core.exceptions.ConflictException;
