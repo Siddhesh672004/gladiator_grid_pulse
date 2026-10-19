@@ -105,7 +105,8 @@ gridpulse:
       - { method: POST, paths: [/api/login, /api/admin/login], capacity: 5, period: 1m, key: IP }
       - { method: POST, paths: [/api/register/send-code, /api/password/forgot, /api/password/set-initial], capacity: 3, period: 10m, key: IP }
       - { method: POST, paths: [/api/register, /api/password/reset], capacity: 10, period: 10m, key: IP }
-      - { method: POST, paths: [/api/chat], capacity: 20, period: 1m, key: CLIENT }
+      # anonymous faq chat shares the gemini keys with the copilot: a small daily cap per address
+      - { method: POST, paths: [/api/chat], capacity: 30, period: 1d, key: IP }
       - { method: POST, paths: ["/api/ai/copilot/**"], capacity: 20, period: 1m, key: CLIENT }
       - { method: POST, paths: [/api/payments/order], capacity: 10, period: 1m, key: CLIENT }
       - { paths: ["/api/live/**"], capacity: 0 }
