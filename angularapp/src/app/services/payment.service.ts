@@ -1,14 +1,15 @@
 import { Injectable, NgZone } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable, from, map, switchMap } from 'rxjs';
 import { Payment, PaymentAudit, PaymentConfirmRequest, PaymentConfirmResult, PaymentOrder, RazorpayResult, Revenue } from '../models/payment.model';
 import { RaceBooking, RaceBookingRequest } from '../models/race-booking.model';
 import { PageResponse } from '../models/admin-user.model';
 import { environment } from '../../environments/environment';
 import { API_ENDPOINTS } from '../constants';
 
-// checkout.js is loaded in index.html
+// set by checkout.js, which loadCheckout() adds to the page
 declare const Razorpay: any;
+const CHECKOUT_URL = 'https://checkout.razorpay.com/v1/checkout.js';
 
 export const PAYMENT_CANCELLED = 'Payment was not completed. Nothing was booked.';
 
@@ -19,6 +20,7 @@ export const PAYMENT_CANCELLED = 'Payment was not completed. Nothing was booked.
 export class PaymentService {
 
   public apiUrl = environment.apiUrl;
+  private checkoutScript?: Promise<void>;
 
   constructor(private http: HttpClient, private zone: NgZone) { }
 
@@ -35,8 +37,9 @@ export class PaymentService {
   }
 
   // emits Razorpay's three values once paid, errors when the window is closed without paying
+  // a checkout.js that could not be downloaded ends like a missing Razorpay below
   openCheckout(order: PaymentOrder): Observable<RazorpayResult> {
-    return new Observable<RazorpayResult>(observer => {
+    return from(this.loadCheckout().catch(() => undefined)).pipe(switchMap(() => new Observable<RazorpayResult>(observer => {
       if (typeof Razorpay === 'undefined') {
         observer.error({ error: { message: 'The payment window could not be loaded. Please check the internet connection.' } });
         return;
@@ -59,7 +62,26 @@ export class PaymentService {
         }
       });
       checkout.open();
-    });
+    })));
+  }
+
+  // checkout.js is downloaded when the first payment window opens (not with every page), then kept
+  private loadCheckout(): Promise<void> {
+    if (!this.checkoutScript) {
+      this.checkoutScript = new Promise<void>((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = CHECKOUT_URL;
+        script.onload = () => resolve();
+        script.onerror = () => {
+          // the next payment tries again
+          script.remove();
+          this.checkoutScript = undefined;
+          reject();
+        };
+        document.head.appendChild(script);
+      });
+    }
+    return this.checkoutScript;
   }
 
   getAllPayments(): Observable<Payment[]> {
