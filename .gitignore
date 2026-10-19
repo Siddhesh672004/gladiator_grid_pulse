@@ -16,6 +16,7 @@ springapp/src/main/resources/static/
 /CLAUDE.md
 /docs/
 /tools/
+.claude/
 /run-*.cmd
 /*.pdf
 /*.docx

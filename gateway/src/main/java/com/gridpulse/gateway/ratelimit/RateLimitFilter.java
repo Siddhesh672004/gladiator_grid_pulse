@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
@@ -54,11 +55,8 @@ public class RateLimitFilter implements GlobalFilter, Ordered {
     private final TokenUsers tokenUsers;
     private final ObjectMapper objectMapper;
     private final boolean trustProxy;
-    // buckets of clients that were quiet for 15 minutes are forgotten
-    private final Cache<String, Bucket> buckets = Caffeine.newBuilder()
-            .expireAfterAccess(Duration.ofMinutes(15))
-            .maximumSize(100_000)
-            .build();
+    // a quiet client's buckets are forgotten only after the longest rule period, so a daily cap stays daily
+    private final Cache<String, Bucket> buckets;
 
     public RateLimitFilter(RateLimitProperties properties, TokenUsers tokenUsers, ObjectMapper objectMapper,
             @Value("${gridpulse.trust-proxy:false}") boolean trustProxy) {
@@ -69,6 +67,17 @@ public class RateLimitFilter implements GlobalFilter, Ordered {
         this.tokenUsers = tokenUsers;
         this.objectMapper = objectMapper;
         this.trustProxy = trustProxy;
+        this.buckets = Caffeine.newBuilder()
+                .expireAfterAccess(longestPeriod(configured))
+                .maximumSize(100_000)
+                .build();
+    }
+
+    private static Duration longestPeriod(List<RateLimitProperties.Rule> rules) {
+        return rules.stream()
+                .map(RateLimitProperties.Rule::period)
+                .filter(Objects::nonNull)
+                .reduce(Duration.ofMinutes(15), (a, b) -> a.compareTo(b) >= 0 ? a : b);
     }
 
     @Override
