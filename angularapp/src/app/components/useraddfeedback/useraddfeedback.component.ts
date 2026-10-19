@@ -10,6 +10,7 @@ import { UserStorageService } from '../../services/user-storage.service';
 import { BOOKING_STATUS, SESSION_STATUS } from '../../constants';
 import { maxChars, minChars, required } from '../../validation';
 import { FieldOption } from '../field/field.component';
+import { byIndex } from '../../shared/track-by';
 
 // add feedback -> FeedbackService. only sessions the driver took part in, that are over and not reviewed yet
 const AI_DOWN = 'AI suggestions are not available right now. You can still send your own text.';
@@ -38,6 +39,8 @@ export class UseraddfeedbackComponent implements OnInit, OnDestroy {
   aiMessage: string = '';
 
   private editSubscription?: Subscription;
+
+  readonly byIndex = byIndex;
 
   constructor(private fb: FormBuilder, private feedbackService: FeedbackService, private raceService: RaceService,
               private userStorage: UserStorageService) {

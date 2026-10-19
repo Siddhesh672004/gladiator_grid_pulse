@@ -2,7 +2,7 @@
   <a class="brand" routerLink="/" aria-label="GridPulse start page"><app-logo></app-logo></a>
 
   <nav class="links" aria-label="Sections">
-    <button type="button" class="link" *ngFor="let section of sections"
+    <button type="button" class="link" *ngFor="let section of sections; trackBy: byIndex"
             [class.active]="section.id === current" (click)="jump.emit(section.id)">{{ section.label }}</button>
     <a class="link" routerLink="/" *ngIf="sections.length === 0">Start page</a>
     <a class="link" routerLink="/how-it-works" routerLinkActive="active">How it works</a>

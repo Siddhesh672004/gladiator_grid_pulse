@@ -28,7 +28,7 @@
         <ng-container *ngIf="!isCancelled">
           <app-startlights [lit]="lightsOn"></app-startlights>
           <ol class="steps">
-            <li *ngFor="let step of steps; let i = index" class="step" [class.done]="isDone(i)" [class.current]="isCurrent(i)">
+            <li *ngFor="let step of steps; let i = index; trackBy: byIndex" class="step" [class.done]="isDone(i)" [class.current]="isCurrent(i)">
               {{ step.label }}
             </li>
           </ol>
@@ -79,7 +79,7 @@
           </thead>
           <tbody>
             <tr *ngIf="standings.length === 0"><td colspan="9" class="empty">{{ isCancelled ? 'This competition was cancelled.' : 'No approved cars yet. Approve bookings on the Registrations page.' }}</td></tr>
-            <tr *ngFor="let row of standings; let i = index" [class.leader]="isLeader(row, i)" [ngClass]="'state-' + stateOf(row)">
+            <tr *ngFor="let row of standings; let i = index; trackBy: byCar" [class.leader]="isLeader(row, i)" [ngClass]="'state-' + stateOf(row)">
               <td data-label="Pos" class="mono">{{ positionLabel(row, i) }}</td>
               <td data-label="Grid" class="mono" *ngIf="viewingRace">{{ row.gridPosition ? 'P' + row.gridPosition : '-' }}</td>
               <td data-label="Car" class="mono">{{ row.carNumber }}</td>

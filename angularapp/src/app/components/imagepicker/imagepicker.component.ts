@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ImageService } from '../../services/image.service';
 import { PICTURE_MAX_MB, pictureProblem } from '../../validation';
+import { byIndex } from '../../shared/track-by';
 
 // "add pictures" box: each chosen file goes to cloudinary at once (ImageService), the page saves the links with its form
 @Component({
@@ -18,6 +19,8 @@ export class ImagepickerComponent {
   maxMb: number = PICTURE_MAX_MB;
   uploading: number = 0;
   errorMessage: string = '';
+
+  readonly byIndex = byIndex;
 
   constructor(private imageService: ImageService) { }
 

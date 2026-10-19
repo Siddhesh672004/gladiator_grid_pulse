@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { RaceBooking, raceStatusText, statusLabel } from '../../models/race-booking.model';
 import { RaceSession, sessionLabel, sessionTime } from '../../models/session.model';
@@ -8,6 +8,7 @@ import { BOOKING_STATUS, COMPETITION_PHASE, LIVE_REFRESH_MS, ROLES, SESSION_STAT
 import { paymentLabel } from '../../models/payment.model';
 import { pageOf } from '../../shared/paging';
 import { blobErrorMessage, fileNameOf, saveFile } from '../../shared/download';
+import { byKey } from '../../shared/track-by';
 
 // the driver's own bookings, reloaded every 4 s -> RaceService
 // cancel while Pending = full refund, cancel an Approved one = no refund. an Approved one has its e-ticket (pdf with qr)
@@ -33,6 +34,8 @@ export class UserviewmyregistrationsComponent implements OnInit, OnDestroy {
   private refreshTimer: number = 0;
   private bookingsRequest?: Subscription;
   private pageClosed: boolean = false;
+
+  readonly byBooking = byKey<RaceBooking>('raceBookingId');
 
   constructor(private raceService: RaceService, private userStorage: UserStorageService) { }
 
@@ -125,7 +128,19 @@ export class UserviewmyregistrationsComponent implements OnInit, OnDestroy {
       return;
     }
     this.refreshBookings();
-    this.refreshTimer = window.setInterval(() => this.refreshBookings(), LIVE_REFRESH_MS);
+    // a hidden tab skips the rounds, it reads the list again when it is shown (tabShown)
+    this.refreshTimer = window.setInterval(() => {
+      if (!document.hidden) {
+        this.refreshBookings();
+      }
+    }, LIVE_REFRESH_MS);
+  }
+
+  @HostListener('document:visibilitychange')
+  tabShown(): void {
+    if (!document.hidden && this.refreshTimer) {
+      this.refreshBookings();
+    }
   }
 
   private refreshBookings(): void {
@@ -194,6 +209,7 @@ export class UserviewmyregistrationsComponent implements OnInit, OnDestroy {
 
   private stopRefresh(): void {
     window.clearInterval(this.refreshTimer);
+    this.refreshTimer = 0;
     this.bookingsRequest?.unsubscribe();
   }
 }

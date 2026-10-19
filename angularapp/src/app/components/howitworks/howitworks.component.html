@@ -2,22 +2,22 @@
 
 <nav class="chapter-bar" aria-label="Chapters">
   <span class="tag">How it works</span>
-  <ng-container *ngFor="let group of groups">
+  <ng-container *ngFor="let group of groups; trackBy: byIndex">
     <span class="group">{{ group.role }}</span>
-    <button type="button" *ngFor="let chapter of group.chapters" [class.current]="chapter.id === current"
+    <button type="button" *ngFor="let chapter of group.chapters; trackBy: byIndex" [class.current]="chapter.id === current"
             [title]="chapter.title" [attr.aria-label]="chapter.title" (click)="goTo(chapter.id)">{{ chapter.number }}</button>
   </ng-container>
 </nav>
 
 <!-- one chapter per window: a few words on the left, the drawn screen on the right -->
-<section class="slide" *ngFor="let chapter of chapters; let odd = odd" [class.white]="odd" [id]="chapter.id">
+<section class="slide" *ngFor="let chapter of chapters; let odd = odd; trackBy: byIndex" [class.white]="odd" [id]="chapter.id">
   <div class="wrap">
     <div>
       <span class="tag">{{ chapter.number }} · {{ chapter.role }}</span>
       <h2 class="display">{{ chapter.title }}</h2>
       <p class="say">{{ chapter.text }}</p>
       <ul class="points">
-        <li *ngFor="let rule of chapter.rules"><span class="slot"></span>{{ rule }}</li>
+        <li *ngFor="let rule of chapter.rules; trackBy: byIndex"><span class="slot"></span>{{ rule }}</li>
       </ul>
     </div>
 
@@ -99,7 +99,7 @@
             <span><small>Live races</small><b class="mono">2</b></span>
             <span><small>Revenue</small><b class="mono">₹48,200</b></span>
           </div>
-          <div class="bars"><i *ngFor="let bar of bars" [style.height.%]="bar"></i></div>
+          <div class="bars"><i *ngFor="let bar of bars; trackBy: byIndex" [style.height.%]="bar"></i></div>
           <p class="note">Bookings per month</p>
         </ng-container>
 

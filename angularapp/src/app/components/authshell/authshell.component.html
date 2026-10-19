@@ -6,7 +6,7 @@
       <h1 class="display">{{ title }}</h1>
       <p>{{ text }}</p>
       <ul>
-        <li *ngFor="let point of points"><span class="slot"></span>{{ point }}</li>
+        <li *ngFor="let point of points; trackBy: byIndex"><span class="slot"></span>{{ point }}</li>
       </ul>
     </div>
   </aside>

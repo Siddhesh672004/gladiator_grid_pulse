@@ -31,7 +31,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let booking of bookings">
+          <tr *ngFor="let booking of bookings; trackBy: byBooking">
             <td><strong>{{ booking.user.username }}</strong><small class="mono">ID {{ booking.user.userId }}</small></td>
             <td data-label="Track / session"><strong>{{ booking.session.trackName }}</strong><small>{{ label(booking.session) }}</small></td>
             <td data-label="Car" class="mono">#{{ booking.carNumber }}<small>{{ booking.carCategory }}</small></td>

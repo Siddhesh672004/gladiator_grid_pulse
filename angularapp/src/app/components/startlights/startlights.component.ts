@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { byIndex } from '../../shared/track-by';
 
 // the 5 start lights: "lit" of them are red (competition phase, steps of a form)
 @Component({
@@ -9,6 +10,8 @@ export class StartlightsComponent {
 
   @Input() lit: number = 0;
   @Input() total: number = 5;
+
+  readonly byIndex = byIndex;
 
   // one entry per light: true = red, false = dark
   get lights(): boolean[] {

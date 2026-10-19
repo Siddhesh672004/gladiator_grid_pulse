@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { AbstractControl, FormControl } from '@angular/forms';
 import { errorText } from '../../validation';
+import { byIndex } from '../../shared/track-by';
 
 // one line of a drop-down box
 export interface FieldOption {
@@ -43,6 +44,8 @@ export class FieldComponent {
   @Input() upper: boolean = false;       // typed letters become capitals
 
   showPassword: boolean = false;         // a password box gets the eye button on its own
+
+  readonly byIndex = byIndex;
 
   // the template binds the box with [formControl], which wants a FormControl
   get box(): FormControl {

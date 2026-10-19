@@ -25,7 +25,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let feedback of pagedFeedbacks">
+          <tr *ngFor="let feedback of pagedFeedbacks; trackBy: byFeedback">
             <td><strong>{{ feedback.session?.trackName || '-' }}</strong><small>{{ sessionText(feedback.session) }}</small></td>
             <td data-label="Feedback" class="text-cell">{{ feedback.feedbackText }}</td>
             <td data-label="Rating" class="stars-cell">{{ stars(feedback.rating) }}</td>

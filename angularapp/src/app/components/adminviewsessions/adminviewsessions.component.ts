@@ -6,6 +6,7 @@ import { SessionService } from '../../services/session.service';
 import { COMPETITION_PHASE, SEARCH_DEBOUNCE_MS, SESSION_STATUS, SESSION_TYPE } from '../../constants';
 import { pageCount } from '../../shared/paging';
 import { FieldOption, toOptions } from '../field/field.component';
+import { byKey } from '../../shared/track-by';
 
 // View Sessions (/admin/view/sessions): every session, newest date first, one page from the backend -> SessionService
 // practice session not started yet -> Edit / Cancel, competition session -> Control. ?type=Competition = the navbar's Competitions
@@ -32,6 +33,8 @@ export class AdminviewsessionsComponent implements OnInit, OnDestroy {
   private pageRequest?: Subscription;
   private searchChanges = new Subject<void>();
   private searchWatch?: Subscription;
+
+  readonly bySession = byKey<RaceSession>('sessionId');
 
   constructor(private sessionService: SessionService, private route: ActivatedRoute, private router: Router) { }
 

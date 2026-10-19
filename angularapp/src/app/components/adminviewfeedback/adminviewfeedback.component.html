@@ -8,14 +8,14 @@
 
   <section class="kpi-row six" aria-label="Counts">
     <div class="kpi"><span>Total</span><b>{{ allCount }}</b></div>
-    <div class="kpi" *ngFor="let sentiment of sentiments"><span>{{ label(sentiment) }}</span><b>{{ countOf(sentiment) }}</b></div>
+    <div class="kpi" *ngFor="let sentiment of sentiments; trackBy: byIndex"><span>{{ label(sentiment) }}</span><b>{{ countOf(sentiment) }}</b></div>
     <div class="kpi"><span>Needs attention</span><b>{{ urgentCount }}</b></div>
   </section>
 
   <p class="muted" id="aiInfo" *ngIf="infoMessage">{{ infoMessage }}</p>
   <div class="panel summary-box" *ngIf="summaryLines.length > 0">
     <span class="tag">AI summary of the latest feedback</span>
-    <p *ngFor="let line of summaryLines">{{ line }}</p>
+    <p *ngFor="let line of summaryLines; trackBy: byIndex">{{ line }}</p>
   </div>
 
   <div class="toolbar">
@@ -47,7 +47,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let feedback of feedbacks">
+          <tr *ngFor="let feedback of feedbacks; trackBy: byFeedback">
             <td><strong>{{ feedback.user?.username }}</strong></td>
             <td data-label="Track / session"><strong>{{ feedback.session?.trackName || '-' }}</strong><small>{{ sessionText(feedback.session) }}</small></td>
             <td data-label="Feedback" class="text-cell">{{ feedback.feedbackText }}</td>

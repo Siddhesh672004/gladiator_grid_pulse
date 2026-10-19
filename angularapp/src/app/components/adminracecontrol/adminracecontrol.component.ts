@@ -11,6 +11,7 @@ import { RACE_STATES, RACE_TIME_ZONE_LABEL, SESSION_STATUS, SESSION_TYPE } from 
 import { todayIso } from '../../validation';
 import { formatRaceTime } from './race-time';
 import { carState, isLeaderRow, pickerDateProblem, positionText } from './live-board';
+import { byKey } from '../../shared/track-by';
 
 // Practice Control (admin): pick track + date + practice session, then Start, +1 Lap, Retire per car and
 // Finish / Reset for the session -> RaceControlService. a competition is run from its own Competition Control page
@@ -43,6 +44,10 @@ export class AdminracecontrolComponent implements OnInit, OnDestroy {
   private sessionsRequest?: Subscription;
   private standingsRequest?: Subscription;
   private pageClosed: boolean = false;
+
+  readonly byTrack = byKey<RaceTrack>('trackId');
+  readonly bySession = byKey<RaceSession>('sessionId');
+  readonly byCar = byKey<LiveStanding>('raceBookingId');
 
   constructor(private liveBoard: LiveBoardService, private raceService: RaceService, private sessionService: SessionService,
               private raceControlService: RaceControlService) { }

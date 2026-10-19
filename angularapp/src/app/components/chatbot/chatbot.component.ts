@@ -11,6 +11,7 @@ import { CopilotService } from '../../services/copilot.service';
 import { PaymentService } from '../../services/payment.service';
 import { UserStorageService } from '../../services/user-storage.service';
 import { CHAT_SESSION_KEY, COPILOT_CHAT_KEY } from '../../constants';
+import { byIndex } from '../../shared/track-by';
 
 const GREETING = "Hi! 🏁 I'm the GridPulse assistant. Ask me about tracks, bookings, the Live Race "
   + 'Control Board or feedback. Log in to book or manage things right here.';
@@ -45,6 +46,8 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   // the message list (to scroll it) and the text box (to put the cursor in it)
   @ViewChild('messageList') messageList?: ElementRef<HTMLElement>;
   @ViewChild('messageInput') messageInput?: ElementRef<HTMLInputElement>;
+
+  readonly byIndex = byIndex;
 
   constructor(private chatService: ChatService, private copilotService: CopilotService,
     private paymentService: PaymentService, private userStorage: UserStorageService) { }

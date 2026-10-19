@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { RaceTrack } from '../../models/race-track.model';
 import { RaceService } from '../../services/race.service';
 import { pageOf } from '../../shared/paging';
+import { byKey } from '../../shared/track-by';
 
 // track cards -> RaceService, Register opens the booking form
 // only tracks with at least one session still open for booking (upcomingSessions from the backend)
@@ -18,6 +19,8 @@ export class UserviewtracksComponent implements OnInit {
   pageSize: number = 12;           // 12 cards fill 2, 3 or 4 columns evenly
   isLoading: boolean = true;
   errorMessage: string = '';
+
+  readonly byTrack = byKey<RaceTrack>('trackId');
 
   constructor(private raceService: RaceService, private router: Router) { }
 

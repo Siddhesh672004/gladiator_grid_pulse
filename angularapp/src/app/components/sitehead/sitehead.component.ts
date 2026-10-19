@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
+import { byIndex } from '../../shared/track-by';
 
 // a section of the page the top bar can jump to
 export interface SiteSection {
@@ -21,6 +22,8 @@ export class SiteheadComponent implements OnInit {
 
   loggedIn: boolean = false;
   homeLink: string = '/home';        // where "Open my dashboard" goes
+
+  readonly byIndex = byIndex;
 
   constructor(private authService: AuthService) { }
 

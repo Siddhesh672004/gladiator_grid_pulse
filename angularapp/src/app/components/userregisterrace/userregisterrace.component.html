@@ -27,7 +27,7 @@
         </p>
         <div class="server-error" *ngIf="sessionsError" role="alert">{{ sessionsError }}</div>
         <div class="session-list" *ngIf="sessions.length > 0">
-          <button type="button" class="session-chip" *ngFor="let session of sessions"
+          <button type="button" class="session-chip" *ngFor="let session of sessions; trackBy: bySession"
                   [class.selected]="selectedSession === session" (click)="selectSession(session)">
             <strong class="mono">{{ time(session) }}</strong>
             {{ label(session) }} · <span class="mono">₹{{ session.price }}</span>
@@ -46,7 +46,7 @@
 
         <span class="tiles-label" id="carCategoryLabel">Car Category *</span>
         <div class="car-tiles" role="radiogroup" aria-labelledby="carCategoryLabel">
-          <label class="car-tile" *ngFor="let category of carCategories"
+          <label class="car-tile" *ngFor="let category of carCategories; trackBy: byCategory"
                  [class.selected]="bookingForm.get('carCategory')?.value === category.name">
             <input type="radio" name="carCategory" formControlName="carCategory" [value]="category.name">
             <img *ngIf="category.imageUrl" [src]="category.imageUrl | cloudImage:320" alt="" width="160" height="100"

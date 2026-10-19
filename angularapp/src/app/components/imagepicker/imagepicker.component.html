@@ -1,5 +1,5 @@
 <div class="thumbs">
-  <div class="thumb" *ngFor="let url of urls; let i = index">
+  <div class="thumb" *ngFor="let url of urls; let i = index; trackBy: byIndex">
     <img [src]="url | cloudImage:240" [alt]="'Picture ' + (i + 1)" width="120" height="80">
     <span class="cover-tag" *ngIf="i === 0 && max > 1">Cover</span>
     <button type="button" class="thumb-remove" (click)="remove(url)" [attr.aria-label]="'Remove picture ' + (i + 1)">&times;</button>

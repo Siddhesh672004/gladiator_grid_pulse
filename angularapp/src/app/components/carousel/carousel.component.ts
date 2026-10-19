@@ -1,4 +1,5 @@
 import { Component, Input, OnChanges } from '@angular/core';
+import { byIndex } from '../../shared/track-by';
 
 // the pictures of a track, one at a time, with previous / next arrows and a dot per picture
 @Component({
@@ -10,6 +11,8 @@ export class CarouselComponent implements OnChanges {
   @Input() images: string[] = [];
   @Input() alt: string = '';
   index: number = 0;
+
+  readonly byIndex = byIndex;
 
   // another list of pictures (another track) -> start again at the first one
   ngOnChanges(): void {

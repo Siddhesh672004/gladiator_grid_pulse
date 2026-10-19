@@ -10,6 +10,7 @@ import { CompetitionService } from '../../services/competition.service';
 import { SESSION_TYPE } from '../../constants';
 import { DIGITS_PATTERN, HAS_LETTER_PATTERN, PRICE_MAX, after, matches, maxChars, minChars, minMinutesAfter, monthsAheadIso,
   notBefore, notInPast, notPassedToday, recheckWhenChanged, required, todayIso, withinMonths } from '../../validation';
+import { byKey } from '../../shared/track-by';
 
 const DATE_RANGE = 'Date must be within the next 12 months';
 const START_PASSED = 'Start Time has already passed';
@@ -41,6 +42,8 @@ export class AdminaddsessionComponent implements OnInit {
   isSaving: boolean = false;
   errorMessage: string = '';
   successText: string = '';
+
+  readonly byTrack = byKey<RaceTrack>('trackId');
 
   constructor(private fb: FormBuilder, private raceService: RaceService, private sessionService: SessionService,
               private competitionService: CompetitionService, private route: ActivatedRoute, private router: Router) {

@@ -4,6 +4,7 @@ import { RaceTrack } from '../../models/race-track.model';
 import { RaceService } from '../../services/race.service';
 import { pageOf } from '../../shared/paging';
 import { FieldOption, toOptions } from '../field/field.component';
+import { byKey } from '../../shared/track-by';
 
 // admin track table: search, indoor / outdoor filter, edit, activate / deactivate, delete -> RaceService
 // a track that ever had a session keeps its history: it can only be deactivated, not deleted
@@ -23,6 +24,8 @@ export class AdminviewtracksComponent implements OnInit {
   errorMessage: string = '';
   successMessage: string = '';
   trackToDelete: RaceTrack | null = null;
+
+  readonly byTrack = byKey<RaceTrack>('trackId');
 
   constructor(private raceService: RaceService, private router: Router) { }
 

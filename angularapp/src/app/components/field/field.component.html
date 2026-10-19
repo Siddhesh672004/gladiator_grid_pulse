@@ -4,7 +4,7 @@
   <div class="field-box">
     <select *ngIf="options" [id]="inputId" [formControl]="box">
       <option *ngIf="nothingChosen" [ngValue]="box.value" disabled>Select</option>
-      <option *ngFor="let option of options" [ngValue]="option.value">{{ option.text }}</option>
+      <option *ngFor="let option of options; trackBy: byIndex" [ngValue]="option.value">{{ option.text }}</option>
     </select>
 
     <textarea *ngIf="!options && rows" [id]="inputId" [rows]="rows" [formControl]="box"

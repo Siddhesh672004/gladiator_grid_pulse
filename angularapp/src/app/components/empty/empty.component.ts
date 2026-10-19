@@ -1,10 +1,12 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
 // shown when a list has no rows: an empty grid slot, one line, and the next step as a button
 // use: <app-empty title="No bookings yet" text="..."> <a class="btn">Book a session</a> </app-empty>
 @Component({
   selector: 'app-empty',
-  templateUrl: './empty.component.html'
+  templateUrl: './empty.component.html',
+  // only its inputs change it (the projected button belongs to the page)
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EmptyComponent {
 

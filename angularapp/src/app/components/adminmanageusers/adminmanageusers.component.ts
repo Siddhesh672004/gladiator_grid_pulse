@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AdminUser } from '../../models/admin-user.model';
 import { AdminUserService } from '../../services/admin-user.service';
 import { FieldOption, toOptions } from '../field/field.component';
+import { byKey } from '../../shared/track-by';
 
 // Manage Users (/admin/manage-users): driver accounts, search + Active / Inactive filter, Activate / Deactivate -> AdminUserService
 // paged by the database (10 rows per request); a deactivated driver cannot log in, their bookings stay
@@ -21,6 +22,8 @@ export class AdminmanageusersComponent implements OnInit {
   isLoading: boolean = true;
   busyId: number | null = null;
   errorMessage: string = '';
+
+  readonly byUser = byKey<AdminUser>('userId');
 
   constructor(private adminUserService: AdminUserService) { }
 

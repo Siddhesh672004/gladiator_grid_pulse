@@ -38,7 +38,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let payment of payments">
+          <tr *ngFor="let payment of payments; trackBy: byPayment">
             <td><strong>{{ payment.user.username }}</strong></td>
             <td data-label="Session">{{ sessionText(payment.session) }}</td>
             <td data-label="Amount" class="mono">₹{{ payment.amount }}</td>
@@ -78,7 +78,7 @@
     <h4 class="sub-title trail-head">Audit Trail</h4>
     <p class="muted" *ngIf="trailLoading">Loading...</p>
     <ol class="trail" *ngIf="!trailLoading">
-      <li *ngFor="let line of trail">
+      <li *ngFor="let line of trail; trackBy: byIndex">
         <span class="trail-time">{{ line.createdAt | date:'dd/MM HH:mm:ss':'+0530' }}</span>
         <strong>{{ line.event }}</strong>
         <span class="trail-detail">{{ line.detail }}</span>

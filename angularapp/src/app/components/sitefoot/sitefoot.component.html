@@ -22,7 +22,7 @@
 
     <div>
       <span class="tag">Photos</span>
-      <a *ngFor="let credit of credits" [href]="credit.link" target="_blank" rel="noopener">
+      <a *ngFor="let credit of credits; trackBy: byIndex" [href]="credit.link" target="_blank" rel="noopener">
         {{ credit.photo }}: {{ credit.author }}, {{ credit.licence }}
       </a>
     </div>

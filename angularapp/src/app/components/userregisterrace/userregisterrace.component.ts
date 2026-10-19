@@ -12,6 +12,7 @@ import { ProfileService } from '../../services/profile.service';
 import { PaymentService } from '../../services/payment.service';
 import { BOOKING_STATUS, BOOKING_TERMS, CAR_CATEGORIES } from '../../constants';
 import { DIGITS_PATTERN, matches, maxChars, monthsAheadIso, notInPast, required, todayIso, withinMonths } from '../../validation';
+import { byKey } from '../../shared/track-by';
 
 // /user/register/:trackId -> pick date and session, car, terms, then Razorpay (PaymentService)
 // the booking is made only after the payment went through. license comes from the profile
@@ -45,6 +46,9 @@ export class UserregisterraceComponent implements OnInit, OnDestroy {
   private dateSubscription?: Subscription;
   private editSubscription?: Subscription;
   private sessionsRequest?: Subscription;
+
+  readonly bySession = byKey<RaceSession>('sessionId');
+  readonly byCategory = byKey<CarCategory>('name');
 
   constructor(private fb: FormBuilder, private raceService: RaceService, private sessionService: SessionService,
               private profileService: ProfileService, private paymentService: PaymentService,

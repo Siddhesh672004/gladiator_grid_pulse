@@ -1,3 +1,3 @@
 <span class="lights" role="img" [attr.aria-label]="lit + ' of ' + total">
-  <i *ngFor="let on of lights" [class.on]="on"></i>
+  <i *ngFor="let on of lights; trackBy: byIndex" [class.on]="on"></i>
 </span>

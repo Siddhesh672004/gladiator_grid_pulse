@@ -32,7 +32,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let track of pagedTracks">
+          <tr *ngFor="let track of pagedTracks; trackBy: byTrack">
             <td>
               <span class="track-name-cell">
                 <img *ngIf="track.imageUrls?.length" class="track-thumb" [src]="track.imageUrls[0] | cloudImage:160" alt=""

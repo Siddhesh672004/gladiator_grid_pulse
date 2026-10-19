@@ -36,7 +36,7 @@
                text="New sessions show up here as soon as an admin schedules them."></app-empty>
 
     <div class="card-grid">
-      <article class="pic-card" *ngFor="let track of tracks">
+      <article class="pic-card" *ngFor="let track of tracks; trackBy: byTrack">
         <div class="cover">
           <img *ngIf="track.imageUrls?.length" [src]="track.imageUrls[0] | cloudImage:640" [alt]="track.trackName" loading="lazy">
         </div>
@@ -61,7 +61,7 @@
     <h2 class="display sec-title">From sign up to chequered flag</h2>
 
     <ol class="race-day">
-      <li *ngFor="let step of steps; let i = index">
+      <li *ngFor="let step of steps; let i = index; trackBy: byIndex">
         <app-startlights [lit]="i + 1"></app-startlights>
         <strong>{{ step.title }}</strong>
         <span>{{ step.text }}</span>
@@ -79,7 +79,7 @@
         <span>LIVE<span class="live-dot"></span></span>
         <span>LAP 7 / 15</span>
       </div>
-      <div class="tower-row" *ngFor="let car of board; let i = index" [class.leader]="i === 0">
+      <div class="tower-row" *ngFor="let car of board; let i = index; trackBy: byIndex" [class.leader]="i === 0">
         <span class="pos">P{{ i + 1 }}</span>
         <span><b>{{ car.driver }}</b><small>#{{ car.car }} · {{ car.laps }} laps</small></span>
         <span class="lap" [class.best]="i === 0">{{ car.lastLap }}</span>
@@ -111,7 +111,7 @@
           <tr><th>Category</th><th>Qualifying laps</th><th>Race laps</th><th>Cars on the grid</th></tr>
         </thead>
         <tbody>
-          <tr *ngFor="let rule of rules">
+          <tr *ngFor="let rule of rules; trackBy: byIndex">
             <td><strong>{{ rule.category }}</strong></td>
             <td data-label="Qualifying laps" class="mono">{{ rule.qualifyingLaps }}</td>
             <td data-label="Race laps" class="mono">{{ rule.raceLaps }}</td>
@@ -139,7 +139,7 @@
             <tr><th>Pos</th><th>Driver</th><th>Wins</th><th>Podiums</th><th>Laps</th></tr>
           </thead>
           <tbody>
-            <tr *ngFor="let leader of leaders">
+            <tr *ngFor="let leader of leaders; trackBy: byIndex">
               <td class="mono">P{{ leader.position }}</td>
               <td data-label="Driver"><strong>{{ leader.username }}</strong></td>
               <td data-label="Wins" class="mono">{{ leader.wins }}</td>

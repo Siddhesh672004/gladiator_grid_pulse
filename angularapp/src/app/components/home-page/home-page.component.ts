@@ -7,6 +7,7 @@ import { FeedbackService } from '../../services/feedback.service';
 import { RaceBooking } from '../../models/race-booking.model';
 import { isLiveOrUpcoming, sessionTime } from '../../models/session.model';
 import { BOOKING_STATUS } from '../../constants';
+import { byIndex } from '../../shared/track-by';
 
 interface QuickAction {
   title: string;
@@ -45,6 +46,8 @@ export class HomePageComponent implements OnInit {
   bookingCount: string = LOADING;
   approvedCount: string = LOADING;
   nextBooking: RaceBooking | null = null;
+
+  readonly byIndex = byIndex;
 
   constructor(private authService: AuthService, private userStorage: UserStorageService, private raceService: RaceService,
               private feedbackService: FeedbackService, private router: Router) { }

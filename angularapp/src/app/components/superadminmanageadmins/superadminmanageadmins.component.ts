@@ -4,6 +4,7 @@ import { AddAdminRequest, AdminAccount } from '../../models/admin.model';
 import { SuperAdminService } from '../../services/super-admin.service';
 import { emailRules, optionalMobileRules, usernameRules } from '../../validation';
 import { pageOf } from '../../shared/paging';
+import { byKey } from '../../shared/track-by';
 
 // super admin only (/admin/manage-admins): add (the admin gets a set-password link), resend the link, switch on / off, delete -> SuperAdminService
 @Component({
@@ -22,6 +23,8 @@ export class SuperadminmanageadminsComponent implements OnInit {
   errorMessage: string = '';
   successMessage: string = '';
   adminToDelete: AdminAccount | null = null;
+
+  readonly byAdmin = byKey<AdminAccount>('userId');
 
   constructor(private fb: FormBuilder, private superAdminService: SuperAdminService) {
     this.adminForm = this.fb.group({

@@ -13,7 +13,7 @@
              [text]="tracks.length === 0 ? 'Please check again later.' : 'Try another name, place or category.'"></app-empty>
 
   <div class="card-grid">
-    <article class="pic-card" *ngFor="let track of pagedTracks">
+    <article class="pic-card" *ngFor="let track of pagedTracks; trackBy: byTrack">
       <div class="cover">
         <img *ngIf="track.imageUrls?.length" [src]="track.imageUrls[0] | cloudImage:640" [alt]="track.trackName" loading="lazy">
       </div>

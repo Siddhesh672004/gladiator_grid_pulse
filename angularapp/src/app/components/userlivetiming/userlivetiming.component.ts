@@ -11,6 +11,7 @@ import { RACE_TIME_ZONE_LABEL } from '../../constants';
 import { todayIso } from '../../validation';
 import { formatRaceTime } from '../adminracecontrol/race-time';
 import { carState, isLeaderRow, pickerDateProblem, positionText } from '../adminracecontrol/live-board';
+import { byKey } from '../../shared/track-by';
 
 // Live Timing (driver, read only): pick track + date + session, the board reloads every 4 s -> RaceControlService
 // only sessions that are live or still to come are listed
@@ -37,6 +38,10 @@ export class UserlivetimingComponent implements OnInit, OnDestroy {
   private watchedSessionId: number | null = null;
   private sessionsRequest?: Subscription;
   private standingsRequest?: Subscription;
+
+  readonly byTrack = byKey<RaceTrack>('trackId');
+  readonly bySession = byKey<RaceSession>('sessionId');
+  readonly byCar = byKey<LiveStanding>('raceBookingId');
 
   constructor(private liveBoard: LiveBoardService, private raceService: RaceService, private sessionService: SessionService,
               private raceControlService: RaceControlService) { }

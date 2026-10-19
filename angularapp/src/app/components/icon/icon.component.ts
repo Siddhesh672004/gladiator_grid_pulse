@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
 // the shapes of the icons the app uses (official Material icon shapes), so no icon font has to be downloaded
 const SHAPES: { [name: string]: string } = {
@@ -23,7 +23,9 @@ const SHAPES: { [name: string]: string } = {
 @Component({
   selector: 'app-icon',
   standalone: true,
-  templateUrl: './icon.component.html'
+  templateUrl: './icon.component.html',
+  // only its name changes it
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class IconComponent {
 

@@ -6,6 +6,7 @@ import { PaymentService } from '../../services/payment.service';
 import { pageCount } from '../../shared/paging';
 import { SEARCH_DEBOUNCE_MS } from '../../constants';
 import { FieldOption, toOptions } from '../field/field.component';
+import { byIndex, byKey } from '../../shared/track-by';
 
 // Payments (/admin/view/payments): money summary, every payment (newest first, one page from the backend), Show More = details + audit trail -> PaymentService
 // Retry refund is for a refund Razorpay refused; refunds move on by themselves (backend job), Refresh shows the latest state
@@ -35,6 +36,9 @@ export class AdminviewpaymentsComponent implements OnInit, OnDestroy {
   private pageRequest?: Subscription;
   private searchChanges = new Subject<void>();
   private searchWatch?: Subscription;
+
+  readonly byIndex = byIndex;
+  readonly byPayment = byKey<Payment>('paymentId');
 
   constructor(private paymentService: PaymentService) { }
 

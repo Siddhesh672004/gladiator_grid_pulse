@@ -11,10 +11,10 @@
   </header>
 
   <div class="chat-messages" #messageList aria-live="polite">
-    <div *ngFor="let bubble of bubbles" class="bubble-row" [class.mine]="bubble.from === 'user'">
+    <div *ngFor="let bubble of bubbles; trackBy: byIndex" class="bubble-row" [class.mine]="bubble.from === 'user'">
       <div class="bubble" [class.user]="bubble.from === 'user'">{{ bubble.text }}</div>
       <small class="bubble-meta" *ngIf="bubble.from === 'bot' && metaLine(bubble)">{{ metaLine(bubble) }}</small>
-      <div class="action-card" *ngFor="let view of bubble.cards" [class.closed]="view.state !== 'open' && view.state !== 'busy'">
+      <div class="action-card" *ngFor="let view of bubble.cards; trackBy: byIndex" [class.closed]="view.state !== 'open' && view.state !== 'busy'">
         <p>{{ view.card.summary }}</p>
         <div class="action-row">
           <button type="button" class="action-confirm" (click)="confirm(view)" [disabled]="view.state !== 'open'">Confirm</button>

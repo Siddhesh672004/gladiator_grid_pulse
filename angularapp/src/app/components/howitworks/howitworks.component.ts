@@ -1,5 +1,6 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy } from '@angular/core';
 import { CHAPTERS } from './howitworks.data';
+import { byIndex } from '../../shared/track-by';
 
 // public walkthrough: one chapter per screen (text from howitworks.data.ts + a small drawn screen)
 // the numbers in the bar on top jump to a chapter and mark the one on screen (handy while presenting)
@@ -19,6 +20,8 @@ export class HowitworksComponent implements AfterViewInit, OnDestroy {
   bars = [30, 45, 40, 60, 75, 55, 80, 65, 90, 70, 50, 62];     // made-up chart of the dashboard drawing
 
   private observer?: IntersectionObserver;
+
+  readonly byIndex = byIndex;
 
   constructor(private host: ElementRef<HTMLElement>) { }
 

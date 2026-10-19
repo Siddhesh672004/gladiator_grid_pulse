@@ -1,6 +1,6 @@
 import { Injectable, NgZone } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
-import { EMPTY, Observable, Subscription, catchError, switchMap, throwError, timer } from 'rxjs';
+import { EMPTY, Observable, Subscription, catchError, filter, fromEvent, merge, switchMap, throwError, timer } from 'rxjs';
 import { LiveStanding } from '../models/live-standing.model';
 import { RaceControlService } from './race-control.service';
 import { environment } from '../../environments/environment';
@@ -35,8 +35,10 @@ export class LiveBoardService {
   }
 
   // a failed read is skipped (the next one comes 4 s later), an unknown session ends the board
+  // a hidden tab skips the rounds and reads the board again when it is shown
   private poll(sessionId: number): Observable<LiveStanding[]> {
-    return timer(0, LIVE_REFRESH_MS).pipe(
+    return merge(timer(0, LIVE_REFRESH_MS), fromEvent(document, 'visibilitychange')).pipe(
+      filter(() => !document.hidden),
       switchMap(() => this.raceControlService.getLiveStandings(sessionId).pipe(
         catchError((err: HttpErrorResponse) => err.status === 404 ? throwError(() => err) : EMPTY))));
   }

@@ -10,6 +10,7 @@ import { CompetitionService } from '../../services/competition.service';
 import { COMPETITION_PHASE, COMPETITION_STATUS, RACE_STATES, RACE_TIME_ZONE_LABEL, SESSION_STATUS } from '../../constants';
 import { formatRaceTime } from '../adminracecontrol/race-time';
 import { carState, isLeaderRow, positionText } from '../adminracecontrol/live-board';
+import { byIndex, byKey } from '../../shared/track-by';
 
 // Competition Control (/admin/competition/:id): one next-step button per stage, the board shows qualifying first, then the race
 @Component({
@@ -44,6 +45,9 @@ export class AdmincompetitioncontrolComponent implements OnInit, OnDestroy {
   private watchedSessionId: number | null = null;
   private standingsRequest?: Subscription;
   private pageClosed: boolean = false;
+
+  readonly byIndex = byIndex;
+  readonly byCar = byKey<LiveStanding>('raceBookingId');
 
   constructor(private liveBoard: LiveBoardService, private raceControlService: RaceControlService, private competitionService: CompetitionService,
               private route: ActivatedRoute, private router: Router) { }

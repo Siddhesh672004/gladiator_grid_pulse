@@ -8,7 +8,7 @@
         <div class="field-box">
           <select id="liveTrack" [(ngModel)]="selectedTrackId" (ngModelChange)="onPickerChange()">
             <option [ngValue]="null">-- Select Track --</option>
-            <option *ngFor="let track of tracks" [ngValue]="track.trackId">{{ track.trackName }} ({{ track.location }})</option>
+            <option *ngFor="let track of tracks; trackBy: byTrack" [ngValue]="track.trackId">{{ track.trackName }} ({{ track.location }})</option>
           </select>
         </div>
       </div>
@@ -27,7 +27,7 @@
       <p class="muted picker-note" *ngIf="loadingSessions">Loading sessions...</p>
       <p class="muted picker-note" *ngIf="!loadingSessions && sessions.length === 0">No running or upcoming sessions for this track on this date.</p>
       <div class="session-list" *ngIf="sessions.length > 0">
-        <button type="button" class="session-chip" *ngFor="let session of sessions" (click)="selectSession(session)">
+        <button type="button" class="session-chip" *ngFor="let session of sessions; trackBy: bySession" (click)="selectSession(session)">
           <strong class="mono">{{ time(session) }}</strong>
           {{ label(session) }} · {{ session.approvedCars }} car{{ session.approvedCars === 1 ? '' : 's' }}
           <app-flag class="chip-flag" [status]="session.status"></app-flag>
@@ -73,7 +73,7 @@
         </thead>
         <tbody>
           <tr *ngIf="standings.length === 0"><td colspan="7" class="empty">No approved cars in this session yet.</td></tr>
-          <tr *ngFor="let row of standings; let i = index" [class.leader]="isLeader(row, i)" [ngClass]="'state-' + stateOf(row)">
+          <tr *ngFor="let row of standings; let i = index; trackBy: byCar" [class.leader]="isLeader(row, i)" [ngClass]="'state-' + stateOf(row)">
             <td data-label="Pos" class="mono">{{ positionLabel(row, i) }}</td>
             <td data-label="Car" class="mono">{{ row.carNumber }}</td>
             <td data-label="Driver" class="col-left">{{ row.user.username }}</td>

@@ -34,7 +34,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let user of users">
+          <tr *ngFor="let user of users; trackBy: byUser">
             <td><strong>{{ user.username }}</strong><small>{{ user.email }}</small></td>
             <td data-label="Mobile Number" class="mono">{{ user.mobileNumber }}</td>
             <td data-label="Profile">{{ user.profileComplete ? 'Complete' : 'Incomplete' }}</td>

@@ -7,6 +7,7 @@ import { FeedbackCounts, FeedbackRow, sentimentLabel, starText } from '../../mod
 import { SEARCH_DEBOUNCE_MS, SENTIMENTS } from '../../constants';
 import { pageCount } from '../../shared/paging';
 import { FieldOption, toOptions } from '../field/field.component';
+import { byIndex, byKey } from '../../shared/track-by';
 
 // every driver's feedback: stars, AI label (Positive / Negative / Neutral + Needs attention), counters, filters, Summarise with AI -> FeedbackService
 // when the AI is down a feedback is "Not analysed" and its row gets an Analyse button. the table is one page from the backend
@@ -45,6 +46,9 @@ export class AdminviewfeedbackComponent implements OnInit, OnDestroy {
   private pageRequest?: Subscription;
   private searchChanges = new Subject<void>();
   private searchWatch?: Subscription;
+
+  readonly byIndex = byIndex;
+  readonly byFeedback = byKey<FeedbackRow>('feedbackId');
 
   constructor(private feedbackService: FeedbackService) { }
 

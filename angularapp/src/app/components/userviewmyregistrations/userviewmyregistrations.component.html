@@ -34,7 +34,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let booking of pagedBookings">
+          <tr *ngFor="let booking of pagedBookings; trackBy: byBooking">
             <td><strong>{{ booking.session.trackName }}</strong><small>{{ label(booking.session) }}</small></td>
             <td data-label="Date / time" class="mono">{{ booking.session.sessionDate }}<small class="mono">{{ time(booking.session) }}</small></td>
             <td data-label="Car #" class="mono">#{{ booking.carNumber }}</td>

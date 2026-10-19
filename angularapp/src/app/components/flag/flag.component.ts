@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
 // a status shown as a race flag: green = go, yellow = wait, red = stop, chequered = finished, blue = coming up
 const FLAGS: { [status: string]: string } = {
@@ -11,7 +11,9 @@ const FLAGS: { [status: string]: string } = {
 
 @Component({
   selector: 'app-flag',
-  templateUrl: './flag.component.html'
+  templateUrl: './flag.component.html',
+  // only its inputs change it
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FlagComponent {
 

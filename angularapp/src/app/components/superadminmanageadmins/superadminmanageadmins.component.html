@@ -21,7 +21,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let admin of pagedAdmins">
+              <tr *ngFor="let admin of pagedAdmins; trackBy: byAdmin">
                 <td><strong>{{ admin.username }}</strong><small>{{ admin.email }}</small></td>
                 <td data-label="Mobile Number" class="mono">{{ admin.mobileNumber || '-' }}</td>
                 <td data-label="Added On" class="mono">{{ admin.createdAt ? (admin.createdAt | date:'dd/MM/yyyy') : '-' }}</td>

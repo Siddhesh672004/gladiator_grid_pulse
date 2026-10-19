@@ -29,7 +29,7 @@
     <div class="panel monitor">
       <h2 class="sub-title">Live Race Monitor<span class="live-dot" *ngIf="liveRaces.length"></span></h2>
       <p class="muted quiet" *ngIf="liveRaces.length === 0">No race is running right now.</p>
-      <div class="live-race" *ngFor="let race of liveRaces">
+      <div class="live-race" *ngFor="let race of liveRaces; trackBy: byRace">
         <div class="live-top">
           <strong>{{ race.trackName }}</strong>
           <app-flag status="LIVE" [label]="race.raceStatus"></app-flag>
@@ -71,7 +71,7 @@
           </thead>
           <tbody>
             <tr *ngIf="dashboard.recentRegistrations.length === 0" class="empty-row"><td colspan="5">No bookings yet</td></tr>
-            <tr *ngFor="let row of dashboard.recentRegistrations">
+            <tr *ngFor="let row of dashboard.recentRegistrations; trackBy: byBooking">
               <td><strong>{{ row.username }}</strong><small>{{ row.email }}</small></td>
               <td data-label="Track / Session"><strong>{{ row.trackName }}</strong><small>{{ row.session }}</small></td>
               <td data-label="Booked On" class="mono">{{ row.registeredAt | date:'dd/MM/yyyy':'+0530' }}</td>

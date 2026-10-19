@@ -4,6 +4,7 @@ import { RaceSession, sessionSummary } from '../../models/session.model';
 import { FeedbackService } from '../../services/feedback.service';
 import { UserStorageService } from '../../services/user-storage.service';
 import { pageOf } from '../../shared/paging';
+import { byKey } from '../../shared/track-by';
 
 // the logged-in driver's own feedback, delete with a confirmation popup
 @Component({
@@ -18,6 +19,8 @@ export class UserviewfeedbackComponent implements OnInit {
   isLoading: boolean = true;
   errorMessage: string = '';
   feedbackToDelete: FeedbackRow | null = null;
+
+  readonly byFeedback = byKey<FeedbackRow>('feedbackId');
 
   constructor(private feedbackService: FeedbackService, private userStorage: UserStorageService) { }
 

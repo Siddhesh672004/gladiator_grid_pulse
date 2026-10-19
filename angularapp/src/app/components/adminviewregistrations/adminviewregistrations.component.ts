@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Subject, Subscription, debounceTime } from 'rxjs';
 import { BookingStatusRequest, RaceBooking, raceStatusText, statusLabel } from '../../models/race-booking.model';
 import { RaceSession, sessionLabel, sessionTime } from '../../models/session.model';
@@ -8,6 +8,7 @@ import { ADMIN_ROLES, BOOKING_STATUS, BOOKING_STATUSES, COMPETITION_PHASE, LIVE_
 import { pageCount } from '../../shared/paging';
 import { paymentLabel } from '../../models/payment.model';
 import { FieldOption, toOptions } from '../field/field.component';
+import { byKey } from '../../shared/track-by';
 
 // every booking of every driver: search, status filter, approve / reject (the reason is required), details, delete -> RaceService
 // one page from the backend, reloaded every 4 s; the approval that fills the last seat rejects everybody still waiting (the backend does that)
@@ -42,6 +43,8 @@ export class AdminviewregistrationsComponent implements OnInit, OnDestroy {
   private pageClosed: boolean = false;
   private searchChanges = new Subject<void>();
   private searchWatch?: Subscription;
+
+  readonly byBooking = byKey<RaceBooking>('raceBookingId');
 
   constructor(private raceService: RaceService, private userStorage: UserStorageService) { }
 
@@ -82,7 +85,19 @@ export class AdminviewregistrationsComponent implements OnInit, OnDestroy {
       return;
     }
     this.refreshBookings();
-    this.refreshTimer = window.setInterval(() => this.refreshBookings(), LIVE_REFRESH_MS);
+    // a hidden tab skips the rounds, it reads the list again when it is shown (tabShown)
+    this.refreshTimer = window.setInterval(() => {
+      if (!document.hidden) {
+        this.refreshBookings();
+      }
+    }, LIVE_REFRESH_MS);
+  }
+
+  @HostListener('document:visibilitychange')
+  tabShown(): void {
+    if (!document.hidden && this.refreshTimer) {
+      this.refreshBookings();
+    }
   }
 
   private refreshBookings(): void {
@@ -239,6 +254,7 @@ export class AdminviewregistrationsComponent implements OnInit, OnDestroy {
 
   private stopRefresh(): void {
     window.clearInterval(this.refreshTimer);
+    this.refreshTimer = 0;
     this.bookingsRequest?.unsubscribe();
   }
 }

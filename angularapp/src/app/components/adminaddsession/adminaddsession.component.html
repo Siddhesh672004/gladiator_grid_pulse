@@ -12,7 +12,7 @@
         <div class="field-box">
           <select id="sessionTrack" [(ngModel)]="selectedTrackId" (ngModelChange)="onTrackOrTypeChange()">
             <option *ngIf="selectedTrackId === null" [ngValue]="null" disabled>Select</option>
-            <option *ngFor="let track of tracks" [ngValue]="track.trackId">{{ track.trackName }} ({{ track.trackCategory }})</option>
+            <option *ngFor="let track of tracks; trackBy: byTrack" [ngValue]="track.trackId">{{ track.trackName }} ({{ track.trackCategory }})</option>
           </select>
         </div>
         <div class="error-text" *ngIf="submitted && !selectedTrackId">Track is required</div>

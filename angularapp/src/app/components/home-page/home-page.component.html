@@ -46,7 +46,7 @@
   <div class="two-col">
     <section class="panel">
       <h2 class="display sec-title"><span class="slot"></span>Quick actions</h2>
-      <a class="action" *ngFor="let action of actions; let i = index" [routerLink]="action.link">
+      <a class="action" *ngFor="let action of actions; let i = index; trackBy: byIndex" [routerLink]="action.link">
         <span class="mono">{{ i + 1 | number:'2.0-0' }}</span>
         <span class="action-body"><strong>{{ action.title }}</strong><small>{{ action.text }}</small></span>
         <app-icon name="arrow_forward"></app-icon>
@@ -57,7 +57,7 @@
       <section class="panel">
         <h2 class="sub-title">A race day in five lights</h2>
         <ol class="light-steps">
-          <li *ngFor="let step of raceDay; let i = index"><app-startlights [lit]="i + 1"></app-startlights>{{ step }}</li>
+          <li *ngFor="let step of raceDay; let i = index; trackBy: byIndex"><app-startlights [lit]="i + 1"></app-startlights>{{ step }}</li>
         </ol>
         <a routerLink="/how-it-works">See how everything works</a>
       </section>

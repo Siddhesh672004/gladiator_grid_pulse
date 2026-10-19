@@ -9,6 +9,7 @@ import { raceToday } from '../../models/session.model';
 import { COMPETITION_STATUS } from '../../constants';
 import { PHOTOS } from '../../shared/photos';
 import { SiteSection } from '../sitehead/sitehead.component';
+import { byIndex, byKey } from '../../shared/track-by';
 
 // shown on a number while its call is on the way / when it failed
 const LOADING = '…';
@@ -76,6 +77,9 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
   startText: string = 'Book a session';
 
   private observer?: IntersectionObserver;
+
+  readonly byIndex = byIndex;
+  readonly byTrack = byKey<RaceTrack>('trackId');
 
   constructor(private authService: AuthService, private raceService: RaceService,
               private competitionService: CompetitionService, private statsService: StatsService,

@@ -1,15 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
 import {
   ArcElement, BarController, BarElement, CategoryScale, Chart, ChartConfiguration, DoughnutController, Legend, LinearScale,
   LineController, LineElement, PieController, PointElement, Tooltip
 } from 'chart.js';
-import { AdminDashboard, LiveRace } from '../../models/admin-dashboard.model';
+import { AdminDashboard, LiveRace, RecentRegistration } from '../../models/admin-dashboard.model';
 import { AdminDashboardService } from '../../services/admin-dashboard.service';
 import { SharedModule } from '../../shared/shared.module';
 import { LIVE_REFRESH_MS } from '../../constants';
+import { byKey } from '../../shared/track-by';
 
 // chart.js needs the chart types and parts of this page switched on once (only these are downloaded), and gets our font
 Chart.register(DoughnutController, PieController, LineController, BarController, ArcElement, LineElement, PointElement,
@@ -51,13 +52,27 @@ export class AdmindashboardComponent implements OnInit, OnDestroy {
   private liveTimer: number = 0;
   private liveRequest?: Subscription;
 
+  readonly byRace = byKey<LiveRace>('sessionId');
+  readonly byBooking = byKey<RecentRegistration>('raceBookingId');
+
   constructor(private dashboardService: AdminDashboardService) { }
 
   ngOnInit(): void {
     this.load();
-    // the live race monitor: now, then every 4 s
+    // the live race monitor: now, then every 4 s (a hidden tab skips the rounds and reads it again when shown)
     this.loadLiveRaces();
-    this.liveTimer = window.setInterval(() => this.loadLiveRaces(), LIVE_REFRESH_MS);
+    this.liveTimer = window.setInterval(() => {
+      if (!document.hidden) {
+        this.loadLiveRaces();
+      }
+    }, LIVE_REFRESH_MS);
+  }
+
+  @HostListener('document:visibilitychange')
+  tabShown(): void {
+    if (!document.hidden) {
+      this.loadLiveRaces();
+    }
   }
 
   ngOnDestroy(): void {

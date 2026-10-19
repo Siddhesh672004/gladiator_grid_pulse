@@ -2,6 +2,6 @@
   <span>{{ label }}</span>
   <select [ngModel]="value" (ngModelChange)="valueChange.emit($event)">
     <option value="All">All</option>
-    <option *ngFor="let option of options" [value]="option.value">{{ option.text }}</option>
+    <option *ngFor="let option of options; trackBy: byIndex" [value]="option.value">{{ option.text }}</option>
   </select>
 </label>
