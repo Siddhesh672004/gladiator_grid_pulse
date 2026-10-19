@@ -16,7 +16,7 @@ import org.springframework.web.service.annotation.PutExchange;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-// the core's api, called with the caller's own token (config/ClientConfig): the core checks the user itself
+// the core's api, called with the caller's own token (ClientConfig): the core checks the user itself
 // the answers stay json, the tools pick what the model needs. a 4xx -> ToolCallException
 @HttpExchange
 public interface CoreClient {

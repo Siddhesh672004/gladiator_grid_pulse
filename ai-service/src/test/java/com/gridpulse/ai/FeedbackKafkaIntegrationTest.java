@@ -24,9 +24,9 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.kafka.KafkaContainer;
 
-import com.gridpulse.ai.dto.FeedbackLabel;
-import com.gridpulse.ai.model.Sentiment;
-import com.gridpulse.ai.service.GroqService;
+import com.gridpulse.ai.feedback.dto.FeedbackLabel;
+import com.gridpulse.ai.feedback.dto.Sentiment;
+import com.gridpulse.ai.feedback.service.GroqService;
 import com.gridpulse.ai.support.AiIntegrationTest;
 import com.gridpulse.common.event.EventEnvelope;
 import com.gridpulse.common.event.EventJson;

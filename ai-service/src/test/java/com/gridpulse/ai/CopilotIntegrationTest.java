@@ -23,12 +23,12 @@ import org.springframework.ai.support.ToolCallbacks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 
-import com.gridpulse.ai.entity.PendingAction;
-import com.gridpulse.ai.repository.ActionLogRepo;
-import com.gridpulse.ai.repository.PendingActionRepo;
+import com.gridpulse.ai.copilot.data.ActionLogRepo;
+import com.gridpulse.ai.copilot.data.PendingAction;
+import com.gridpulse.ai.copilot.data.PendingActionRepo;
+import com.gridpulse.ai.copilot.tools.AdminTools;
+import com.gridpulse.ai.copilot.tools.Toolsets;
 import com.gridpulse.ai.support.AiIntegrationTest;
-import com.gridpulse.ai.tools.AdminTools;
-import com.gridpulse.ai.tools.Toolsets;
 
 // the Copilot without a model: which tools a role gets, prepare writes nothing, and the Confirm rules
 class CopilotIntegrationTest extends AiIntegrationTest {

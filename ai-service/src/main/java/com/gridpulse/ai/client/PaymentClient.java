@@ -11,7 +11,7 @@ import org.springframework.web.service.annotation.PostExchange;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-// payment-service's api with the caller's own token (config/ClientConfig); a 4xx -> ToolCallException
+// payment-service's api with the caller's own token (ClientConfig); a 4xx -> ToolCallException
 @HttpExchange("/api/payments")
 public interface PaymentClient {
 
