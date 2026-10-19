@@ -20,7 +20,7 @@ const NOT_REACHED = 'Sorry, I cannot reach the GridPulse server right now. Pleas
 // same number as ChatRequest / CopilotRequest in spring
 const MESSAGE_MAX = 1000;
 
-// floating assistant, mounted once in app.component.html so it is on every page
+// floating assistant on every page, created (open) by the chat button (chatlauncher) on its first click
 // logged out: the faq chat (ChatService). logged in: the Copilot (CopilotService), whose changes come as cards;
 // a confirmed booking opens the Razorpay window like the booking page (PaymentService)
 @Component({
@@ -52,12 +52,11 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // logging in or out switches the mode and starts a fresh chat
     this.loginWatch = this.userStorage.loggedIn$.subscribe(() => this.startChat());
-    this.countdown = setInterval(() => this.tick(), 1000);
   }
 
   ngOnDestroy(): void {
     this.loginWatch?.unsubscribe();
-    clearInterval(this.countdown);
+    this.stopCountdown();
   }
 
   toggle(): void {
@@ -155,6 +154,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     this.copilot = token !== null && !this.userStorage.isTokenExpired();
     this.role = this.copilot ? (this.userStorage.getUserRole() ?? '') : '';
     this.bubbles = [{ from: 'bot', text: this.copilot ? COPILOT_GREETING : GREETING, time: new Date() }];
+    this.stopCountdown();
   }
 
   private sendFailed(err: any, key: string): void {
@@ -198,17 +198,28 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     }
   }
 
-  // every second: the time left on the open cards, an open card at 0 is over
+  // every second while a card counts down: the time left on the open cards, an open card at 0 is over
   private tick(): void {
     const now = Date.now();
-    this.bubbles.reduce<CardView[]>((all, bubble) => all.concat(bubble.cards ?? []), [])
-      .filter(view => view.state === 'open')
-      .forEach(view => {
-        view.secondsLeft = Math.max(0, Math.floor((new Date(view.card.expiresAt).getTime() - now) / 1000));
-        if (view.secondsLeft === 0) {
-          view.state = 'expired';
-        }
-      });
+    const openCards = this.bubbles.reduce<CardView[]>((all, bubble) => all.concat(bubble.cards ?? []), [])
+      .filter(view => view.state === 'open');
+    openCards.forEach(view => {
+      view.secondsLeft = Math.max(0, Math.floor((new Date(view.card.expiresAt).getTime() - now) / 1000));
+      if (view.secondsLeft === 0) {
+        view.state = 'expired';
+      }
+    });
+    // the clock only runs while a countdown is on screen (each round redraws the page)
+    if (openCards.some(view => view.state === 'open')) {
+      this.countdown = this.countdown ?? setInterval(() => this.tick(), 1000);
+    } else {
+      this.stopCountdown();
+    }
+  }
+
+  private stopCountdown(): void {
+    clearInterval(this.countdown);
+    this.countdown = undefined;
   }
 
   // same two steps as the booking page: the driver pays in Razorpay's window ...

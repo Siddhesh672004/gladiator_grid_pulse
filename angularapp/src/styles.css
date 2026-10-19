@@ -4283,8 +4283,9 @@ app-carousel .carousel.empty {
 }
 
 /* ==== chat assistant ==== */
-/* floating assistant, above the page content but below popups */
-app-chatbot .chat-launcher {
+/* floating assistant, above the page content but below popups. the button: app-chatlauncher draws it until the
+   chat is downloaded, then the chat (app-chatbot, inside app-chatlauncher) draws its own */
+app-chatlauncher .chat-launcher {
   position: fixed;
   right: 22px;
   bottom: 22px;
@@ -4302,11 +4303,11 @@ app-chatbot .chat-launcher {
   transition: transform 0.16s var(--ease-out);
 }
 
-app-chatbot .chat-launcher:active {
+app-chatlauncher .chat-launcher:active {
   transform: scale(0.95);
 }
 
-app-chatbot .online-dot {
+app-chatlauncher .online-dot {
   position: absolute;
   top: 2px;
   right: 2px;
@@ -4573,7 +4574,7 @@ app-chatbot .chat-limit {
 }
 
 @media (hover: hover) {
-  app-chatbot .chat-launcher:hover {
+  app-chatlauncher .chat-launcher:hover {
     transform: scale(1.06);
   }
 }
@@ -4586,7 +4587,7 @@ app-chatbot .chat-limit {
     bottom: 84px;
   }
 
-  app-chatbot .chat-launcher {
+  app-chatlauncher .chat-launcher {
     right: 14px;
     bottom: 14px;
   }

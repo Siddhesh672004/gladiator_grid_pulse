@@ -1,0 +1,10 @@
+<!-- same button as the closed chat (chatbot.component.html) until the chat is here and shows its own -->
+<button type="button" class="chat-launcher" *ngIf="!loaded" (click)="open()" aria-expanded="false" aria-label="Open assistant">
+  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+    <path d="M6 3v18" stroke="#fff" stroke-width="2"/>
+    <path d="M7 4h11v8H7z" fill="#fff"/>
+    <path d="M7 4h2.75v2.67H7zM12.5 4h2.75v2.67H12.5zM9.75 6.67h2.75v2.66H9.75zM15.25 6.67H18v2.66h-2.75zM7 9.33h2.75V12H7zM12.5 9.33h2.75V12H12.5z" fill="#222"/>
+  </svg>
+  <span class="online-dot" aria-hidden="true"></span>
+</button>
+<ng-container #chatSlot></ng-container>

@@ -3,7 +3,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NavigationEnd, NavigationError, RouteConfigLoadEnd, RouteConfigLoadStart, Router, RouterOutlet } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AdminnavComponent } from './components/adminnav/adminnav.component';
-import { ChatbotComponent } from './components/chatbot/chatbot.component';
+import { ChatlauncherComponent } from './components/chatlauncher/chatlauncher.component';
 import { UsernavComponent } from './components/usernav/usernav.component';
 import { AuthService } from './services/auth.service';
 import { UserStorageService } from './services/user-storage.service';
@@ -12,12 +12,12 @@ import { BasicModule } from './shared/basic.module';
 // landing, how it works and the login pages bring their own top bar
 const PUBLIC_PAGES = ['/login', '/signup', '/admin-login', '/forgot-password', '/set-password', '/how-it-works'];
 
-// the main shell -> the right navbar on top, the current page (router-outlet), and the chatbot on every page
+// the main shell -> the right navbar on top, the current page (router-outlet), and the chat button on every page
 // standalone: it lists what its template uses, there is no app.module
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, BasicModule, AdminnavComponent, UsernavComponent, ChatbotComponent],
+  imports: [CommonModule, RouterOutlet, BasicModule, AdminnavComponent, UsernavComponent, ChatlauncherComponent],
   templateUrl: './app.component.html'
 })
 export class AppComponent implements OnInit, OnDestroy {
