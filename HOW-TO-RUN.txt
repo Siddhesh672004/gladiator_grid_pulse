@@ -9,7 +9,7 @@ What runs where
    port   service                 what it does
    8080   gateway                 the one address the site calls: routes, CORS, rate limits (429)
    8081   angular (npm start)     the site
-   8082   core (springapp)        accounts, tracks, sessions, bookings, waitlist, race control, feedback
+   8082   core-service            accounts, tracks, sessions, bookings, waitlist, race control, feedback
                                   (a second core instance: 8083)
    8084   notification-service    every email (codes, invites, booking decisions + e-ticket, refunds, waitlist,
                                   urgent feedback for the admins)
@@ -26,12 +26,12 @@ What runs where
 
 First run (once)
 ----------------
-1. Secrets: cp springapp/secrets.properties.example springapp/secrets.properties and fill in what you have
+1. Secrets: cp secrets.properties.example secrets.properties and fill in what you have
    (empty = that feature is off). One file for every service; an environment variable with the same name wins.
    Set the same JWT_SECRET and INTERNAL_API_KEY for all services (they are in that one file).
 2. Infra: cp .env.example .env, then  docker compose up -d mysql redis kafka   (kafka-ui optional)
-   or a local MySQL 8 on 3306 (root / examly by default) and only  docker compose up -d kafka.
-   DB_PASSWORD in secrets.properties = MYSQL_ROOT_PASSWORD in .env (both "examly" by default).
+   or a local MySQL 8 on 3306 (user root, its password goes into secrets.properties as DB_PASSWORD) and only  docker compose up -d kafka.
+   DB_PASSWORD in secrets.properties = MYSQL_ROOT_PASSWORD in .env (required, no default).
    The databases appdb, payment_db, ai_db and notification_db are made on the first start.
 3. Shared code: ./mvnw -q install -DskipTests -pl common   (again after every change in common/)
 4. Only for an appdb from before phase 5 / 6 (once, in this order):
@@ -44,7 +44,7 @@ First run (once)
 Mode A - terminal (light: infra in Docker / local MySQL, services from the repo root)
 -------------------------------------------------------------------------------------
    start order: core -> notification -> payment -> ai -> gateway (one terminal each)
-   CORS_ENABLED=false ./mvnw -pl springapp spring-boot:run   http://localhost:8082
+   CORS_ENABLED=false ./mvnw -pl core-service spring-boot:run   http://localhost:8082
    ./mvnw -pl notification-service spring-boot:run           http://localhost:8084
    ./mvnw -pl payment-service spring-boot:run                http://localhost:8085
    ./mvnw -pl ai-service spring-boot:run                     http://localhost:8086
@@ -52,7 +52,7 @@ Mode A - terminal (light: infra in Docker / local MySQL, services from the repo 
 
    no Redis:            CACHE_TYPE=none for the core and ai-service (no cache, same answers)
    emails to files:     MAIL_TO_FILE=true ./mvnw -pl notification-service spring-boot:run (target/test-mails)
-   two core instances:  SERVER_PORT=8083 CORS_ENABLED=false ./mvnw -pl springapp spring-boot:run
+   two core instances:  SERVER_PORT=8083 CORS_ENABLED=false ./mvnw -pl core-service spring-boot:run
                         SPRING_PROFILES_ACTIVE=docker CORE_2_URL=http://localhost:8083 ./mvnw -pl gateway spring-boot:run
                         (which one answered: the X-Served-By header, dev only)
 
@@ -76,7 +76,7 @@ Mode B - full Docker (everything in containers; heavy: 6 services + the infra)
 
 Frontend (http://localhost:8081)
 --------------------------------
-   cd angularapp && npm install && npm start
+   cd frontend && npm install && npm start
    logged out the chat bubble answers from the FAQ list; logged in it is the Copilot ("Copilot · <role>"):
    it reads your data and shows every change as a card that only happens when you press Confirm.
 
@@ -108,7 +108,7 @@ Tests
 -----
    unit tests, no Docker:   ./mvnw -q -pl common,notification-service test
    integration tests (need Docker: their own MySQL, some also a Kafka; no real AI or payment is ever called):
-                            ./mvnw -pl springapp verify
+                            ./mvnw -pl core-service verify
                             ./mvnw -pl payment-service verify    (wiremock plays the core, razorpay is faked)
                             ./mvnw -pl ai-service verify         (wiremock plays the core + payment, no model)
    core: concurrency (car numbers, last seat), internal api rules, payment events once, waitlist, feedback labels
@@ -116,5 +116,5 @@ Tests
    payment-service: booked -> PAID, refused -> refund, core too slow -> 202 -> the job finishes, refund once.
    ai-service: tools per role, prepare changes nothing, Confirm only by its owner / once / in time, with the
    caller's token; FeedbackSubmitted -> FeedbackLabelled over kafka, once.
-   one class only:  ./mvnw -pl springapp test -Dtest=StatsIntegrationTest
+   one class only:  ./mvnw -pl core-service test -Dtest=StatsIntegrationTest
    skip them:       ./mvnw package -DskipTests

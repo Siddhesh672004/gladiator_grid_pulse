@@ -74,7 +74,7 @@ class NotificationListenerTest {
 
         listener.onAccountEvent(envelope("e3", new OtpRequested("a@b.co", "A", "123456", 10, "SIGNUP")));
         listener.onAccountEvent(EventJson.MAPPER.writeValueAsString(new EventEnvelope("e4", "ProfileChanged",
-                Instant.now(), "springapp", EventJson.MAPPER.createObjectNode())));
+                Instant.now(), "core-service", EventJson.MAPPER.createObjectNode())));
 
         verify(emailService).send(eq("a@b.co"), any(OtpEmail.class), eq(List.of()));
         verify(inbox, never()).isNew("e4", NotificationListener.CONSUMER);
@@ -128,6 +128,6 @@ class NotificationListenerTest {
 
     private static String envelope(String eventId, Object payload) throws Exception {
         return EventJson.MAPPER.writeValueAsString(new EventEnvelope(eventId, payload.getClass().getSimpleName(),
-                Instant.now(), "springapp", EventJson.MAPPER.valueToTree(payload)));
+                Instant.now(), "core-service", EventJson.MAPPER.valueToTree(payload)));
     }
 }

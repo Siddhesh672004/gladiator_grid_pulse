@@ -19,15 +19,14 @@ Motorsport track booking with live race control. Drivers book sessions on real c
 Full steps (Docker infra, tests, Swagger): see `HOW-TO-RUN.txt`.
 
 1. MySQL on port 3306, login via `DB_USERNAME` / `DB_PASSWORD` (database `appdb` is created on first start).
-2. Backend: put your keys in `springapp/secrets.properties` (`MAIL_USERNAME`, `MAIL_PASSWORD`, `SUPER_ADMIN_EMAIL`, `SUPER_ADMIN_PASSWORD`, `GEMINI_API_KEY`, `GROQ_API_KEY`, `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`), then
+2. Backend: put your keys in `secrets.properties` (repo root) (`MAIL_USERNAME`, `MAIL_PASSWORD`, `SUPER_ADMIN_EMAIL`, `SUPER_ADMIN_PASSWORD`, `GEMINI_API_KEY`, `GROQ_API_KEY`, `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`), then
    ```
-   cd springapp
-   ./mvnw spring-boot:run
+   ./mvnw -pl core-service spring-boot:run
    ```
-   API on http://localhost:8080
+   core on http://localhost:8082 (gateway and the other services: see HOW-TO-RUN.txt)
 3. Frontend (Node 20):
    ```
-   cd angularapp
+   cd frontend
    npm install
    npx ng serve --port 8081
    ```

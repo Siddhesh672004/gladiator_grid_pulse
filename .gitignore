@@ -10,7 +10,6 @@ secrets.properties
 .env
 logs/
 .gridpulse-backups/
-springapp/src/main/resources/static/
 
 # laptop notes, helper scripts and editor settings
 /CLAUDE.md

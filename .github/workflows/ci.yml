@@ -37,7 +37,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: jars
-          # the leading wildcard keeps the module folders (springapp/target/springapp-0.0.1-SNAPSHOT.jar ...)
+          # the leading wildcard keeps the module folders (core-service/target/core-service-0.0.1-SNAPSHOT.jar ...)
           path: '*/target/*-SNAPSHOT.jar'
           if-no-files-found: error
           retention-days: 3
@@ -55,7 +55,7 @@ jobs:
     timeout-minutes: 20
     defaults:
       run:
-        working-directory: angularapp
+        working-directory: frontend
     env:
       NG_CLI_ANALYTICS: "false"
       PUPPETEER_SKIP_DOWNLOAD: "true"
@@ -66,7 +66,7 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: angularapp/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install
         run: npm ci --no-audit --no-fund
@@ -79,7 +79,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: web-dist
-          path: angularapp/dist/angularapp
+          path: frontend/dist/gridpulse-web
           if-no-files-found: error
           retention-days: 3
 

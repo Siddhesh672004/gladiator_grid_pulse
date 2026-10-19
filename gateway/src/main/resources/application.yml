@@ -9,7 +9,7 @@ spring:
     name: gateway
   # JWT_SECRET (rate limit per user) from the shared secrets file, an env variable wins
   config:
-    import: optional:file:./secrets.properties,optional:file:../springapp/secrets.properties,optional:file:./springapp/secrets.properties
+    import: optional:file:./secrets.properties,optional:file:../secrets.properties
   cloud:
     # no eureka: the core instances are listed here, the load balancer only uses the healthy ones
     discovery:

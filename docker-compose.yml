@@ -95,7 +95,7 @@ services:
       context: .
       dockerfile: docker/Dockerfile.java
       args:
-        MODULE: springapp
+        MODULE: core-service
     restart: unless-stopped
     ports:
       - "8082:8082"
@@ -132,7 +132,7 @@ services:
       context: .
       dockerfile: docker/Dockerfile.java
       args:
-        MODULE: springapp
+        MODULE: core-service
     restart: unless-stopped
     ports:
       - "8083:8082"
