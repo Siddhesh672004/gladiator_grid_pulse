@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
-import com.gridpulse.core.model.User;
+import com.gridpulse.core.account.data.User;
 import com.gridpulse.core.support.IntegrationTest;
 
 // no token = 401, wrong role = 403, a switched off account's token = 401

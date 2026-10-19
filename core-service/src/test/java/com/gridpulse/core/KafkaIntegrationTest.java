@@ -26,11 +26,11 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.kafka.KafkaContainer;
 
-import com.gridpulse.core.model.RaceSession;
-import com.gridpulse.core.support.IntegrationTest;
 import com.gridpulse.common.event.Topics;
 import com.gridpulse.common.outbox.OutboxEvent;
 import com.gridpulse.common.outbox.OutboxRepository;
+import com.gridpulse.core.session.data.RaceSession;
+import com.gridpulse.core.support.IntegrationTest;
 
 // with a real kafka (its own container): the outbox relay sends, and the live board hears the change through kafka
 class KafkaIntegrationTest extends IntegrationTest {

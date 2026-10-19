@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockMultipartFile;
 
-import com.gridpulse.core.exceptions.GatewayException;
-import com.gridpulse.core.service.CloudinaryService;
+import com.gridpulse.core.media.service.CloudinaryService;
+import com.gridpulse.core.platform.exception.GatewayException;
 import com.gridpulse.core.support.IntegrationTest;
 import com.fasterxml.jackson.databind.JsonNode;
 

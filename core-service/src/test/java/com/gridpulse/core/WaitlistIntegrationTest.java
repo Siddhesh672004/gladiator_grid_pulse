@@ -7,15 +7,15 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 
-import com.gridpulse.core.model.BookingStatus;
-import com.gridpulse.core.model.PaymentStatus;
-import com.gridpulse.core.model.RaceSession;
-import com.gridpulse.core.model.User;
-import com.gridpulse.core.support.IntegrationTest;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.gridpulse.common.event.BookingPromoted;
 import com.gridpulse.common.event.BookingRefundRequested;
 import com.gridpulse.common.event.BookingWaitlisted;
+import com.gridpulse.core.account.data.User;
+import com.gridpulse.core.booking.data.BookingStatus;
+import com.gridpulse.core.booking.data.PaymentStatus;
+import com.gridpulse.core.session.data.RaceSession;
+import com.gridpulse.core.support.IntegrationTest;
+import com.fasterxml.jackson.databind.JsonNode;
 
 // a full session keeps paid bookings on its waitlist: a seat that opens moves the oldest one up,
 // the start of the session rejects and refunds whoever is still waiting

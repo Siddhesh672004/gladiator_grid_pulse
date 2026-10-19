@@ -7,17 +7,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.boot.test.context.TestComponent;
 
-import com.gridpulse.core.config.JwtUtils;
-import com.gridpulse.core.model.RaceBooking;
-import com.gridpulse.core.model.RaceSession;
-import com.gridpulse.core.model.RaceTrack;
-import com.gridpulse.core.model.Role;
-import com.gridpulse.core.model.SessionStatus;
-import com.gridpulse.core.model.User;
-import com.gridpulse.core.repository.RaceBookingRepo;
-import com.gridpulse.core.repository.RaceSessionRepo;
-import com.gridpulse.core.repository.RaceTrackRepo;
-import com.gridpulse.core.repository.UserRepo;
+import com.gridpulse.core.account.data.Role;
+import com.gridpulse.core.account.data.User;
+import com.gridpulse.core.account.data.UserRepo;
+import com.gridpulse.core.account.security.JwtUtils;
+import com.gridpulse.core.booking.data.RaceBooking;
+import com.gridpulse.core.booking.data.RaceBookingRepo;
+import com.gridpulse.core.session.data.RaceSession;
+import com.gridpulse.core.session.data.RaceSessionRepo;
+import com.gridpulse.core.session.data.SessionStatus;
+import com.gridpulse.core.track.data.RaceTrack;
+import com.gridpulse.core.track.data.RaceTrackRepo;
 
 import lombok.RequiredArgsConstructor;
 

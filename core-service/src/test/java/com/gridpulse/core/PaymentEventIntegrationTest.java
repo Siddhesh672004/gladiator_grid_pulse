@@ -8,15 +8,15 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.gridpulse.core.messaging.PaymentEventListener;
-import com.gridpulse.core.model.PaymentStatus;
-import com.gridpulse.core.model.RaceBooking;
-import com.gridpulse.core.model.RaceSession;
-import com.gridpulse.core.support.IntegrationTest;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.gridpulse.common.event.EventEnvelope;
 import com.gridpulse.common.event.EventJson;
 import com.gridpulse.common.event.PaymentStatusChanged;
+import com.gridpulse.core.booking.data.PaymentStatus;
+import com.gridpulse.core.booking.data.RaceBooking;
+import com.gridpulse.core.booking.service.PaymentEventListener;
+import com.gridpulse.core.session.data.RaceSession;
+import com.gridpulse.core.support.IntegrationTest;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 // payment-service's PaymentStatusChanged on the booking: kafka may deliver an event twice, it counts once
 // (the kafka listener is off in the tests, the events are handed to it directly)

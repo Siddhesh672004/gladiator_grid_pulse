@@ -8,12 +8,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 
-import com.gridpulse.core.model.RaceSession;
-import com.gridpulse.core.model.User;
-import com.gridpulse.core.support.IntegrationTest;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.gridpulse.common.event.BookingDecided;
 import com.gridpulse.common.ticket.TicketCodes;
+import com.gridpulse.core.account.data.User;
+import com.gridpulse.core.session.data.RaceSession;
+import com.gridpulse.core.support.IntegrationTest;
+import com.fasterxml.jackson.databind.JsonNode;
 
 // a decision is saved together with its event (outbox row); an approval carries the e-ticket code
 class BookingEventIntegrationTest extends IntegrationTest {

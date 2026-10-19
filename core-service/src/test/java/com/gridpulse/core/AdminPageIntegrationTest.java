@@ -11,9 +11,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 
-import com.gridpulse.core.model.RaceSession;
-import com.gridpulse.core.model.RaceTrack;
+import com.gridpulse.core.session.data.RaceSession;
 import com.gridpulse.core.support.IntegrationTest;
+import com.gridpulse.core.track.data.RaceTrack;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import jakarta.persistence.EntityManagerFactory;

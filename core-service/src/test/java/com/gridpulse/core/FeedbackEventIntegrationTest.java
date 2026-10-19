@@ -10,19 +10,19 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 
-import com.gridpulse.core.messaging.FeedbackEventListener;
-import com.gridpulse.core.model.Feedback;
-import com.gridpulse.core.model.RaceSession;
-import com.gridpulse.core.model.Sentiment;
-import com.gridpulse.core.model.User;
-import com.gridpulse.core.repository.FeedbackRepo;
-import com.gridpulse.core.support.IntegrationTest;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.gridpulse.common.event.EventEnvelope;
 import com.gridpulse.common.event.EventJson;
 import com.gridpulse.common.event.FeedbackLabelled;
 import com.gridpulse.common.event.FeedbackSubmitted;
 import com.gridpulse.common.event.UrgentFeedbackReported;
+import com.gridpulse.core.account.data.User;
+import com.gridpulse.core.feedback.data.Feedback;
+import com.gridpulse.core.feedback.data.FeedbackRepo;
+import com.gridpulse.core.feedback.data.Sentiment;
+import com.gridpulse.core.feedback.service.FeedbackEventListener;
+import com.gridpulse.core.session.data.RaceSession;
+import com.gridpulse.core.support.IntegrationTest;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 // feedback is saved at once (NOT_ANALYSED + FeedbackSubmitted); ai-service's label comes back later: the row
 // takes it, and an urgent one tells the admins once (the kafka listener is off in the tests, events go to it directly)

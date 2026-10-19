@@ -7,10 +7,10 @@ import java.time.LocalTime;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 
-import com.gridpulse.core.dto.request.CompetitionRequest;
-import com.gridpulse.core.model.RaceSession;
-import com.gridpulse.core.model.RaceTrack;
+import com.gridpulse.core.competition.dto.CompetitionRequest;
+import com.gridpulse.core.session.data.RaceSession;
 import com.gridpulse.core.support.IntegrationTest;
+import com.gridpulse.core.track.data.RaceTrack;
 
 // competition buttons only work in their own status
 class CompetitionIntegrationTest extends IntegrationTest {

@@ -9,12 +9,12 @@ import java.util.stream.StreamSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 
-import com.gridpulse.core.dto.request.CompetitionRequest;
-import com.gridpulse.core.model.RaceBooking;
-import com.gridpulse.core.model.RaceSession;
-import com.gridpulse.core.model.RaceTrack;
-import com.gridpulse.core.model.User;
+import com.gridpulse.core.account.data.User;
+import com.gridpulse.core.booking.data.RaceBooking;
+import com.gridpulse.core.competition.dto.CompetitionRequest;
+import com.gridpulse.core.session.data.RaceSession;
 import com.gridpulse.core.support.IntegrationTest;
+import com.gridpulse.core.track.data.RaceTrack;
 import com.fasterxml.jackson.databind.JsonNode;
 
 // a whole competition through the api: two drivers qualify, race, one retires -> their stats + the leaderboard

@@ -10,11 +10,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 
-import com.gridpulse.core.model.RaceSession;
-import com.gridpulse.core.model.User;
+import com.gridpulse.common.security.InternalApi;
+import com.gridpulse.core.account.data.User;
+import com.gridpulse.core.session.data.RaceSession;
 import com.gridpulse.core.support.IntegrationTest;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.gridpulse.common.security.InternalApi;
 
 // /internal/** is for payment-service: the key always, the driver's token too except for by-order
 class InternalApiIntegrationTest extends IntegrationTest {

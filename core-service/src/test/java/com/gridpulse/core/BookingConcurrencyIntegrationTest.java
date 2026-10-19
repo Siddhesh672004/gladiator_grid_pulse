@@ -7,13 +7,13 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 
-import com.gridpulse.core.model.BookingStatus;
-import com.gridpulse.core.model.PaymentStatus;
-import com.gridpulse.core.model.RaceBooking;
-import com.gridpulse.core.model.RaceSession;
-import com.gridpulse.core.model.User;
-import com.gridpulse.core.support.IntegrationTest;
 import com.gridpulse.common.event.BookingRefundRequested;
+import com.gridpulse.core.account.data.User;
+import com.gridpulse.core.booking.data.BookingStatus;
+import com.gridpulse.core.booking.data.PaymentStatus;
+import com.gridpulse.core.booking.data.RaceBooking;
+import com.gridpulse.core.session.data.RaceSession;
+import com.gridpulse.core.support.IntegrationTest;
 
 // the session row lock: two paid bookings at the same moment, exactly one wins (payment-service refunds the other)
 class BookingConcurrencyIntegrationTest extends IntegrationTest {

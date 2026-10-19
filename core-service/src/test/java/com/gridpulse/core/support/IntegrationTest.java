@@ -24,18 +24,18 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.testcontainers.containers.MySQLContainer;
 
-import com.gridpulse.core.dto.request.BookingStatusRequest;
-import com.gridpulse.core.dto.request.InternalBookingRequest;
-import com.gridpulse.core.dto.request.RaceBookingRequest;
-import com.gridpulse.core.model.BookingStatus;
-import com.gridpulse.core.model.RaceSession;
-import com.gridpulse.core.model.User;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gridpulse.common.event.EventReader;
 import com.gridpulse.common.outbox.OutboxRepository;
 import com.gridpulse.common.security.InternalApi;
+import com.gridpulse.core.account.data.User;
+import com.gridpulse.core.booking.data.BookingStatus;
+import com.gridpulse.core.booking.dto.BookingStatusRequest;
+import com.gridpulse.core.booking.dto.InternalBookingRequest;
+import com.gridpulse.core.booking.dto.RaceBookingRequest;
+import com.gridpulse.core.session.data.RaceSession;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 // the real app on a random port against a throw-away mysql in docker
 // bookings are made the way payment-service makes them (/internal/bookings), no ai / cloudinary call leaves the machine
