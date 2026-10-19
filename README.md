@@ -39,11 +39,11 @@ but only after you press Confirm.
 
 | Landing page | Admin dashboard |
 |---|---|
-| ![Landing page](docs/images/landing.png) | ![Admin dashboard](docs/images/admin-dashboard.png) |
+| ![Landing page](docs/images/landing.jpg) | ![Admin dashboard](docs/images/admin-dashboard.png) |
 
-| Live timing | Booking on a phone |
+| My registrations | Booking on a phone |
 |---|---|
-| ![Live timing board](docs/images/live-timing.png) | ![Booking on a phone](docs/images/booking-mobile.png) |
+| ![My registrations with payment badges](docs/images/my-registrations.png) | ![Booking on a phone](docs/images/booking-mobile.jpg) |
 
 ## Architecture
 
