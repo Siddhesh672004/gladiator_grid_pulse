@@ -1,0 +1,33 @@
+# ci only, on top of docker-compose.yml: a fake razorpay and emails written to files the smoke test can read
+# docker compose -f docker-compose.yml -f scripts/ci/compose.ci.yml --profile apps up -d --build --wait
+# paths are relative to the repo root (the folder of the first compose file)
+services:
+  razorpay-stub:
+    profiles: [apps]
+    image: node:20-alpine
+    volumes:
+      - ./scripts/smoke:/stub:ro
+    command: node /stub/razorpay-stub.mjs
+    environment:
+      PORT: 9099
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:9099/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  payment:
+    environment:
+      # RazorpayServiceImpl adds /orders, /payments/... to this
+      RAZORPAY_BASE_URL: http://razorpay-stub:9099/v1
+    depends_on:
+      razorpay-stub:
+        condition: service_healthy
+
+  notification:
+    environment:
+      MAIL_TO_FILE: "true"
+      # gridpulse.mail.file-dir
+      GRIDPULSE_MAIL_FILEDIR: /mails
+    volumes:
+      - ./scripts/smoke/out/mails:/mails

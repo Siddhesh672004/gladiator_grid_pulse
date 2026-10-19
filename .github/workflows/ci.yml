@@ -1,0 +1,154 @@
+# every push / pull request: maven verify (unit + testcontainers tests) and the angular build, then the whole stack
+# in docker (prebuilt jars, razorpay stub, emails to files) with an end-to-end smoke test and page screenshots
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# a newer push to the same branch / pull request stops the older run
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: maven
+
+      # every module, the testcontainers tests included (the runner has docker)
+      - name: Build and test
+        run: ./mvnw -B -ntp verify
+
+      - name: Upload the service jars
+        uses: actions/upload-artifact@v4
+        with:
+          name: jars
+          # the leading wildcard keeps the module folders (springapp/target/springapp-0.0.1-SNAPSHOT.jar ...)
+          path: '*/target/*-SNAPSHOT.jar'
+          if-no-files-found: error
+          retention-days: 3
+
+      - name: Upload the test reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: '**/target/surefire-reports/**'
+          if-no-files-found: ignore
+
+  frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: angularapp
+    env:
+      NG_CLI_ANALYTICS: "false"
+      PUPPETEER_SKIP_DOWNLOAD: "true"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: angularapp/package-lock.json
+
+      - name: Install
+        run: npm ci --no-audit --no-fund
+
+      # production build, apiUrl http://localhost:8080 = the gateway of the e2e stack
+      - name: Build
+        run: npm run build
+
+      - name: Upload the site
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-dist
+          path: angularapp/dist/angularapp
+          if-no-files-found: error
+          retention-days: 3
+
+  e2e:
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download the service jars
+        uses: actions/download-artifact@v4
+        with:
+          name: jars
+          path: .
+
+      - name: Download the site
+        uses: actions/download-artifact@v4
+        with:
+          name: web-dist
+          path: web-dist
+
+      - name: Write .env with random secrets
+        run: bash scripts/ci/write-env.sh
+
+      # the images only copy the jars; --wait = every service healthy (or the step fails)
+      - name: Start the stack
+        run: |
+          mkdir -p scripts/smoke/out/mails
+          docker compose -f docker-compose.yml -f scripts/ci/compose.ci.yml --profile apps up -d --build --wait --wait-timeout 600
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Smoke test
+        id: smoke
+        run: node scripts/smoke/smoke.mjs
+
+      # also after a failed smoke test (the pages show how far it got); never fails the job
+      - name: Screenshots
+        if: ${{ !cancelled() && steps.smoke.outcome != 'skipped' }}
+        continue-on-error: true
+        working-directory: scripts/ci
+        env:
+          WEB_DIST: ${{ github.workspace }}/web-dist
+        run: |
+          npm i --no-save --no-audit --no-fund playwright@1.47.2
+          npx playwright install --with-deps chromium
+          node screenshots.mjs
+
+      - name: Dump the container logs
+        if: failure()
+        run: |
+          mkdir -p scripts/smoke/out
+          docker compose -f docker-compose.yml -f scripts/ci/compose.ci.yml --profile apps logs --no-color > scripts/smoke/out/compose.log 2>&1 || true
+
+      # mails hold sign-up codes and session.json holds tokens: both stay on the runner
+      - name: Upload the smoke output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-output
+          path: |
+            scripts/smoke/out/**
+            !scripts/smoke/out/mails/**
+            !scripts/smoke/out/session.json
+          if-no-files-found: ignore
+
+      - name: Stop the stack
+        if: always()
+        run: docker compose -f docker-compose.yml -f scripts/ci/compose.ci.yml --profile apps down -v
