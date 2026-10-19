@@ -108,14 +108,17 @@ public class RazorpayServiceImpl implements RazorpayService {
     }
 
     // breaker open (razorpay failed a lot just now): answer at once instead of waiting for a timeout
+    @SuppressWarnings("unused")
     private String createOrderBusy(long amountPaise, String receipt, CallNotPermittedException e) {
         throw new GatewayException(BUSY);
     }
 
+    @SuppressWarnings("unused")
     private String refundBusy(String paymentId, long amountPaise, CallNotPermittedException e) {
         throw new GatewayException(BUSY);
     }
 
+    @SuppressWarnings("unused")
     private String findCapturedPaymentBusy(String orderId, CallNotPermittedException e) {
         throw new GatewayException(BUSY);
     }

@@ -49,6 +49,7 @@ public class PaymentClient {
     }
 
     // no revenue numbers: the rest of the dashboard still shows
+    @SuppressWarnings("unused")
     private RevenueResponse noSummary(Exception e) {
         log.warn("Revenue from payment-service not available: {}", e.getClass().getSimpleName());
         List<ChartPoint> months = IntStream.range(0, 12)

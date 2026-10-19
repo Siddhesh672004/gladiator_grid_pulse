@@ -63,14 +63,17 @@ public class CoreCalls {
     }
 
     // breaker open (the core failed a lot just now): answer at once instead of waiting for a timeout
+    @SuppressWarnings("unused")
     private BookingQuote checkBusy(RaceBookingRequest request, CallNotPermittedException e) {
         throw new CoreUnavailableException(NOT_ANSWERING, e);
     }
 
+    @SuppressWarnings("unused")
     private JsonNode createBookingBusy(InternalBookingRequest request, CallNotPermittedException e) {
         throw new CoreUnavailableException(NOT_ANSWERING, e);
     }
 
+    @SuppressWarnings("unused")
     private Optional<JsonNode> findByOrderBusy(String orderId, CallNotPermittedException e) {
         throw new CoreUnavailableException(NOT_ANSWERING, e);
     }

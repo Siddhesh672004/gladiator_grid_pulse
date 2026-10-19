@@ -44,6 +44,7 @@ public class AiClient {
                 .body(FeedbackLabelResponse.class);
     }
 
+    @SuppressWarnings("unused")
     private FeedbackLabelResponse notAnalysed(String feedbackText, Exception e) {
         log.warn("ai-service gave no label: {}", e.getClass().getSimpleName());
         return NOT_ANALYSED;

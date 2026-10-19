@@ -79,6 +79,7 @@ public class CloudinaryServiceImpl implements CloudinaryService {
     }
 
     // breaker open (cloudinary failed a lot just now): answer at once
+    @SuppressWarnings("unused")
     private String uploadBusy(MultipartFile file, String folder, CallNotPermittedException e) {
         throw new GatewayException("The picture service is busy. Please try again in a minute.");
     }

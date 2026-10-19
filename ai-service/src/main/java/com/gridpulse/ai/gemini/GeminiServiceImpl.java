@@ -95,10 +95,12 @@ public class GeminiServiceImpl implements GeminiService {
     }
 
     // breaker open (gemini failed a lot just now): the callers fall back to word-overlap search at once
+    @SuppressWarnings("unused")
     private float[] embedResting(String text, CallNotPermittedException e) {
         throw new GeminiException("Gemini is resting after too many failures");
     }
 
+    @SuppressWarnings("unused")
     private String generateResting(String prompt, CallNotPermittedException e) {
         throw new GeminiException("Gemini is resting after too many failures");
     }

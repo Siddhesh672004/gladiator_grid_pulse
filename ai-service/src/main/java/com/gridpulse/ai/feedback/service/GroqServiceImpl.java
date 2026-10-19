@@ -55,11 +55,13 @@ public class GroqServiceImpl implements GroqService {
     }
 
     // groq failed, or the breaker is open after many failures
+    @SuppressWarnings("unused")
     private String noAnswer(String instructions, String text, Exception e) {
         log.warn("Groq gave no answer ({})", e.getClass().getSimpleName());
         return "";
     }
 
+    @SuppressWarnings("unused")
     private <T> T noEntity(String instructions, String text, Class<T> type, Exception e) {
         log.warn("Groq gave no usable {} ({})", type.getSimpleName(), e.getClass().getSimpleName());
         return null;
