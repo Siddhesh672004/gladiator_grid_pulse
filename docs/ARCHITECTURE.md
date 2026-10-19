@@ -1,7 +1,7 @@
 # GridPulse architecture
 
 This page explains how the parts of GridPulse fit together: which service owns what, how they talk, and where to look
-in the code when something happens. For running it see [HOW-TO-RUN.txt](../HOW-TO-RUN.txt); for production see
+in the code when something happens. For running it see [docs/HOW-TO-RUN.txt](HOW-TO-RUN.txt); for production see
 [DEPLOYMENT.md](DEPLOYMENT.md).
 
 **Path shorthand.** File paths below are written from the main package of each module:

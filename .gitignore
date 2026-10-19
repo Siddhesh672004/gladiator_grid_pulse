@@ -14,9 +14,9 @@ logs/
 # laptop notes, helper scripts and editor settings
 /CLAUDE.md
 /docs/private/
-/tools/
+/.local/
+bin/
 .claude/
-/run-*.cmd
 /*.pdf
 /*.docx
 .vscode/

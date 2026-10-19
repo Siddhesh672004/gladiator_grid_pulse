@@ -156,7 +156,7 @@ cd frontend && npm install && npm start                      # http://localhost:
 ```
 
 The full guide (every service, ports, settings, the all-in-Docker mode, tests and the smoke test) is in
-[HOW-TO-RUN.txt](HOW-TO-RUN.txt).
+[docs/HOW-TO-RUN.txt](docs/HOW-TO-RUN.txt).
 
 ## Deploy
 
