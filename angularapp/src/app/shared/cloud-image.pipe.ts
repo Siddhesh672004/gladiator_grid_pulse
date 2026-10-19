@@ -3,7 +3,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 // cloudinary link -> a lighter version of the same picture: <img [src]="url | cloudImage:400">
 // pass about twice the displayed width so it stays sharp on phones
 @Pipe({
-  name: 'cloudImage'
+  name: 'cloudImage',
+  standalone: true
 })
 export class CloudImagePipe implements PipeTransform {
 

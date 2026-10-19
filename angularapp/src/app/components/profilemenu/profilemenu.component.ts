@@ -1,16 +1,18 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { ProfileService } from '../../services/profile.service';
-import { BasicModule } from '../../shared/basic.module';
+import { CloudImagePipe } from '../../shared/cloud-image.pipe';
+import { IconComponent } from '../icon/icon.component';
 
-// round icon in both navbars: Show User Profile -> /profile, Log Out -> tells the navbar, which owns the logout popup
+// round icon in both navbars: Show User Profile -> /profile, Log Out -> asks right in the list, then tells the navbar
+// (no popup here: the dialog code stays out of the always-loaded shell)
 @Component({
   selector: 'app-profilemenu',
   standalone: true,
-  imports: [CommonModule, BasicModule],
+  imports: [CommonModule, IconComponent, CloudImagePipe],
   templateUrl: './profilemenu.component.html'
 })
 export class ProfilemenuComponent implements OnInit, OnDestroy {
@@ -22,6 +24,10 @@ export class ProfilemenuComponent implements OnInit, OnDestroy {
   initial: string = '?';    // shown in the icon when there is no picture
   picture: string | null = null;
   menuOpen: boolean = false;
+  askingLogout: boolean = false;
+
+  // the question box, focused when it opens so Tab goes on to its buttons
+  @ViewChild('logoutBox') logoutBox?: ElementRef<HTMLElement>;
 
   private pictureSubscription?: Subscription;
 
@@ -42,13 +48,37 @@ export class ProfilemenuComponent implements OnInit, OnDestroy {
     this.pictureSubscription?.unsubscribe();
   }
 
+  toggleMenu(): void {
+    this.menuOpen = !this.menuOpen;
+    this.askingLogout = false;
+  }
+
   showProfile(): void {
     this.menuOpen = false;
     this.router.navigate(['/profile']);
   }
 
+  // "Log Out": ask first. no button gets the focus, so Enter can't log out by accident
+  askLogout(): void {
+    this.askingLogout = true;
+    setTimeout(() => this.logoutBox?.nativeElement.focus());
+  }
+
   logOut(): void {
-    this.menuOpen = false;
+    this.closeMenu();
     this.logoutClicked.emit();
+  }
+
+  // Cancel, a click next to the list, or Escape while the question is shown
+  closeMenu(): void {
+    this.menuOpen = false;
+    this.askingLogout = false;
+  }
+
+  @HostListener('document:keydown.escape')
+  escape(): void {
+    if (this.askingLogout) {
+      this.closeMenu();
+    }
   }
 }

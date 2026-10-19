@@ -3660,7 +3660,7 @@ app-profilemenu .profile-list {
   box-shadow: var(--gp-shadow);
 }
 
-app-profilemenu .profile-list button {
+app-profilemenu .profile-list > button {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -3677,7 +3677,7 @@ app-profilemenu .profile-list button {
   transition: background-color 0.15s ease;
 }
 
-app-profilemenu .profile-list button:hover {
+app-profilemenu .profile-list > button:hover {
   background: var(--gp-field);
 }
 
@@ -3698,6 +3698,27 @@ app-profilemenu .user-badge {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Log Out asks first, in place of the two buttons */
+app-profilemenu .logout-confirm {
+  padding: 6px 16px 8px;
+  text-align: center;
+  outline: 0;
+  animation: gp-pop 0.2s var(--ease-out);
+}
+
+app-profilemenu .logout-confirm p {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: var(--gp-ink);
+}
+
+app-profilemenu .logout-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 /* ==== public top bar ==== */

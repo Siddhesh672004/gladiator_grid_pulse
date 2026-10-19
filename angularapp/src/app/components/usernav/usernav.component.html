@@ -2,7 +2,7 @@
   <nav class="navbar">
     <a class="brand" routerLink="/home" (click)="closeMenus()"><app-logo></app-logo></a>
 
-    <app-profilemenu (logoutClicked)="askLogout()"></app-profilemenu>
+    <app-profilemenu (logoutClicked)="logout()"></app-profilemenu>
 
     <button class="icon-btn menu-toggle" type="button" (click)="menuOpen = !menuOpen" [attr.aria-expanded]="menuOpen" aria-label="Menu">
       <app-icon [name]="menuOpen ? 'close' : 'menu'"></app-icon>
@@ -33,14 +33,3 @@
     <div class="menu-backdrop" *ngIf="openMenu" (click)="openMenu = ''"></div>
   </nav>
 </header>
-
-<!-- logout popup -->
-<ng-template [appPopup]="showLogoutPopup">
-  <div class="modal-box white" *ngIf="showLogoutPopup">
-    <p>Are you sure you want to logout?</p>
-    <div class="modal-actions">
-      <button class="btn" (click)="logout()">Yes, Logout</button>
-      <button class="btn btn-grey" (click)="showLogoutPopup = false">Cancel</button>
-    </div>
-  </div>
-</ng-template>

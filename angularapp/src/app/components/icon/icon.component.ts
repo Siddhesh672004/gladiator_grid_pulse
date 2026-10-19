@@ -22,6 +22,7 @@ const SHAPES: { [name: string]: string } = {
 // use: <app-icon name="search"></app-icon>
 @Component({
   selector: 'app-icon',
+  standalone: true,
   templateUrl: './icon.component.html'
 })
 export class IconComponent {

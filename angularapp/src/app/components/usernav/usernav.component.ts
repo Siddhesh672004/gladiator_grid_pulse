@@ -2,21 +2,21 @@ import { CommonModule } from '@angular/common';
 import { Component, HostListener } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { BasicModule } from '../../shared/basic.module';
+import { IconComponent } from '../icon/icon.component';
+import { LogoComponent } from '../logo/logo.component';
 import { ProfilemenuComponent } from '../profilemenu/profilemenu.component';
 
-// driver navbar. "Log Out" in the profile icon menu opens the logout popup of this navbar
+// driver navbar. "Log Out" in the profile icon menu asks there first, then this navbar logs out
 @Component({
   selector: 'app-usernav',
   standalone: true,
-  imports: [CommonModule, RouterModule, BasicModule, ProfilemenuComponent],
+  imports: [CommonModule, RouterModule, LogoComponent, IconComponent, ProfilemenuComponent],
   templateUrl: './usernav.component.html'
 })
 export class UsernavComponent {
 
   menuOpen: boolean = false;       // the phone menu
   openMenu: string = '';           // the group whose list is open: 'tracks', ... or '' for none
-  showLogoutPopup: boolean = false;
 
   constructor(private authService: AuthService, private router: Router) { }
 
@@ -41,14 +41,9 @@ export class UsernavComponent {
     this.openMenu = '';
   }
 
-  // "Log Out" in the profile menu: ask first
-  askLogout(): void {
-    this.showLogoutPopup = true;
-    this.closeMenus();
-  }
-
+  // "Yes, Logout" in the profile menu
   logout(): void {
-    this.showLogoutPopup = false;
+    this.closeMenus();
     this.authService.logout();
     this.router.navigate(['/login']);
   }

@@ -4,10 +4,10 @@ import { NavigationEnd, NavigationError, RouteConfigLoadEnd, RouteConfigLoadStar
 import { Subscription } from 'rxjs';
 import { AdminnavComponent } from './components/adminnav/adminnav.component';
 import { ChatlauncherComponent } from './components/chatlauncher/chatlauncher.component';
+import { LoaderComponent } from './components/loader/loader.component';
 import { UsernavComponent } from './components/usernav/usernav.component';
 import { AuthService } from './services/auth.service';
 import { UserStorageService } from './services/user-storage.service';
-import { BasicModule } from './shared/basic.module';
 
 // landing, how it works and the login pages bring their own top bar
 const PUBLIC_PAGES = ['/login', '/signup', '/admin-login', '/forgot-password', '/set-password', '/how-it-works'];
@@ -17,7 +17,7 @@ const PUBLIC_PAGES = ['/login', '/signup', '/admin-login', '/forgot-password', '
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, BasicModule, AdminnavComponent, UsernavComponent, ChatlauncherComponent],
+  imports: [CommonModule, RouterOutlet, LoaderComponent, AdminnavComponent, UsernavComponent, ChatlauncherComponent],
   templateUrl: './app.component.html'
 })
 export class AppComponent implements OnInit, OnDestroy {
