@@ -1,41 +1,41 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { AdminaddtrackComponent } from '../components/adminaddtrack/adminaddtrack.component';
-import { AdmineditrackComponent } from '../components/admineditrack/admineditrack.component';
-import { AdminviewtracksComponent } from '../components/adminviewtracks/adminviewtracks.component';
-import { AdminaddsessionComponent } from '../components/adminaddsession/adminaddsession.component';
-import { AdminviewsessionsComponent } from '../components/adminviewsessions/adminviewsessions.component';
-import { AdmincompetitioncontrolComponent } from '../components/admincompetitioncontrol/admincompetitioncontrol.component';
-import { AdminviewregistrationsComponent } from '../components/adminviewregistrations/adminviewregistrations.component';
-import { AdminviewfeedbackComponent } from '../components/adminviewfeedback/adminviewfeedback.component';
-import { AdminracecontrolComponent } from '../components/adminracecontrol/adminracecontrol.component';
-import { SuperadminmanageadminsComponent } from '../components/superadminmanageadmins/superadminmanageadmins.component';
-import { AdminviewpaymentsComponent } from '../components/adminviewpayments/adminviewpayments.component';
-import { AdminmanageusersComponent } from '../components/adminmanageusers/adminmanageusers.component';
-import { AdmincheckticketComponent } from '../components/admincheckticket/admincheckticket.component';
-import { ROLES } from '../constants';
+import { AdminAddTrackComponent } from './add-track/admin-add-track.component';
+import { AdminEditTrackComponent } from './edit-track/admin-edit-track.component';
+import { AdminViewTracksComponent } from './view-tracks/admin-view-tracks.component';
+import { AdminAddSessionComponent } from './add-session/admin-add-session.component';
+import { AdminViewSessionsComponent } from './view-sessions/admin-view-sessions.component';
+import { AdminCompetitionControlComponent } from './competition-control/admin-competition-control.component';
+import { AdminViewRegistrationsComponent } from './view-registrations/admin-view-registrations.component';
+import { AdminViewFeedbackComponent } from './view-feedback/admin-view-feedback.component';
+import { AdminRaceControlComponent } from './race-control/admin-race-control.component';
+import { SuperAdminManageAdminsComponent } from './manage-admins/super-admin-manage-admins.component';
+import { AdminViewPaymentsComponent } from './view-payments/admin-view-payments.component';
+import { AdminManageUsersComponent } from './manage-users/admin-manage-users.component';
+import { AdminCheckTicketComponent } from './check-ticket/admin-check-ticket.component';
+import { ROLES } from '../core/constants';
 
 // /admin/** (the guard and the Admin role check are on the parent route in app.routes.ts)
 // manage-admins is for the SuperAdmin only. the dashboard has its own download (chart.js)
 const routes: Routes = [
   {
     path: 'dashboard',
-    loadComponent: () => import('../components/admindashboard/admindashboard.component').then((m) => m.AdmindashboardComponent)
+    loadComponent: () => import('./dashboard/admin-dashboard.component').then((m) => m.AdminDashboardComponent)
   },
-  { path: 'manage-users', component: AdminmanageusersComponent },
-  { path: 'add/track', component: AdminaddtrackComponent },
-  { path: 'view/tracks', component: AdminviewtracksComponent },
-  { path: 'edit/track/:id', component: AdmineditrackComponent },
-  { path: 'add/session', component: AdminaddsessionComponent },
-  { path: 'edit/session/:id', component: AdminaddsessionComponent },
-  { path: 'view/sessions', component: AdminviewsessionsComponent },
-  { path: 'competition/:id', component: AdmincompetitioncontrolComponent },
-  { path: 'view/registrations', component: AdminviewregistrationsComponent },
-  { path: 'check-ticket', component: AdmincheckticketComponent },
-  { path: 'view/feedback', component: AdminviewfeedbackComponent },
-  { path: 'view/payments', component: AdminviewpaymentsComponent },
-  { path: 'race-control', component: AdminracecontrolComponent },
-  { path: 'manage-admins', component: SuperadminmanageadminsComponent, data: { roles: [ROLES.SUPER_ADMIN] } },
+  { path: 'manage-users', component: AdminManageUsersComponent },
+  { path: 'add/track', component: AdminAddTrackComponent },
+  { path: 'view/tracks', component: AdminViewTracksComponent },
+  { path: 'edit/track/:id', component: AdminEditTrackComponent },
+  { path: 'add/session', component: AdminAddSessionComponent },
+  { path: 'edit/session/:id', component: AdminAddSessionComponent },
+  { path: 'view/sessions', component: AdminViewSessionsComponent },
+  { path: 'competition/:id', component: AdminCompetitionControlComponent },
+  { path: 'view/registrations', component: AdminViewRegistrationsComponent },
+  { path: 'check-ticket', component: AdminCheckTicketComponent },
+  { path: 'view/feedback', component: AdminViewFeedbackComponent },
+  { path: 'view/payments', component: AdminViewPaymentsComponent },
+  { path: 'race-control', component: AdminRaceControlComponent },
+  { path: 'manage-admins', component: SuperAdminManageAdminsComponent, data: { roles: [ROLES.SUPER_ADMIN] } },
   { path: '**', redirectTo: '/error' }
 ];
 

@@ -1,22 +1,22 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { UserviewtracksComponent } from '../components/userviewtracks/userviewtracks.component';
-import { UserregisterraceComponent } from '../components/userregisterrace/userregisterrace.component';
-import { UserviewmyregistrationsComponent } from '../components/userviewmyregistrations/userviewmyregistrations.component';
-import { UseraddfeedbackComponent } from '../components/useraddfeedback/useraddfeedback.component';
-import { UserviewfeedbackComponent } from '../components/userviewfeedback/userviewfeedback.component';
-import { UserlivetimingComponent } from '../components/userlivetiming/userlivetiming.component';
+import { UserViewTracksComponent } from './view-tracks/user-view-tracks.component';
+import { UserRegisterRaceComponent } from './register-race/user-register-race.component';
+import { UserViewMyRegistrationsComponent } from './view-my-registrations/user-view-my-registrations.component';
+import { UserAddFeedbackComponent } from './add-feedback/user-add-feedback.component';
+import { UserViewFeedbackComponent } from './view-feedback/user-view-feedback.component';
+import { UserLiveTimingComponent } from './live-timing/user-live-timing.component';
 
 // /user/** (the guard and the User role check are on the parent route in app.routes.ts)
 // My Stats has its own download (chart.js)
 const routes: Routes = [
-  { path: 'view/tracks', component: UserviewtracksComponent },
-  { path: 'register/:trackId', component: UserregisterraceComponent },
-  { path: 'view/registrations', component: UserviewmyregistrationsComponent },
-  { path: 'add/feedback', component: UseraddfeedbackComponent },
-  { path: 'view/feedback', component: UserviewfeedbackComponent },
-  { path: 'live-timing', component: UserlivetimingComponent },
-  { path: 'stats', loadComponent: () => import('../components/userstats/userstats.component').then((m) => m.UserstatsComponent) },
+  { path: 'view/tracks', component: UserViewTracksComponent },
+  { path: 'register/:trackId', component: UserRegisterRaceComponent },
+  { path: 'view/registrations', component: UserViewMyRegistrationsComponent },
+  { path: 'add/feedback', component: UserAddFeedbackComponent },
+  { path: 'view/feedback', component: UserViewFeedbackComponent },
+  { path: 'live-timing', component: UserLiveTimingComponent },
+  { path: 'stats', loadComponent: () => import('./stats/user-stats.component').then((m) => m.UserStatsComponent) },
   { path: '**', redirectTo: '/error' }
 ];
 

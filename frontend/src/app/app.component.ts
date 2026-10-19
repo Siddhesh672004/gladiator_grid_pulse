@@ -2,12 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NavigationEnd, NavigationError, RouteConfigLoadEnd, RouteConfigLoadStart, Router, RouterOutlet } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { AdminnavComponent } from './components/adminnav/adminnav.component';
-import { ChatlauncherComponent } from './components/chatlauncher/chatlauncher.component';
-import { LoaderComponent } from './components/loader/loader.component';
-import { UsernavComponent } from './components/usernav/usernav.component';
-import { AuthService } from './services/auth.service';
-import { UserStorageService } from './services/user-storage.service';
+import { AdminNavComponent } from './core/layout/admin-nav/admin-nav.component';
+import { ChatLauncherComponent } from './chat/chat-launcher/chat-launcher.component';
+import { LoaderComponent } from './shared/ui/loader/loader.component';
+import { UserNavComponent } from './core/layout/user-nav/user-nav.component';
+import { AuthService } from './core/services/auth.service';
+import { UserStorageService } from './core/services/user-storage.service';
 
 // landing, how it works and the login pages bring their own top bar
 const PUBLIC_PAGES = ['/login', '/signup', '/admin-login', '/forgot-password', '/set-password', '/how-it-works'];
@@ -17,7 +17,7 @@ const PUBLIC_PAGES = ['/login', '/signup', '/admin-login', '/forgot-password', '
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, LoaderComponent, AdminnavComponent, UsernavComponent, ChatlauncherComponent],
+  imports: [CommonModule, RouterOutlet, LoaderComponent, AdminNavComponent, UserNavComponent, ChatLauncherComponent],
   templateUrl: './app.component.html'
 })
 export class AppComponent implements OnInit, OnDestroy {

@@ -3,22 +3,24 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { UserRoutingModule } from './user-routing.module';
 import { SharedModule } from '../shared/shared.module';
-import { UserviewtracksComponent } from '../components/userviewtracks/userviewtracks.component';
-import { UserregisterraceComponent } from '../components/userregisterrace/userregisterrace.component';
-import { UserviewmyregistrationsComponent } from '../components/userviewmyregistrations/userviewmyregistrations.component';
-import { UseraddfeedbackComponent } from '../components/useraddfeedback/useraddfeedback.component';
-import { UserviewfeedbackComponent } from '../components/userviewfeedback/userviewfeedback.component';
-import { UserlivetimingComponent } from '../components/userlivetiming/userlivetiming.component';
+import { UserViewTracksComponent } from './view-tracks/user-view-tracks.component';
+import { UserRegisterRaceComponent } from './register-race/user-register-race.component';
+import { UserViewMyRegistrationsComponent } from './view-my-registrations/user-view-my-registrations.component';
+import { UserAddFeedbackComponent } from './add-feedback/user-add-feedback.component';
+import { UserViewFeedbackComponent } from './view-feedback/user-view-feedback.component';
+import { UserLiveTimingComponent } from './live-timing/user-live-timing.component';
+import { CarouselComponent } from './carousel/carousel.component';
 
-// lazy loaded driver pages, the component files stay in app/components (My Stats is standalone, see the routing)
+// lazy loaded driver pages (My Stats is standalone, see the routing)
 @NgModule({
   declarations: [
-    UserviewtracksComponent,
-    UserregisterraceComponent,
-    UserviewmyregistrationsComponent,
-    UseraddfeedbackComponent,
-    UserviewfeedbackComponent,
-    UserlivetimingComponent
+    UserViewTracksComponent,
+    UserRegisterRaceComponent,
+    UserViewMyRegistrationsComponent,
+    UserAddFeedbackComponent,
+    UserViewFeedbackComponent,
+    UserLiveTimingComponent,
+    CarouselComponent
   ],
   imports: [
     CommonModule,

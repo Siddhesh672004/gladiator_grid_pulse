@@ -3,38 +3,40 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AdminRoutingModule } from './admin-routing.module';
 import { SharedModule } from '../shared/shared.module';
-import { AdminaddtrackComponent } from '../components/adminaddtrack/adminaddtrack.component';
-import { TrackformComponent } from '../components/trackform/trackform.component';
-import { AdmineditrackComponent } from '../components/admineditrack/admineditrack.component';
-import { AdminviewtracksComponent } from '../components/adminviewtracks/adminviewtracks.component';
-import { AdminaddsessionComponent } from '../components/adminaddsession/adminaddsession.component';
-import { AdminviewsessionsComponent } from '../components/adminviewsessions/adminviewsessions.component';
-import { AdmincompetitioncontrolComponent } from '../components/admincompetitioncontrol/admincompetitioncontrol.component';
-import { AdminviewregistrationsComponent } from '../components/adminviewregistrations/adminviewregistrations.component';
-import { AdminviewfeedbackComponent } from '../components/adminviewfeedback/adminviewfeedback.component';
-import { AdminracecontrolComponent } from '../components/adminracecontrol/adminracecontrol.component';
-import { SuperadminmanageadminsComponent } from '../components/superadminmanageadmins/superadminmanageadmins.component';
-import { AdminviewpaymentsComponent } from '../components/adminviewpayments/adminviewpayments.component';
-import { AdminmanageusersComponent } from '../components/adminmanageusers/adminmanageusers.component';
-import { AdmincheckticketComponent } from '../components/admincheckticket/admincheckticket.component';
+import { AdminAddTrackComponent } from './add-track/admin-add-track.component';
+import { TrackFormComponent } from './track-form/track-form.component';
+import { FilterBoxComponent } from './filter-box/filter-box.component';
+import { AdminEditTrackComponent } from './edit-track/admin-edit-track.component';
+import { AdminViewTracksComponent } from './view-tracks/admin-view-tracks.component';
+import { AdminAddSessionComponent } from './add-session/admin-add-session.component';
+import { AdminViewSessionsComponent } from './view-sessions/admin-view-sessions.component';
+import { AdminCompetitionControlComponent } from './competition-control/admin-competition-control.component';
+import { AdminViewRegistrationsComponent } from './view-registrations/admin-view-registrations.component';
+import { AdminViewFeedbackComponent } from './view-feedback/admin-view-feedback.component';
+import { AdminRaceControlComponent } from './race-control/admin-race-control.component';
+import { SuperAdminManageAdminsComponent } from './manage-admins/super-admin-manage-admins.component';
+import { AdminViewPaymentsComponent } from './view-payments/admin-view-payments.component';
+import { AdminManageUsersComponent } from './manage-users/admin-manage-users.component';
+import { AdminCheckTicketComponent } from './check-ticket/admin-check-ticket.component';
 
-// lazy loaded admin pages, the component files stay in app/components (the dashboard is standalone, see the routing)
+// lazy loaded admin pages (the dashboard is standalone, see the routing)
 @NgModule({
   declarations: [
-    AdminaddtrackComponent,
-    TrackformComponent,
-    AdmineditrackComponent,
-    AdminviewtracksComponent,
-    AdminaddsessionComponent,
-    AdminviewsessionsComponent,
-    AdmincompetitioncontrolComponent,
-    AdminviewregistrationsComponent,
-    AdminviewfeedbackComponent,
-    AdminracecontrolComponent,
-    SuperadminmanageadminsComponent,
-    AdminviewpaymentsComponent,
-    AdminmanageusersComponent,
-    AdmincheckticketComponent
+    AdminAddTrackComponent,
+    TrackFormComponent,
+    FilterBoxComponent,
+    AdminEditTrackComponent,
+    AdminViewTracksComponent,
+    AdminAddSessionComponent,
+    AdminViewSessionsComponent,
+    AdminCompetitionControlComponent,
+    AdminViewRegistrationsComponent,
+    AdminViewFeedbackComponent,
+    AdminRaceControlComponent,
+    SuperAdminManageAdminsComponent,
+    AdminViewPaymentsComponent,
+    AdminManageUsersComponent,
+    AdminCheckTicketComponent
   ],
   imports: [
     CommonModule,

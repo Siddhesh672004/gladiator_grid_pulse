@@ -2,22 +2,19 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BasicModule } from './basic.module';
-import { FielderrorComponent } from '../components/fielderror/fielderror.component';
-import { FieldComponent } from '../components/field/field.component';
-import { SearchboxComponent } from '../components/searchbox/searchbox.component';
-import { FilterboxComponent } from '../components/filterbox/filterbox.component';
-import { PaginatorComponent } from '../components/paginator/paginator.component';
-import { ImagepickerComponent } from '../components/imagepicker/imagepicker.component';
-import { CarouselComponent } from '../components/carousel/carousel.component';
-import { PageheadComponent } from '../components/pagehead/pagehead.component';
-import { FlagComponent } from '../components/flag/flag.component';
-import { StartlightsComponent } from '../components/startlights/startlights.component';
-import { EmptyComponent } from '../components/empty/empty.component';
-import { RevealDirective } from './reveal.directive';
+import { FieldErrorComponent } from './ui/field-error/field-error.component';
+import { FieldComponent } from './ui/field/field.component';
+import { SearchBoxComponent } from './ui/search-box/search-box.component';
+import { PaginatorComponent } from './ui/paginator/paginator.component';
+import { ImagePickerComponent } from './ui/image-picker/image-picker.component';
+import { PageHeadComponent } from './ui/page-head/page-head.component';
+import { FlagComponent } from './ui/flag/flag.component';
+import { StartLightsComponent } from './ui/start-lights/start-lights.component';
+import { EmptyComponent } from './ui/empty/empty.component';
 
 const PIECES = [
-  FielderrorComponent, FieldComponent, SearchboxComponent, FilterboxComponent, PaginatorComponent, ImagepickerComponent, CarouselComponent,
-  PageheadComponent, FlagComponent, StartlightsComponent, EmptyComponent, RevealDirective
+  FieldErrorComponent, FieldComponent, SearchBoxComponent, PaginatorComponent, ImagePickerComponent,
+  PageHeadComponent, FlagComponent, StartLightsComponent, EmptyComponent
 ];
 
 // used by every page module (site, admin, user): the reusable pieces + BasicModule

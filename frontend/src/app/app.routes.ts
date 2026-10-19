@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
-import { AuthGuard } from './components/authguard/auth.guard';
-import { ADMIN_ROLES, ROLES } from './constants';
+import { AuthGuard } from './core/guards/auth.guard';
+import { ADMIN_ROLES, ROLES } from './core/constants';
 
 // url -> lazy module. admin / user pages: the AuthGuard runs first. everything else is in the site module
 export const routes: Routes = [

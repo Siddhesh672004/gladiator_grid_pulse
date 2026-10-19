@@ -7,7 +7,7 @@ import {
 import { provideAnimations } from "@angular/platform-browser/animations";
 import { provideRouter, withInMemoryScrolling } from "@angular/router";
 import { routes } from "./app.routes";
-import { AuthInterceptor } from "./services/auth.interceptor";
+import { AuthInterceptor } from "./core/interceptors/auth.interceptor";
 
 // what the old app.module provided: router, http (with our token interceptor) and the animations Angular Material needs
 export const appConfig: ApplicationConfig = {
