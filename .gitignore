@@ -13,7 +13,7 @@ logs/
 
 # laptop notes, helper scripts and editor settings
 /CLAUDE.md
-/docs/
+/docs/private/
 /tools/
 .claude/
 /run-*.cmd
