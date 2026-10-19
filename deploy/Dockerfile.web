@@ -1,0 +1,5 @@
+# the site image: caddy with the angular build (ci downloads it to web-dist/) and the Caddyfile
+# docker build -f deploy/Dockerfile.web .   (run by the deploy job in .github/workflows/ci.yml)
+FROM caddy:2-alpine
+COPY deploy/Caddyfile /etc/caddy/Caddyfile
+COPY web-dist/ /srv/

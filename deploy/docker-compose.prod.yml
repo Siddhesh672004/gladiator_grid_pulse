@@ -1,0 +1,187 @@
+# production on one vm (docs/DEPLOYMENT.md): only caddy (web) is reachable from outside, on 80/443
+# everything else talks over the private compose network. secrets come from .env next to this file
+# (copy .env.prod.example), images from ghcr (built by the deploy job in .github/workflows/ci.yml)
+name: gridpulse
+
+x-app: &app
+  restart: unless-stopped
+  env_file: .env
+  logging:
+    driver: json-file
+    options: { max-size: "10m", max-file: "3" }
+
+x-java-env: &java-env
+  SPRING_PROFILES_ACTIVE: prod
+  DB_HOST: mysql
+  KAFKA_BOOTSTRAP: kafka:29092
+  JAVA_TOOL_OPTIONS: ${APP_JAVA_OPTS:--Xmx512m -XX:+UseSerialGC}
+
+services:
+  mysql:
+    <<: *app
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+    volumes:
+      - mysql-data:/var/lib/mysql
+      # runs only on the first start with an empty volume: one schema per service
+      - ./mysql-init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+  redis:
+    <<: *app
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # the broker writes as "appuser": an empty volume belongs to root, so it is handed over once first
+  kafka-volume:
+    image: apache/kafka:4.0.0
+    user: root
+    entrypoint: ["sh", "-c", "chown -R appuser /var/lib/kafka/data"]
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+
+  kafka:
+    <<: *app
+    image: apache/kafka:4.0.0
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      KAFKA_LISTENERS: DOCKER://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: DOCKER://kafka:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: DOCKER:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_HEAP_OPTS: -Xmx512m -Xms512m
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "KAFKA_HEAP_OPTS=-Xmx128m /opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:29092 > /dev/null 2>&1"]
+      interval: 15s
+      timeout: 15s
+      retries: 10
+      start_period: 30s
+    depends_on:
+      kafka-volume:
+        condition: service_completed_successfully
+
+  core:
+    <<: *app
+    image: ghcr.io/${GHCR_OWNER:?set GHCR_OWNER in .env}/gridpulse-core-service:${TAG:-latest}
+    environment:
+      <<: *java-env
+      SERVER_PORT: 8082
+      CORS_ENABLED: "false"
+      CORS_ALLOWED_ORIGINS: https://${DOMAIN}
+      FRONTEND_URL: https://${DOMAIN}
+      REDIS_HOST: redis
+      PAYMENT_URL: http://payment:8085
+      AI_URL: http://ai:8086
+    healthcheck: &health
+      test: ["CMD", "curl", "-fs", "http://localhost:8082/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 180s
+    depends_on:
+      mysql: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      kafka: { condition: service_healthy }
+
+  notification:
+    <<: *app
+    image: ghcr.io/${GHCR_OWNER}/gridpulse-notification-service:${TAG:-latest}
+    environment:
+      <<: *java-env
+    healthcheck:
+      <<: *health
+      test: ["CMD", "curl", "-fs", "http://localhost:8084/actuator/health"]
+    depends_on:
+      mysql: { condition: service_healthy }
+      kafka: { condition: service_healthy }
+
+  payment:
+    <<: *app
+    image: ghcr.io/${GHCR_OWNER}/gridpulse-payment-service:${TAG:-latest}
+    environment:
+      <<: *java-env
+      CORE_1_URL: http://core:8082
+    healthcheck:
+      <<: *health
+      test: ["CMD", "curl", "-fs", "http://localhost:8085/actuator/health"]
+    depends_on:
+      mysql: { condition: service_healthy }
+      kafka: { condition: service_healthy }
+
+  ai:
+    <<: *app
+    image: ghcr.io/${GHCR_OWNER}/gridpulse-ai-service:${TAG:-latest}
+    environment:
+      <<: *java-env
+      REDIS_HOST: redis
+      CORE_1_URL: http://core:8082
+      PAYMENT_URL: http://payment:8085
+    healthcheck:
+      <<: *health
+      test: ["CMD", "curl", "-fs", "http://localhost:8086/actuator/health"]
+    depends_on:
+      mysql: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      kafka: { condition: service_healthy }
+
+  gateway:
+    <<: *app
+    image: ghcr.io/${GHCR_OWNER}/gridpulse-gateway:${TAG:-latest}
+    environment:
+      JAVA_TOOL_OPTIONS: ${APP_JAVA_OPTS:--Xmx512m -XX:+UseSerialGC}
+      CORE_1_URL: http://core:8082
+      PAYMENT_URL: http://payment:8085
+      AI_URL: http://ai:8086
+      # caddy is the only way in and it writes the visitor address, so the first X-Forwarded-For entry is real
+      GRIDPULSE_TRUST_PROXY: "true"
+      GRIDPULSE_CORS_ALLOWED_ORIGINS: https://${DOMAIN}
+    healthcheck:
+      <<: *health
+      test: ["CMD", "curl", "-fs", "http://localhost:8080/actuator/health"]
+    depends_on:
+      core: { condition: service_healthy }
+      payment: { condition: service_healthy }
+      ai: { condition: service_healthy }
+
+  web:
+    <<: *app
+    image: ghcr.io/${GHCR_OWNER}/gridpulse-web:${TAG:-latest}
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN in .env}
+      ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL in .env}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      gateway: { condition: service_healthy }
+
+volumes:
+  mysql-data:
+  kafka-data:
+  caddy-data:
+  caddy-config:

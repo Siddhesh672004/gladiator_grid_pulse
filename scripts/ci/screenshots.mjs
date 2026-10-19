@@ -1,6 +1,6 @@
 // ci only: serves the built angular site (WEB_DIST) on :4200 and screenshots the main pages with the smoke test's
 // logins (scripts/smoke/out/session.json); a page that fails is logged and skipped, the script never fails the job
-import { createServer } from 'node:http';
+import { createServer, request } from 'node:http';
 import { existsSync, mkdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, extname, join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -11,6 +11,8 @@ const SESSION_FILE = join(HERE, '..', 'smoke', 'out', 'session.json');
 const SHOTS = join(HERE, '..', 'smoke', 'out', 'screenshots');
 const PORT = 4200;
 const SITE = `http://localhost:${PORT}`;
+// the production build calls /api on its own address (same origin, like caddy in prod): pass it to the gateway
+const GATEWAY = new URL(process.env.GATEWAY || 'http://localhost:8080');
 
 const VIEWPORTS = [
   { name: 'desktop', width: 1280, height: 800 },
@@ -33,6 +35,13 @@ function fileFor(urlPath) {
 
 function startSite() {
   const server = createServer((req, res) => {
+    if (req.url.startsWith('/api/')) {
+      const upstream = request({ host: GATEWAY.hostname, port: GATEWAY.port, path: req.url, method: req.method, headers: req.headers },
+        (answer) => { res.writeHead(answer.statusCode, answer.headers); answer.pipe(res); });
+      upstream.on('error', () => { res.writeHead(502); res.end(); });
+      req.pipe(upstream);
+      return;
+    }
     try {
       const file = fileFor(new URL(req.url, SITE).pathname);
       res.writeHead(200, { 'Content-Type': TYPES[extname(file).toLowerCase()] || 'application/octet-stream' });

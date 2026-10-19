@@ -1,0 +1,5 @@
+# the site image needs only the caddy config and the angular build
+*
+!deploy/Caddyfile
+!web-dist/
+!web-dist/**

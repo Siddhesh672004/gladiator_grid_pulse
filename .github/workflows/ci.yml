@@ -152,3 +152,73 @@ jobs:
       - name: Stop the stack
         if: always()
         run: docker compose -f docker-compose.yml -f scripts/ci/compose.ci.yml --profile apps down -v
+
+  # main only, after every test passed, and only once the repository variable DEPLOY_ENABLED is "true"
+  # (docs/DEPLOYMENT.md): arm64 + amd64 images to ghcr.io, then the vm pulls them and restarts what changed
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && vars.DEPLOY_ENABLED == 'true'
+    needs: [e2e]
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: read
+      packages: write
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download the service jars
+        uses: actions/download-artifact@v4
+        with:
+          name: jars
+          path: .
+
+      - name: Download the site
+        uses: actions/download-artifact@v4
+        with:
+          name: web-dist
+          path: web-dist
+
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # the images only copy finished jars / files, so building for arm64 under emulation stays quick
+      - name: Build and push the images
+        run: |
+          owner=$(echo "$GITHUB_REPOSITORY_OWNER" | tr '[:upper:]' '[:lower:]')
+          for module in core-service notification-service payment-service ai-service gateway; do
+            docker buildx build --platform linux/arm64,linux/amd64 -f docker/Dockerfile.java --build-arg MODULE=$module \
+              -t ghcr.io/$owner/gridpulse-$module:latest -t ghcr.io/$owner/gridpulse-$module:$GITHUB_SHA --push .
+          done
+          docker buildx build --platform linux/arm64,linux/amd64 -f deploy/Dockerfile.web \
+            -t ghcr.io/$owner/gridpulse-web:latest -t ghcr.io/$owner/gridpulse-web:$GITHUB_SHA --push .
+
+      - name: Roll out on the vm
+        env:
+          VM_HOST: ${{ secrets.VM_HOST }}
+          VM_USER: ${{ secrets.VM_USER }}
+          VM_SSH_KEY: ${{ secrets.VM_SSH_KEY }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p ~/.ssh && echo "$VM_SSH_KEY" > ~/.ssh/vm && chmod 600 ~/.ssh/vm
+          ssh-keyscan -H "$VM_HOST" >> ~/.ssh/known_hosts 2> /dev/null
+          ssh_vm() { ssh -i ~/.ssh/vm "$VM_USER@$VM_HOST" "$@"; }
+          scp -i ~/.ssh/vm deploy/docker-compose.prod.yml deploy/backup.sh "$VM_USER@$VM_HOST:/opt/gridpulse/"
+          scp -i ~/.ssh/vm docker/mysql/init.sql "$VM_USER@$VM_HOST:/opt/gridpulse/mysql-init.sql"
+          echo "$GHCR_TOKEN" | ssh_vm "docker login ghcr.io -u $GITHUB_ACTOR --password-stdin"
+          ssh_vm "cd /opt/gridpulse && export TAG=$GITHUB_SHA && docker compose -f docker-compose.prod.yml pull \
+            && docker compose -f docker-compose.prod.yml up -d --remove-orphans && docker image prune -f"
+
+      - name: Check the live site
+        env:
+          DOMAIN: ${{ vars.DOMAIN }}
+        run: |
+          curl -fsS --retry 40 --retry-delay 15 --retry-all-errors "https://$DOMAIN/api/faqs" -o /dev/null
+          curl -fsS "https://$DOMAIN/" | grep -q '<app-root' && echo "live: https://$DOMAIN"
