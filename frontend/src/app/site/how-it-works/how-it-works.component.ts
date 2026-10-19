@@ -1,6 +1,7 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy } from '@angular/core';
 import { CHAPTERS } from './how-it-works.data';
 import { byIndex } from '../../shared/utils/track-by';
+import { scrollBehavior } from '../../shared/utils/motion';
 
 // public walkthrough: one chapter per screen (text from how-it-works.data.ts + a small drawn screen)
 // the numbers in the bar on top jump to a chapter and mark the one on screen (handy while presenting)
@@ -42,6 +43,6 @@ export class HowItWorksComponent implements AfterViewInit, OnDestroy {
   }
 
   goTo(id: string): void {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    document.getElementById(id)?.scrollIntoView({ behavior: scrollBehavior() });
   }
 }

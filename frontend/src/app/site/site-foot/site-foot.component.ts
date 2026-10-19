@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { PHOTO_CREDITS } from '../photos';
 import { byIndex } from '../../shared/utils/track-by';
+import { scrollBehavior } from '../../shared/utils/motion';
 
 // bottom of the public pages: links, contact, who took the pictures, back to top
 @Component({
@@ -14,6 +15,6 @@ export class SiteFootComponent {
   readonly byIndex = byIndex;
 
   toTop(): void {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: scrollBehavior() });
   }
 }

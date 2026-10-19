@@ -4,12 +4,14 @@ app-root main {
   min-height: calc(100vh - var(--gp-nav-h));
 }
 
-/* less motion asked for: no movement, the car just waits on the track */
+/* less motion asked for: no movement, the car just waits on the track. one run only, so a looping animation
+   (the chat's typing dots) stands still instead of flickering */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 

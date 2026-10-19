@@ -10,6 +10,7 @@ import { COMPETITION_STATUS } from '../../core/constants';
 import { PHOTOS } from '../photos';
 import { SiteSection } from '../site-head/site-head.component';
 import { byIndex, byKey } from '../../shared/utils/track-by';
+import { scrollBehavior } from '../../shared/utils/motion';
 
 // shown on a number while its call is on the way / when it failed
 const LOADING = '…';
@@ -121,7 +122,7 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   goTo(id: string): void {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    document.getElementById(id)?.scrollIntoView({ behavior: scrollBehavior() });
   }
 
   // same tracks as the driver's View Tracks: active and with a session still open

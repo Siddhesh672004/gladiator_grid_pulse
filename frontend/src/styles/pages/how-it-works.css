@@ -282,6 +282,12 @@ app-howitworks .window-body .tower-row {
     padding: 0 var(--space-4);
   }
 
+  /* big enough for a finger */
+  app-howitworks .chapter-bar button {
+    min-width: 40px;
+    height: 40px;
+  }
+
   app-howitworks .slide {
     min-height: 0;
     padding: 44px 0;
