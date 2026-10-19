@@ -26,6 +26,7 @@ import com.gridpulse.payment.service.PaymentAuditService;
 import com.gridpulse.payment.service.PaymentRecordService;
 import com.gridpulse.payment.service.RazorpayService;
 import com.gridpulse.payment.service.RefundJob;
+import com.gridpulse.payment.support.FakeRazorpayService;
 import com.gridpulse.payment.support.PaymentIntegrationTest;
 
 // the confirm saga against a fake core: booked -> PAID, refused -> money back, no answer -> 202 and the job finishes it
@@ -48,6 +49,9 @@ class PaymentSagaIntegrationTest extends PaymentIntegrationTest {
 
     @Autowired
     private BookingEventListener bookingEventListener;
+
+    @Autowired
+    private FakeRazorpayService fakeRazorpay;
 
     @Test
     void bookedByTheCoreMeansPaid() throws Exception {
@@ -151,6 +155,33 @@ class PaymentSagaIntegrationTest extends PaymentIntegrationTest {
         assertThat(payment.getStatus()).isEqualTo(PaymentStatus.REFUND_PENDING);
         assertThat(payment.getNote()).isEqualTo("Booking rejected: car not ready");
         assertThat(announcedStatuses(order)).containsExactly("CAPTURED", "PAID", "REFUND_PENDING");
+    }
+
+    @Test
+    void oneBrokenRefundDoesNotStopTheOthers() throws Exception {
+        String broken = refusedOrder(551);
+        String fine = refusedOrder(552);
+        fakeRazorpay.breakRefundOf("pay_" + broken);
+        try {
+            refundJob().run();
+        } finally {
+            fakeRazorpay.breakRefundOf(null);
+        }
+
+        assertThat(payment(broken).getStatus()).isEqualTo(PaymentStatus.REFUND_PENDING);
+        assertThat(payment(fine).getStatus()).isEqualTo(PaymentStatus.REFUNDED);
+    }
+
+    // a payment the core refused: REFUND_PENDING until the job sends the money back
+    private String refusedOrder(int userId) throws Exception {
+        String driver = token(userId, "User");
+        String order = order(userId, driver);
+        CORE.stubFor(post(urlEqualTo("/internal/bookings")).willReturn(aResponse().withStatus(409)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{\"status\":409,\"message\":\"Car number 7 is already registered for this session\"}")));
+        assertThat(status(confirm(driver, 7, order))).isEqualTo(409);
+        assertThat(payment(order).getStatus()).isEqualTo(PaymentStatus.REFUND_PENDING);
+        return order;
     }
 
     // checkout step 1: the core's check (stubbed for this driver), then the fake razorpay order

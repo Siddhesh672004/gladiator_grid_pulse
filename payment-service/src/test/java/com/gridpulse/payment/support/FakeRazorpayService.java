@@ -14,6 +14,13 @@ public class FakeRazorpayService implements RazorpayService {
 
     private static final AtomicInteger COUNTER = new AtomicInteger();
 
+    // the refund of this razorpay payment fails with an unexpected error (null = every refund works)
+    private volatile String brokenRefund;
+
+    public void breakRefundOf(String paymentId) {
+        brokenRefund = paymentId;
+    }
+
     @Override
     public boolean isConfigured() {
         return true;
@@ -36,6 +43,9 @@ public class FakeRazorpayService implements RazorpayService {
 
     @Override
     public String refund(String paymentId, long amountPaise) {
+        if (paymentId.equals(brokenRefund)) {
+            throw new RuntimeException("refund broke");
+        }
         return "rfnd_test_" + COUNTER.incrementAndGet();
     }
 

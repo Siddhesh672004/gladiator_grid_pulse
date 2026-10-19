@@ -3,6 +3,7 @@ package com.gridpulse.payment.service;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -38,11 +39,20 @@ public class RefundJob {
     public void run() {
         // first: a refund this finds is sent in the same run
         Instant unconfirmed = Instant.now().minus(UNCONFIRMED_MINUTES, ChronoUnit.MINUTES);
-        paymentRecordService.findCapturedOlderThan(unconfirmed).forEach(this::reconcile);
+        paymentRecordService.findCapturedOlderThan(unconfirmed).forEach(payment -> isolated(payment, this::reconcile));
         // no razorpay keys = nothing to refund or check
         Optional.of(razorpayService)
                 .filter(RazorpayService::isConfigured)
                 .ifPresent(razorpay -> refundAndCheck());
+    }
+
+    // one broken payment must not stop the others: it keeps its status and the next run tries it again
+    private void isolated(Payment payment, Consumer<Payment> work) {
+        try {
+            work.accept(payment);
+        } catch (RuntimeException e) {
+            log.warn("Refund job skipped order {}: {}", payment.getRazorpayOrderId(), e.getClass().getSimpleName());
+        }
     }
 
     // did the core save the booking after all? yes -> PAID, no -> the money goes back, core still down -> next run
@@ -66,9 +76,9 @@ public class RefundJob {
 
     // waiting refunds first, then the orders nobody paid in time
     private void refundAndCheck() {
-        paymentRecordService.findRefundPending().forEach(this::refund);
+        paymentRecordService.findRefundPending().forEach(payment -> isolated(payment, this::refund));
         Instant cutoff = Instant.now().minus(UNPAID_MINUTES, ChronoUnit.MINUTES);
-        paymentRecordService.findUnpaidOlderThan(cutoff).forEach(this::checkUnpaid);
+        paymentRecordService.findUnpaidOlderThan(cutoff).forEach(payment -> isolated(payment, this::checkUnpaid));
     }
 
     private void refund(Payment payment) {
