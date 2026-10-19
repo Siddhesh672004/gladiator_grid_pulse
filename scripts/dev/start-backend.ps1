@@ -64,7 +64,7 @@ $services = [ordered]@{
 $missing = $services.Values | Where-Object { -not (Test-Path "$($_.module)\target\$($_.module)-0.0.1-SNAPSHOT.jar") }
 if ($Build -or $missing) {
     Write-Host "building the jars (1-3 min)..."
-    & .\mvnw.cmd -q package -DskipTests
+    & .\mvnw.cmd -q clean package -DskipTests
     if ($LASTEXITCODE -ne 0) { throw 'maven build failed' }
 }
 
