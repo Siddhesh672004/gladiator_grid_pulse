@@ -100,6 +100,8 @@ async function shoot(browser, viewport, page) {
     await tab.goto(SITE + page.path, { waitUntil: 'domcontentloaded', timeout: 30_000 });
     // live pages keep a stream open, so "network idle" may never come: give it a few seconds at most
     await tab.waitForLoadState('networkidle', { timeout: 8_000 }).catch(() => {});
+    // a full-page shot never scrolls, so the fade-in sections would stay hidden: show them all first
+    await tab.evaluate(() => document.querySelectorAll('.on-scroll').forEach(block => block.classList.add('seen')));
     await tab.waitForTimeout(800);
     await tab.screenshot({ path: file, fullPage: true });
     console.log(`shot  ${viewport.name} ${page.name}`);
