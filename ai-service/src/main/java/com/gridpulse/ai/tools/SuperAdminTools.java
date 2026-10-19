@@ -13,8 +13,8 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.gridpulse.ai.client.CoreClient;
 import com.gridpulse.ai.dto.response.ActionResult;
-import com.gridpulse.ai.security.annotation.SuperAdminOnly;
 import com.gridpulse.ai.service.PendingActions;
+import com.gridpulse.web.security.SuperAdminOnly;
 
 import lombok.RequiredArgsConstructor;
 

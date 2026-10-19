@@ -9,10 +9,10 @@ import org.springframework.context.annotation.Profile;
 
 import com.gridpulse.core.config.properties.CloudinaryProperties;
 import com.gridpulse.core.config.properties.CorsProperties;
-import com.gridpulse.core.config.properties.InternalApiProperties;
 import com.gridpulse.core.config.properties.JwtProperties;
 import com.gridpulse.core.config.properties.SuperAdminProperties;
 import com.gridpulse.core.config.properties.TicketProperties;
+import com.gridpulse.web.security.InternalApiProperties;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;

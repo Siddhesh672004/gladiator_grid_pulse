@@ -1,4 +1,4 @@
-package com.gridpulse.ai.dto.response;
+package com.gridpulse.web.error;
 
 // a plain {"message": "..."} answer
 public record MessageResponse(String message) {

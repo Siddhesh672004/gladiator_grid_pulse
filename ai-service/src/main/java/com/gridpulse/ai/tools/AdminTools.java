@@ -17,9 +17,9 @@ import com.gridpulse.ai.client.CoreClient;
 import com.gridpulse.ai.client.PaymentClient;
 import com.gridpulse.ai.dto.response.ActionResult;
 import com.gridpulse.ai.exceptions.ToolCallException;
-import com.gridpulse.ai.security.annotation.AdminOnly;
 import com.gridpulse.ai.service.FeedbackAiService;
 import com.gridpulse.ai.service.PendingActions;
+import com.gridpulse.web.security.AdminOnly;
 
 import lombok.RequiredArgsConstructor;
 

@@ -1,4 +1,4 @@
-package com.gridpulse.ai.security.annotation;
+package com.gridpulse.web.security;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,9 +7,9 @@ import java.lang.annotation.Target;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 
-// any logged-in account; "is it your booking?" is checked in the service (UserService.checkOwnerOrAdmin)
+// drivers (role User) only
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@PreAuthorize("isAuthenticated()")
-public @interface LoggedIn {
+@PreAuthorize("hasRole('User')")
+public @interface UserOnly {
 }

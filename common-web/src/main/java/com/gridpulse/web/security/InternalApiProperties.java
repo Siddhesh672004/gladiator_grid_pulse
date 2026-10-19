@@ -1,8 +1,8 @@
-package com.gridpulse.payment.config.properties;
+package com.gridpulse.web.security;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-// gridpulse.internal-api-key (INTERNAL_API_KEY): the key this service sends on the core's /internal/** calls
+// gridpulse.internal-api-key (INTERNAL_API_KEY): the key the services send and check on /internal/** calls
 @ConfigurationProperties(prefix = "gridpulse")
 public record InternalApiProperties(String internalApiKey) {
 

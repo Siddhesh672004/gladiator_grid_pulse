@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.gridpulse.core.dto.request.ProfileRequest;
 import com.gridpulse.core.dto.response.ProfileResponse;
-import com.gridpulse.core.security.annotation.LoggedIn;
 import com.gridpulse.core.service.ProfileService;
+import com.gridpulse.web.security.LoggedIn;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

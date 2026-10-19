@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.gridpulse.core.dto.request.TrackRequest;
 import com.gridpulse.core.dto.response.TrackResponse;
-import com.gridpulse.core.security.annotation.AdminOnly;
 import com.gridpulse.core.service.RaceTrackService;
+import com.gridpulse.web.security.AdminOnly;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.gridpulse.core.dto.request.AdminStatusRequest;
 import com.gridpulse.core.dto.response.AdminUserResponse;
 import com.gridpulse.core.dto.response.PageResponse;
-import com.gridpulse.core.security.annotation.AdminOnly;
 import com.gridpulse.core.service.AdminUserService;
+import com.gridpulse.web.security.AdminOnly;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

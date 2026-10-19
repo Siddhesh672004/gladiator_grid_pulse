@@ -13,8 +13,8 @@ import com.gridpulse.core.dto.request.RaceBookingRequest;
 import com.gridpulse.core.dto.response.BookingQuote;
 import com.gridpulse.core.dto.response.RaceBookingResponse;
 import com.gridpulse.core.exceptions.ResourceNotFoundException;
-import com.gridpulse.core.security.annotation.UserOnly;
 import com.gridpulse.core.service.RaceBookingService;
+import com.gridpulse.web.security.UserOnly;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

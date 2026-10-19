@@ -22,11 +22,11 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gridpulse.ai.client.CoreClient;
 import com.gridpulse.ai.client.PaymentClient;
-import com.gridpulse.ai.config.properties.InternalApiProperties;
-import com.gridpulse.ai.dto.response.ErrorResponse;
 import com.gridpulse.ai.exceptions.ServiceDownException;
 import com.gridpulse.ai.exceptions.ToolCallException;
 import com.gridpulse.common.security.InternalApi;
+import com.gridpulse.web.error.ErrorResponse;
+import com.gridpulse.web.security.InternalApiProperties;
 
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;

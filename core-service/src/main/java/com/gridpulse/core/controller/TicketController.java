@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.gridpulse.core.dto.response.TicketCheckResponse;
-import com.gridpulse.core.security.annotation.AdminOnly;
 import com.gridpulse.core.service.TicketService;
+import com.gridpulse.web.security.AdminOnly;
 
 import lombok.RequiredArgsConstructor;
 

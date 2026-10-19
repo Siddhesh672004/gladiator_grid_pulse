@@ -10,9 +10,9 @@ import com.gridpulse.ai.dto.FeedbackLabel;
 import com.gridpulse.ai.dto.request.LabelRequest;
 import com.gridpulse.ai.dto.request.SuggestionRequest;
 import com.gridpulse.ai.dto.response.AiLinesResponse;
-import com.gridpulse.ai.security.annotation.AdminOnly;
-import com.gridpulse.ai.security.annotation.UserOnly;
 import com.gridpulse.ai.service.FeedbackAiService;
+import com.gridpulse.web.security.AdminOnly;
+import com.gridpulse.web.security.UserOnly;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

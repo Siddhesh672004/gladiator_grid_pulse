@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.gridpulse.core.dto.request.EmailRequest;
 import com.gridpulse.core.dto.request.ResetPasswordRequest;
 import com.gridpulse.core.dto.request.SetPasswordRequest;
-import com.gridpulse.core.dto.response.MessageResponse;
 import com.gridpulse.core.service.AuthService;
+import com.gridpulse.web.error.MessageResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

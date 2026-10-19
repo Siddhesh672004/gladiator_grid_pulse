@@ -11,11 +11,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.gridpulse.common.event.AdminInvited;
 import com.gridpulse.core.config.properties.FrontendProperties;
 import com.gridpulse.core.config.properties.OtpProperties;
 import com.gridpulse.core.dto.request.AddAdminRequest;
 import com.gridpulse.core.dto.response.AdminResponse;
-import com.gridpulse.core.dto.response.MessageResponse;
 import com.gridpulse.core.exceptions.OtpException;
 import com.gridpulse.core.exceptions.ResourceNotFoundException;
 import com.gridpulse.core.mapper.UserMapper;
@@ -24,7 +24,7 @@ import com.gridpulse.core.model.Role;
 import com.gridpulse.core.model.User;
 import com.gridpulse.core.repository.OtpCodeRepo;
 import com.gridpulse.core.repository.UserRepo;
-import com.gridpulse.common.event.AdminInvited;
+import com.gridpulse.web.error.MessageResponse;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

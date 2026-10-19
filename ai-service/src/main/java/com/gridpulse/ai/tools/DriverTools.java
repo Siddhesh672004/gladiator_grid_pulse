@@ -20,9 +20,9 @@ import com.gridpulse.ai.client.CoreClient;
 import com.gridpulse.ai.client.PaymentClient;
 import com.gridpulse.ai.dto.response.ActionResult;
 import com.gridpulse.ai.exceptions.ToolCallException;
-import com.gridpulse.ai.security.TokenUser;
-import com.gridpulse.ai.security.annotation.UserOnly;
 import com.gridpulse.ai.service.PendingActions;
+import com.gridpulse.web.security.TokenUser;
+import com.gridpulse.web.security.UserOnly;
 
 import lombok.RequiredArgsConstructor;
 

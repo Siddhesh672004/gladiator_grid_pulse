@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.gridpulse.core.dto.response.AdminDashboardResponse;
 import com.gridpulse.core.dto.response.LiveRaceResponse;
-import com.gridpulse.core.security.annotation.AdminOnly;
 import com.gridpulse.core.service.AdminDashboardService;
+import com.gridpulse.web.security.AdminOnly;
 
 import lombok.RequiredArgsConstructor;
 

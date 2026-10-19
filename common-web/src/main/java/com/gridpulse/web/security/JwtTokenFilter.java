@@ -1,4 +1,4 @@
-package com.gridpulse.ai.config;
+package com.gridpulse.web.security;
 
 import java.io.IOException;
 import java.util.List;
@@ -11,7 +11,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.gridpulse.ai.security.TokenUser;
 import com.gridpulse.common.security.JwtClaims;
 import com.gridpulse.common.security.JwtVerifier;
 

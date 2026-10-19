@@ -19,7 +19,7 @@ import com.gridpulse.ai.entity.PendingAction;
 import com.gridpulse.ai.exceptions.ActionRefusedException;
 import com.gridpulse.ai.repository.ActionLogRepo;
 import com.gridpulse.ai.repository.PendingActionRepo;
-import com.gridpulse.ai.security.TokenUser;
+import com.gridpulse.web.security.TokenUser;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -33,7 +33,7 @@ First run (once)
    or a local MySQL 8 on 3306 (user root, its password goes into secrets.properties as DB_PASSWORD) and only  docker compose up -d kafka.
    DB_PASSWORD in secrets.properties = MYSQL_ROOT_PASSWORD in .env (required, no default).
    The databases appdb, payment_db, ai_db and notification_db are made on the first start.
-3. Shared code: ./mvnw -q install -DskipTests -pl common   (again after every change in common/)
+3. Shared code: ./mvnw -q install -DskipTests -pl common,common-web   (again after every change in common/ or common-web/)
 4. Only for an appdb from before phase 5 / 6 (once, in this order):
    start the core once, then             mysql -uroot -p < docker/sql/phase5-backfill-core.sql
    start payment-service once, then      mysql -uroot -p < docker/sql/phase5-copy-payments.sql

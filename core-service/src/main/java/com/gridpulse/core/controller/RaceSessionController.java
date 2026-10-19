@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.gridpulse.core.dto.request.SessionRequest;
 import com.gridpulse.core.dto.response.PageResponse;
 import com.gridpulse.core.dto.response.SessionResponse;
-import com.gridpulse.core.security.annotation.AdminOnly;
 import com.gridpulse.core.service.RaceSessionService;
+import com.gridpulse.web.security.AdminOnly;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

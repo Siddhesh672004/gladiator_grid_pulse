@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.gridpulse.core.dto.request.AddAdminRequest;
 import com.gridpulse.core.dto.response.AdminResponse;
-import com.gridpulse.core.dto.response.MessageResponse;
+import com.gridpulse.web.error.MessageResponse;
 
 public interface SuperAdminService {
 

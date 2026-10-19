@@ -30,8 +30,8 @@ import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
-import com.gridpulse.core.dto.response.ErrorResponse;
 import com.gridpulse.core.validation.ValidationRules;
+import com.gridpulse.web.error.ErrorResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
 

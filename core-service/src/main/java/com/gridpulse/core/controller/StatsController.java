@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.gridpulse.core.dto.response.DriverStatsResponse;
 import com.gridpulse.core.dto.response.LeaderboardEntry;
-import com.gridpulse.core.security.annotation.UserOnly;
 import com.gridpulse.core.service.StatsService;
+import com.gridpulse.web.security.UserOnly;
 
 import lombok.RequiredArgsConstructor;
 

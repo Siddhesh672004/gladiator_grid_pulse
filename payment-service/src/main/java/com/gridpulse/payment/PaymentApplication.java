@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServic
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 // payments: razorpay orders, the confirm saga with the core (/internal/bookings), refunds and the payment checks
-// no user table here: who calls comes from the core's token (config/JwtTokenFilter)
+// no user table here: who calls comes from the core's token (common-web JwtTokenFilter)
 @SpringBootApplication(exclude = UserDetailsServiceAutoConfiguration.class)
 @ConfigurationPropertiesScan
 public class PaymentApplication {

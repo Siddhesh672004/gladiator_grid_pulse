@@ -19,11 +19,11 @@ import com.gridpulse.core.dto.request.BookingStatusRequest;
 import com.gridpulse.core.dto.response.CarCategoryResponse;
 import com.gridpulse.core.dto.response.PageResponse;
 import com.gridpulse.core.dto.response.RaceBookingResponse;
-import com.gridpulse.core.security.annotation.AdminOnly;
-import com.gridpulse.core.security.annotation.LoggedIn;
-import com.gridpulse.core.security.annotation.UserOnly;
 import com.gridpulse.core.service.RaceBookingService;
 import com.gridpulse.core.service.TicketService;
+import com.gridpulse.web.security.AdminOnly;
+import com.gridpulse.web.security.LoggedIn;
+import com.gridpulse.web.security.UserOnly;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

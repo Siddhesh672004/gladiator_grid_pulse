@@ -1,4 +1,4 @@
-package com.gridpulse.ai.config;
+package com.gridpulse.web.security;
 
 import java.io.IOException;
 
@@ -8,7 +8,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gridpulse.ai.dto.response.ErrorResponse;
+import com.gridpulse.web.error.ErrorResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

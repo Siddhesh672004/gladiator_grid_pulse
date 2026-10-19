@@ -8,10 +8,10 @@ import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
-import com.gridpulse.core.config.properties.AiServiceProperties;
-import com.gridpulse.core.config.properties.InternalApiProperties;
-import com.gridpulse.core.dto.response.FeedbackLabelResponse;
 import com.gridpulse.common.security.InternalApi;
+import com.gridpulse.core.config.properties.AiServiceProperties;
+import com.gridpulse.core.dto.response.FeedbackLabelResponse;
+import com.gridpulse.web.security.InternalApiProperties;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.extern.slf4j.Slf4j;

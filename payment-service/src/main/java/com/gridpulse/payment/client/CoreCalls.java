@@ -13,9 +13,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gridpulse.payment.dto.request.RaceBookingRequest;
-import com.gridpulse.payment.dto.response.ErrorResponse;
 import com.gridpulse.payment.exceptions.CoreRefusedException;
 import com.gridpulse.payment.exceptions.CoreUnavailableException;
+import com.gridpulse.web.error.ErrorResponse;
 
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;

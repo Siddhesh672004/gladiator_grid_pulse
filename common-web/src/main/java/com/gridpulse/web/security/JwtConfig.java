@@ -1,4 +1,4 @@
-package com.gridpulse.payment.config;
+package com.gridpulse.web.security;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.gridpulse.common.security.JwtVerifier;
-import com.gridpulse.payment.config.properties.JwtProperties;
 
 import lombok.extern.slf4j.Slf4j;
 

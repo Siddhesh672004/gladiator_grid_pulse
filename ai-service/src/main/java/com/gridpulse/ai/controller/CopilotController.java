@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.gridpulse.ai.dto.request.CopilotRequest;
 import com.gridpulse.ai.dto.response.ActionResult;
 import com.gridpulse.ai.dto.response.CopilotReply;
-import com.gridpulse.ai.security.annotation.LoggedIn;
 import com.gridpulse.ai.service.CopilotService;
+import com.gridpulse.web.security.LoggedIn;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

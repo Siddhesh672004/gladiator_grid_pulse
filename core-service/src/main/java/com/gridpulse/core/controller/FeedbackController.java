@@ -16,10 +16,10 @@ import com.gridpulse.core.dto.request.FeedbackRequest;
 import com.gridpulse.core.dto.response.FeedbackCountsResponse;
 import com.gridpulse.core.dto.response.FeedbackResponse;
 import com.gridpulse.core.dto.response.PageResponse;
-import com.gridpulse.core.security.annotation.AdminOnly;
-import com.gridpulse.core.security.annotation.LoggedIn;
-import com.gridpulse.core.security.annotation.UserOnly;
 import com.gridpulse.core.service.FeedbackService;
+import com.gridpulse.web.security.AdminOnly;
+import com.gridpulse.web.security.LoggedIn;
+import com.gridpulse.web.security.UserOnly;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

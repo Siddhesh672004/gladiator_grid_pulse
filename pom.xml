@@ -12,6 +12,7 @@
 
 	<modules>
 		<module>common</module>
+		<module>common-web</module>
 		<module>core-service</module>
 		<module>notification-service</module>
 		<module>payment-service</module>

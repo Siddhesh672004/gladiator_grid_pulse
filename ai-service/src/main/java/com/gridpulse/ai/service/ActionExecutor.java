@@ -10,9 +10,9 @@ import org.springframework.stereotype.Service;
 
 import com.gridpulse.ai.dto.response.ActionResult;
 import com.gridpulse.ai.exceptions.ActionRefusedException;
-import com.gridpulse.ai.security.TokenUser;
 import com.gridpulse.ai.tools.ConfirmableTools;
 import com.gridpulse.ai.tools.ToolErrorProcessor;
+import com.gridpulse.web.security.TokenUser;
 
 import lombok.extern.slf4j.Slf4j;
 

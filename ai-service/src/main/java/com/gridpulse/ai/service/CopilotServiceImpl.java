@@ -16,8 +16,8 @@ import com.gridpulse.ai.dto.response.ActionCard;
 import com.gridpulse.ai.dto.response.ActionResult;
 import com.gridpulse.ai.dto.response.CopilotReply;
 import com.gridpulse.ai.exceptions.GeminiException;
-import com.gridpulse.ai.security.TokenUser;
 import com.gridpulse.ai.tools.Toolsets;
+import com.gridpulse.web.security.TokenUser;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

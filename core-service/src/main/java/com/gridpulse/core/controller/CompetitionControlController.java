@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.gridpulse.core.dto.response.CompetitionResponse;
 import com.gridpulse.core.dto.response.LiveStandingResponse;
-import com.gridpulse.core.security.annotation.AdminOnly;
 import com.gridpulse.core.service.CompetitionControlService;
+import com.gridpulse.web.security.AdminOnly;
 
 import lombok.RequiredArgsConstructor;
 

@@ -1,8 +1,8 @@
-package com.gridpulse.payment.config.properties;
+package com.gridpulse.web.security;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-// jwt.secret (JWT_SECRET, the core's) and the core's key file for a laptop without it (config/JwtConfig)
+// jwt.secret (JWT_SECRET, the core's) and the core's key file for a laptop without it (JwtConfig)
 @ConfigurationProperties(prefix = "jwt")
 public record JwtProperties(String secret, String secretFile) {
 

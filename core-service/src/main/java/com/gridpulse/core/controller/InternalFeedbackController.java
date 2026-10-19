@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.gridpulse.core.dto.response.RecentFeedbackResponse;
-import com.gridpulse.core.security.annotation.AdminOnly;
 import com.gridpulse.core.service.FeedbackService;
+import com.gridpulse.web.security.AdminOnly;
 
 import lombok.RequiredArgsConstructor;
 

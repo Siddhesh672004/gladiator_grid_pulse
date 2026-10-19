@@ -5,7 +5,7 @@ import com.gridpulse.core.dto.request.LoginRequest;
 import com.gridpulse.core.dto.request.ResetPasswordRequest;
 import com.gridpulse.core.dto.request.SetPasswordRequest;
 import com.gridpulse.core.dto.response.LoginResponse;
-import com.gridpulse.core.dto.response.MessageResponse;
+import com.gridpulse.web.error.MessageResponse;
 
 // login for drivers and admins (two login pages) + forgot / reset password + the first password of an invited admin
 public interface AuthService {

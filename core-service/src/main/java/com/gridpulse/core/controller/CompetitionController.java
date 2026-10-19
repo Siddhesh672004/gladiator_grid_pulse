@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.gridpulse.core.dto.CompetitionRule;
 import com.gridpulse.core.dto.request.CompetitionRequest;
 import com.gridpulse.core.dto.response.CompetitionResponse;
-import com.gridpulse.core.security.annotation.AdminOnly;
 import com.gridpulse.core.service.CompetitionService;
+import com.gridpulse.web.security.AdminOnly;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

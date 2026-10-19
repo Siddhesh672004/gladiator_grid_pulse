@@ -1,4 +1,4 @@
-package com.gridpulse.core.config;
+package com.gridpulse.web.security;
 
 import java.io.IOException;
 
@@ -7,10 +7,9 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.gridpulse.core.config.properties.InternalApiProperties;
-import com.gridpulse.core.dto.response.ErrorResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gridpulse.common.security.InternalApi;
+import com.gridpulse.web.error.ErrorResponse;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

@@ -28,7 +28,7 @@ import org.testcontainers.containers.MySQLContainer;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
-import com.gridpulse.ai.security.TokenUser;
+import com.gridpulse.web.security.TokenUser;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

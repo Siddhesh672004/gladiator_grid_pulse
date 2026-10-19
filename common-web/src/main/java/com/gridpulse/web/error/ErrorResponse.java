@@ -1,4 +1,4 @@
-package com.gridpulse.ai.dto.response;
+package com.gridpulse.web.error;
 
 import java.time.LocalDateTime;
 import java.util.Map;

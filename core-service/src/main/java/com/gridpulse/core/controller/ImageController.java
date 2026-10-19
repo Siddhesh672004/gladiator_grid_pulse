@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.gridpulse.core.dto.response.ImageResponse;
-import com.gridpulse.core.security.annotation.AdminOnly;
-import com.gridpulse.core.security.annotation.LoggedIn;
 import com.gridpulse.core.service.CloudinaryService;
+import com.gridpulse.web.security.AdminOnly;
+import com.gridpulse.web.security.LoggedIn;
 
 import lombok.RequiredArgsConstructor;
 

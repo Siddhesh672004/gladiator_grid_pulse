@@ -1,4 +1,4 @@
-package com.gridpulse.ai.security.annotation;
+package com.gridpulse.web.security;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

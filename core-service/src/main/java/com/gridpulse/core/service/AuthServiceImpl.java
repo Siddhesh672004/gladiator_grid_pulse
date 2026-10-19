@@ -13,13 +13,13 @@ import com.gridpulse.core.dto.request.LoginRequest;
 import com.gridpulse.core.dto.request.ResetPasswordRequest;
 import com.gridpulse.core.dto.request.SetPasswordRequest;
 import com.gridpulse.core.dto.response.LoginResponse;
-import com.gridpulse.core.dto.response.MessageResponse;
 import com.gridpulse.core.exceptions.OtpException;
 import com.gridpulse.core.mapper.UserMapper;
 import com.gridpulse.core.model.OtpPurpose;
 import com.gridpulse.core.model.Role;
 import com.gridpulse.core.model.User;
 import com.gridpulse.core.repository.UserRepo;
+import com.gridpulse.web.error.MessageResponse;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

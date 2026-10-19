@@ -17,7 +17,7 @@ import com.gridpulse.payment.exceptions.CoreRefusedException;
 import com.gridpulse.payment.exceptions.CoreUnavailableException;
 import com.gridpulse.payment.exceptions.GridPulseException;
 import com.gridpulse.payment.model.Payment;
-import com.gridpulse.payment.security.TokenUser;
+import com.gridpulse.web.security.TokenUser;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

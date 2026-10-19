@@ -2,12 +2,19 @@ package com.gridpulse.ai.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.gridpulse.web.security.InternalKeyFilter;
+import com.gridpulse.web.security.InternalKeySecurityConfiguration;
+import com.gridpulse.web.security.JwtEntryPoint;
+import com.gridpulse.web.security.JwtTokenFilter;
+import com.gridpulse.web.security.TokenSecurityConfiguration;
 
 import lombok.RequiredArgsConstructor;
 
@@ -16,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 // no CORS here: the browser only talks to the gateway
 @Configuration
 @EnableMethodSecurity
+@Import({ TokenSecurityConfiguration.class, InternalKeySecurityConfiguration.class })
 @RequiredArgsConstructor
 public class SecurityConfig {
 

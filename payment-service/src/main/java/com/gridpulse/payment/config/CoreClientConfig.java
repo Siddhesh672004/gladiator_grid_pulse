@@ -4,6 +4,7 @@ import java.net.http.HttpClient;
 import java.time.Duration;
 import java.util.Optional;
 
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,14 +19,16 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 import com.gridpulse.common.security.InternalApi;
 import com.gridpulse.payment.client.CoreClient;
-import com.gridpulse.payment.config.properties.InternalApiProperties;
+import com.gridpulse.web.security.InternalApiProperties;
 
 import lombok.extern.slf4j.Slf4j;
 
 // CoreClient over a load balanced RestClient: http://core-service = one of the healthy core instances
 // every call carries X-Internal-Key, plus the caller's own token when there is one (the core checks the driver)
+// the key is only sent from here: this service has no /internal/** urls, so no InternalKeyFilter
 @Slf4j
 @Configuration
+@EnableConfigurationProperties(InternalApiProperties.class)
 public class CoreClientConfig {
 
     private static final String CORE = "http://core-service";

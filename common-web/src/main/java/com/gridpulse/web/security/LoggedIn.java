@@ -1,4 +1,4 @@
-package com.gridpulse.core.security.annotation;
+package com.gridpulse.web.security;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,9 +7,9 @@ import java.lang.annotation.Target;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 
-// Admin or SuperAdmin only; wrong role -> AccessDeniedException -> 403 (GlobalExceptionHandler)
+// any logged-in account; "is it your booking?" is checked in the service (UserService.checkOwnerOrAdmin)
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@PreAuthorize("hasAnyRole('Admin', 'SuperAdmin')")
-public @interface AdminOnly {
+@PreAuthorize("isAuthenticated()")
+public @interface LoggedIn {
 }
