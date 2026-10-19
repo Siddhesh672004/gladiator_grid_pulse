@@ -497,15 +497,15 @@ table.gp-table {
   background: var(--gp-surface);
   color: var(--gp-muted);
   font: 700 var(--text-xs)/1.4 var(--gp-mono);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   text-align: left;
-  padding: var(--space-3);
+  padding: var(--space-3) var(--space-2);
   white-space: nowrap;
 }
 
 .gp-table td {
-  padding: var(--space-3);
+  padding: var(--space-3) var(--space-2);
   border-top: 1px solid var(--gp-line);
   text-align: left;
   vertical-align: middle;
@@ -553,8 +553,21 @@ table.gp-table.flat {
   white-space: nowrap;
 }
 
+/* wide admin tables must fit at 1280px: cells keep their outer padding, the inner gaps stay tight */
+@media (min-width: 1241px) {
+  .gp-table th:first-child,
+  .gp-table td:first-child {
+    padding-left: var(--space-3);
+  }
+
+  .gp-table th:last-child,
+  .gp-table td:last-child {
+    padding-right: var(--space-3);
+  }
+}
+
 .gp-table .actions .btn {
-  margin: var(--space-1) var(--space-2) var(--space-1) 0;
+  margin: var(--space-1) var(--space-1) var(--space-1) 0;
   white-space: nowrap;
 }
 
