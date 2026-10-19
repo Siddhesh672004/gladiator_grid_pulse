@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -43,8 +41,6 @@ import com.gridpulse.core.booking.mapper.RaceBookingMapper;
 import com.gridpulse.core.competition.data.Competition;
 import com.gridpulse.core.media.service.CloudinaryService;
 import com.gridpulse.core.platform.exception.BookingException;
-import com.gridpulse.core.platform.exception.ConflictException;
-import com.gridpulse.core.platform.exception.DuplicateCarNumberException;
 import com.gridpulse.core.platform.exception.ResourceNotFoundException;
 import com.gridpulse.core.session.data.RaceSession;
 import com.gridpulse.core.session.data.RaceSessionRepo;
@@ -67,39 +63,15 @@ public class RaceBookingServiceImpl implements RaceBookingService {
             BookingStatus.REJECTED, BookingStatus.WAITLISTED);
     private static final List<String> CAR_CATEGORIES = List.of("GT3", "Formula", "Karting", "Rally", "Stock");
     private static final String CAR_PICTURE_PREFIX = "gridpulse_car_";
-    // a rejected booking holds no car number and no time slot
-    private static final List<String> HOLDS_A_PLACE = List.of(BookingStatus.PENDING, BookingStatus.APPROVED,
-            BookingStatus.WAITLISTED);
     // what payment-service's events may change on a booking
     private static final Set<PaymentStatus> COPIED_PAYMENT_STATUSES = EnumSet.of(PaymentStatus.REFUND_PENDING,
             PaymentStatus.REFUNDED, PaymentStatus.REFUND_FAILED);
-
-    // one rule of a session: when it is broken + the message for it
-    private record SessionRule(Predicate<RaceSession> broken, Function<RaceSession, String> message) {
-    }
-
-    // a driver books only a session that waits for its start, on an active track
-    private static final List<SessionRule> OPEN_FOR_BOOKING = List.of(
-            new SessionRule(RaceSession::isRacing,
-                    session -> "Race places come from qualifying - book the qualifying session instead"),
-            new SessionRule(session -> !session.isScheduled(),
-                    session -> "This session is " + session.getStatus() + " - booking is closed"),
-            new SessionRule(RaceSession::hasStarted,
-                    session -> "Booking is closed: this session has already started"),
-            new SessionRule(session -> !session.getTrack().isActive(),
-                    session -> "This track is not available right now"));
-
-    // approve / reject only before the session starts
-    private static final List<SessionRule> BOOKINGS_CAN_CHANGE = List.of(
-            new SessionRule(RaceSession::isRacing,
-                    session -> "Race places come from qualifying and cannot be changed"),
-            new SessionRule(session -> !session.isScheduled(),
-                    session -> "This session is " + session.getStatus() + " - its bookings can no longer be changed"));
 
     private final RaceBookingRepo raceBookingRepo;
     private final RaceSessionRepo raceSessionRepo;
     private final UserService userService;
     private final RaceBookingMapper raceBookingMapper;
+    private final BookingRules bookingRules;
     private final ApplicationEventPublisher eventPublisher;
     private final CloudinaryService cloudinaryService;
     private final TicketService ticketService;
@@ -146,7 +118,7 @@ public class RaceBookingServiceImpl implements RaceBookingService {
     public RaceSession checkCanBook(RaceBookingRequest request) {
         User driver = userService.getLoggedInUser();
         RaceSession session = findSessionToBook(request.sessionId());
-        checkBookingRules(newBooking(request, driver, session));
+        bookingRules.checkNewBooking(newBooking(request, driver, session));
         return session;
     }
 
@@ -158,7 +130,8 @@ public class RaceBookingServiceImpl implements RaceBookingService {
         String competitionName = Optional.ofNullable(session.getCompetition())
                 .map(Competition::getCompetitionName)
                 .orElse(null);
-        return new BookingQuote(session.getSessionId(), session.getPrice(), description(session), isFull(session),
+        boolean full = bookingRules.isFull(session);
+        return new BookingQuote(session.getSessionId(), session.getPrice(), description(session), full,
                 driver.getUserId(), driver.getUsername(), driver.getEmail(), driver.getMobileNumber(),
                 track.getTrackName(), track.getLocation(), session.getSessionDate(), session.getStartTime(),
                 session.getEndTime(), session.getSessionType(), session.getPhase(), competitionName);
@@ -179,12 +152,12 @@ public class RaceBookingServiceImpl implements RaceBookingService {
             return new InternalBookingResult(toResponse(booking), false);
         }
         RaceBooking booking = newBooking(request.booking(), driver, session);
-        checkBookingRules(booking);
+        bookingRules.checkNewBooking(booking);
         booking.setPaymentOrderId(request.razorpayOrderId());
         booking.setPaymentStatus(PaymentStatus.PAID);
         booking.setTotalPrice(request.amount());
         // full: paid, but it waits for a seat
-        boolean full = isFull(session);
+        boolean full = bookingRules.isFull(session);
         booking.setStatus(full ? BookingStatus.WAITLISTED : BookingStatus.PENDING);
         booking.setTermsAcceptedAt(Instant.now());
         RaceBooking saved = raceBookingRepo.save(booking);
@@ -228,7 +201,7 @@ public class RaceBookingServiceImpl implements RaceBookingService {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public RaceBookingResponse updateRaceBooking(Long bookingId, BookingStatusRequest request) {
         RaceBooking booking = findBooking(bookingId);
-        checkBookingCanChange(booking.getSession());
+        bookingRules.checkBookingCanChange(booking.getSession());
 
         String oldStatus = booking.getStatus();
         // no status sent = the status stays
@@ -257,7 +230,7 @@ public class RaceBookingServiceImpl implements RaceBookingService {
     public void deleteRaceBooking(Long bookingId) {
         RaceBooking booking = findBooking(bookingId);
         userService.checkOwnerOrAdmin(booking.getUser().getUserId());
-        checkCanBeDeleted(booking);
+        bookingRules.checkCanBeDeleted(booking);
 
         boolean callerIsAdmin = userService.getLoggedInUser().getUserRole().isAdmin();
         boolean pending = BookingStatus.PENDING.equals(booking.getStatus());
@@ -333,7 +306,7 @@ public class RaceBookingServiceImpl implements RaceBookingService {
         boolean rejecting = BookingStatus.REJECTED.equals(newStatus);
         boolean wasRejected = BookingStatus.REJECTED.equals(oldStatus);
         boolean seatFreed = BookingStatus.APPROVED.equals(oldStatus);
-        checkWaitlistChange(oldStatus, newStatus);
+        bookingRules.checkWaitlistChange(oldStatus, newStatus);
 
         // one at a time per session: two admins can't give away the last seat or one
         // car number twice
@@ -344,16 +317,16 @@ public class RaceBookingServiceImpl implements RaceBookingService {
         Optional.of(session)
                 .filter(locked -> approving)
                 .ifPresent(locked -> {
-                    checkSeatFree(locked);
-                    checkMoneyStillHere(booking);
+                    bookingRules.checkSeatFree(locked);
+                    bookingRules.checkMoneyStillHere(booking);
                 });
         // a rejected booking gave its car number back, somebody else may have taken it
         Optional.of(booking)
                 .filter(again -> wasRejected)
-                .ifPresent(this::checkCarNumberStillFree);
+                .ifPresent(bookingRules::checkCarNumberStillFree);
         Optional.of(booking)
                 .filter(rejected -> rejecting)
-                .ifPresent(rejected -> checkReason(note));
+                .ifPresent(rejected -> bookingRules.checkReason(note));
 
         booking.setStatus(newStatus);
         booking.setAdminNote(note);
@@ -375,14 +348,6 @@ public class RaceBookingServiceImpl implements RaceBookingService {
         return toResponse(saved);
     }
 
-    private void checkBookingRules(RaceBooking booking) {
-        RaceSession session = booking.getSession();
-        checkProfileComplete(booking.getUser());
-        checkOpenForBooking(session);
-        checkDriverIsFree(booking.getUser(), session);
-        checkCarNumberFree(booking);
-    }
-
     private RaceBooking newBooking(RaceBookingRequest request, User driver, RaceSession session) {
         RaceBooking booking = raceBookingMapper.toEntity(request, driver, session);
         booking.setCarCategory(allowedValue(CAR_CATEGORIES, booking.getCarCategory(), "Car category"));
@@ -400,130 +365,6 @@ public class RaceBookingServiceImpl implements RaceBookingService {
                 .orElseThrow(() -> new BookingException("Session with ID: " + sessionId + " not found."));
     }
 
-    private void checkProfileComplete(User driver) {
-        Optional.of(driver)
-                .filter(User::isProfileComplete)
-                .orElseThrow(() -> new BookingException("Please complete your profile before booking a race"));
-    }
-
-    // one driver, one session at a time on any track. back to back (13:30 end,
-    // 13:30 start) is fine
-    private void checkDriverIsFree(User driver, RaceSession session) {
-        raceBookingRepo.findByUserUserIdAndSessionSessionDateAndStatusIn(driver.getUserId(),
-                        session.getSessionDate(), HOLDS_A_PLACE).stream()
-                .map(RaceBooking::getSession)
-                .filter(taken -> session.getStartTime().isBefore(taken.getEndTime())
-                        && taken.getStartTime().isBefore(session.getEndTime()))
-                .findFirst()
-                .ifPresent(taken -> {
-                    throw new ConflictException(
-                            "This driver is already registered for an overlapping session on this date");
-                });
-    }
-
-    private void checkOpenForBooking(RaceSession session) {
-        checkSessionRules(OPEN_FOR_BOOKING, session);
-    }
-
-    private void checkBookingCanChange(RaceSession session) {
-        checkSessionRules(BOOKINGS_CAN_CHANGE, session);
-    }
-
-    // rules are tried from the top, the first broken one is the answer
-    private void checkSessionRules(List<SessionRule> rules, RaceSession session) {
-        rules.stream()
-                .filter(rule -> rule.broken().test(session))
-                .map(rule -> rule.message().apply(session))
-                .findFirst()
-                .ifPresent(message -> {
-                    throw new BookingException(message);
-                });
-    }
-
-    private void checkSeatFree(RaceSession session) {
-        Optional.of(session)
-                .filter(open -> !isFull(open))
-                .orElseThrow(() -> new ConflictException("Session is full (" + session.getMaxCars() + " cars)"));
-    }
-
-    private boolean isFull(RaceSession session) {
-        return countApprovedCars(session.getSessionId()) >= session.getMaxCars();
-    }
-
-    // a reject needs a reason of at least 5 characters
-    private void checkReason(String note) {
-        String reason = Optional.ofNullable(note)
-                .orElseThrow(() -> new BookingException("Please write a reason for rejecting this booking"));
-        Optional.of(reason)
-                .filter(text -> text.length() >= 5)
-                .orElseThrow(() -> new BookingException("Reason must be at least 5 characters"));
-    }
-
-    // a rejected booking does not hold its car number
-    private void checkCarNumberFree(RaceBooking booking) {
-        Optional.of(booking)
-                .filter(car -> !raceBookingRepo.existsBySessionSessionIdAndCarNumberAndStatusNot(
-                        car.getSession().getSessionId(), car.getCarNumber(), BookingStatus.REJECTED))
-                .orElseThrow(() -> new DuplicateCarNumberException("Car number " + booking.getCarNumber()
-                        + " is already registered for this session"));
-    }
-
-    private void checkCarNumberStillFree(RaceBooking booking) {
-        Optional.of(booking)
-                .filter(car -> !raceBookingRepo.existsBySessionSessionIdAndCarNumberAndStatusNotAndRaceBookingIdNot(
-                        car.getSession().getSessionId(), car.getCarNumber(), BookingStatus.REJECTED,
-                        car.getRaceBookingId()))
-                .orElseThrow(() -> new DuplicateCarNumberException("Car number " + booking.getCarNumber()
-                        + " was taken by another booking in the meantime"));
-    }
-
-    private void checkCanBeDeleted(RaceBooking booking) {
-        RaceSession session = booking.getSession();
-        Optional.of(session)
-                .filter(stage -> !stage.isRacing())
-                .orElseThrow(() -> new BookingException("Race places come from qualifying and cannot be removed"));
-        // an approved car of a session that already ran is part of the results
-        Optional.of(booking)
-                .filter(car -> BookingStatus.APPROVED.equals(car.getStatus()) && !session.isScheduled())
-                .ifPresent(car -> {
-                    throw new BookingException("This session is " + session.getStatus() + " - its results are kept");
-                });
-    }
-
-    // a refunded booking can't be approved again (no payment status = a free race place)
-    private void checkMoneyStillHere(RaceBooking booking) {
-        Optional.ofNullable(booking.getPaymentStatus())
-                .filter(status -> status != PaymentStatus.PAID)
-                .ifPresent(status -> {
-                    throw new BookingException(
-                            "The payment of this booking was refunded - the driver has to book again");
-                });
-    }
-
-    // only GridPulse puts a booking on the waitlist, and a waitlisted one only moves up by itself (or is rejected)
-    private void checkWaitlistChange(String oldStatus, String newStatus) {
-        Optional.of(newStatus)
-                .filter(BookingStatus.WAITLISTED::equals)
-                .ifPresent(status -> {
-                    throw new BookingException("Waitlisted is set by GridPulse when the session is full");
-                });
-        // waitlisted = the session is full: approving it is the same clash as approving into a full session
-        Optional.of(oldStatus)
-                .filter(BookingStatus.WAITLISTED::equals)
-                .filter(waiting -> BookingStatus.APPROVED.equals(newStatus))
-                .ifPresent(waiting -> {
-                    throw new ConflictException(
-                            "Session is full - a waitlisted booking moves up by itself when a seat opens");
-                });
-        Optional.of(oldStatus)
-                .filter(BookingStatus.WAITLISTED::equals)
-                .filter(waiting -> !BookingStatus.REJECTED.equals(newStatus))
-                .ifPresent(waiting -> {
-                    throw new BookingException(
-                            "A waitlisted booking can only be rejected - it moves up by itself when a seat opens");
-                });
-    }
-
     // Pending + Waitlisted: everyone without a seat
     private Stream<RaceBooking> waitingBookings(Long sessionId) {
         return Stream.concat(raceBookingRepo.findBySessionSessionIdAndStatus(sessionId, BookingStatus.PENDING).stream(),
@@ -534,7 +375,7 @@ public class RaceBookingServiceImpl implements RaceBookingService {
     // no refund: the booking keeps its money and its place in the queue
     private void waitlistPendingIfFull(RaceSession session) {
         Optional.of(session)
-                .filter(this::isFull)
+                .filter(bookingRules::isFull)
                 .ifPresent(full -> raceBookingRepo.findBySessionSessionIdAndStatusOrderByRaceBookingIdAsc(
                         full.getSessionId(), BookingStatus.PENDING).forEach(this::waitlist));
     }

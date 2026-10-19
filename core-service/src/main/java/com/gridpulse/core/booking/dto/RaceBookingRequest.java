@@ -10,7 +10,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 // no userId and no license: the driver comes from the token, the license from the profile
-// db rules (seat left, free car number ...) are checked in RaceBookingServiceImpl
+// db rules (seat left, free car number ...) are checked in BookingRules
 public record RaceBookingRequest(
 
         @NotNull(message = "Please pick a session")
