@@ -1,0 +1,145 @@
+/* ==== add / edit session ==== */
+app-adminaddsession .panel > .sub-title:not(:first-child) {
+  margin-top: 18px;
+}
+
+/* the two big choices: Practice or Competition */
+app-adminaddsession .type-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+app-adminaddsession .type-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--gp-border);
+  border-radius: var(--gp-radius);
+  font-size: 13.5px;
+  color: var(--gp-muted);
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+app-adminaddsession .type-option strong {
+  display: block;
+  font-size: 15px;
+  color: var(--gp-ink);
+}
+
+app-adminaddsession .type-option.chosen {
+  border-color: var(--gp-ink);
+  box-shadow: inset 0 0 0 1px var(--gp-ink);
+  background: var(--gp-accent-soft);
+}
+
+app-adminaddsession .type-option input {
+  margin-top: 4px;
+}
+
+app-adminaddsession .slot-facts {
+  margin-top: 12px;
+}
+
+@media (max-width: 560px) {
+  app-adminaddsession .type-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==== check ticket (admin) ==== */
+app-admincheckticket .check-form {
+  margin-bottom: 18px;
+}
+
+app-admincheckticket .check-row {
+  display: flex;
+  gap: 10px;
+}
+
+app-admincheckticket .ticket-result {
+  border-left: 6px solid var(--gp-border);
+}
+
+app-admincheckticket .ticket-result.valid {
+  border-left-color: var(--gp-green);
+  background: var(--gp-green-soft);
+}
+
+app-admincheckticket .ticket-result.invalid {
+  border-left-color: var(--gp-red);
+  background: var(--gp-red-soft);
+}
+
+app-admincheckticket .ticket-result.valid .sub-title {
+  color: var(--gp-green-dark);
+}
+
+app-admincheckticket .ticket-result.invalid .sub-title {
+  color: var(--gp-red-dark);
+}
+
+/* ==== manage users ==== */
+app-adminmanageusers .search-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: min(480px, 100%);
+}
+
+app-adminmanageusers .search-form .search-box {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ==== payments ==== */
+app-adminviewpayments .kpi-row {
+  margin-bottom: 20px;
+}
+
+.gp-table .small-id,
+.facts .small-id {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Show More with the audit trail */
+.modal-box.trail-box {
+  width: 560px;
+}
+
+.trail-title {
+  margin: 4px 0 16px;
+  font-size: 26px;
+}
+
+.trail-head {
+  margin: 22px 0 10px;
+}
+
+.trail {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+  text-align: left;
+}
+
+.trail li {
+  padding: 8px 0 8px 14px;
+  border-left: 2px solid var(--gp-line);
+}
+
+.trail-time {
+  margin-right: 8px;
+  font: 500 12px var(--gp-mono);
+  color: var(--gp-muted);
+}
+
+.trail-detail {
+  display: block;
+  color: var(--gp-text);
+}

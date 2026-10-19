@@ -1,0 +1,149 @@
+/* ==== add feedback ==== */
+app-useraddfeedback .no-session {
+  margin: -4px 0 16px;
+}
+
+/* rating stars */
+app-useraddfeedback .star-label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gp-muted);
+}
+
+app-useraddfeedback .star-row {
+  display: flex;
+  gap: 6px;
+}
+
+app-useraddfeedback .star {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  font-size: 32px;
+  line-height: 1;
+  color: var(--gp-border);
+  cursor: pointer;
+  transition: color 0.15s ease, transform 0.16s var(--ease-out);
+}
+
+app-useraddfeedback .star.filled {
+  color: var(--gp-gold);
+}
+
+app-useraddfeedback .star:active {
+  transform: scale(0.9);
+}
+
+app-useraddfeedback .text-box {
+  display: block;
+  margin-top: 20px;
+}
+
+app-useraddfeedback .ai-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin-bottom: 14px;
+}
+
+app-useraddfeedback .ai-note {
+  flex: 1;
+  min-width: 200px;
+  font-size: 12.5px;
+}
+
+app-useraddfeedback .suggestion-title {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gp-ink);
+}
+
+app-useraddfeedback .suggestion {
+  display: block;
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--gp-border);
+  border-radius: var(--gp-radius);
+  background: var(--gp-surface);
+  color: var(--gp-text);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+app-useraddfeedback .suggestion:hover {
+  border-color: var(--gp-ink);
+  box-shadow: inset 0 0 0 1px var(--gp-ink);
+}
+
+app-useraddfeedback .panel > .server-error {
+  margin: 0 0 14px;
+}
+
+app-useraddfeedback .preview-stars {
+  margin: 8px 0;
+  font-size: 22px;
+}
+
+app-useraddfeedback .preview-stars .dim {
+  color: var(--gp-line);
+}
+
+app-useraddfeedback .preview-text {
+  margin: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+/* ==== feedback lists (driver and admin) ==== */
+app-userviewfeedback .text-cell,
+app-adminviewfeedback .text-cell {
+  min-width: 260px;
+}
+
+.stars-cell {
+  color: var(--gp-gold);
+  letter-spacing: 2px;
+  white-space: nowrap;
+}
+
+/* ==== feedback (admin) ==== */
+app-adminviewfeedback .kpi-row {
+  margin-bottom: 20px;
+}
+
+app-adminviewfeedback .summary-box {
+  margin-bottom: 20px;
+  border-left: 4px solid var(--gp-accent);
+}
+
+app-adminviewfeedback .summary-box p {
+  margin: 8px 0 0;
+}
+
+app-adminviewfeedback .check-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gp-ink);
+  cursor: pointer;
+}
+
+app-adminviewfeedback .urgent {
+  display: block;
+  width: fit-content;
+  margin-top: 6px;
+}
+
+.profile-name {
+  margin: 4px 0 16px;
+  font-size: 19px;
+}

@@ -1,0 +1,23 @@
+/* ==== logo ==== */
+app-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 20px;
+  white-space: nowrap;
+}
+
+app-logo svg {
+  flex: none;
+  width: 1.5em;
+  height: 1em;
+  fill: none;
+  stroke: var(--gp-accent);
+  stroke-width: 3;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+app-logo .display {
+  color: inherit;
+}

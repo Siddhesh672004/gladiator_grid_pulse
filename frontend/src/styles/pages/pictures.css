@@ -1,0 +1,233 @@
+/* ==== track form: pictures + preview ==== */
+app-trackform .pictures-title {
+  margin: 10px 0 4px;
+}
+
+app-trackform .pictures-hint {
+  margin: 0 0 12px;
+  font-size: 13px;
+}
+
+app-trackform .cover-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--gp-muted);
+}
+
+app-trackform .preview-note {
+  margin: 0;
+  font-size: 13px;
+}
+
+/* ==== picture picker ==== */
+app-imagepicker .thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+app-imagepicker .thumb,
+app-imagepicker .add-tile {
+  position: relative;
+  width: 120px;
+  height: 80px;
+  border-radius: var(--gp-radius);
+  overflow: hidden;
+}
+
+app-imagepicker .thumb {
+  border: 1px solid var(--gp-line);
+  background: var(--gp-field);
+}
+
+app-imagepicker .thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+app-imagepicker .thumb.uploading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--gp-muted);
+}
+
+app-imagepicker .cover-tag {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(20, 23, 31, 0.75);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+app-imagepicker .thumb-remove {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(20, 23, 31, 0.75);
+  color: #fff;
+  font-size: 16px;
+  line-height: 24px;
+  cursor: pointer;
+}
+
+app-imagepicker .thumb-remove:hover {
+  background: var(--gp-red);
+}
+
+app-imagepicker .add-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: 1px dashed var(--gp-border);
+  background: var(--gp-surface);
+  color: var(--gp-muted);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+app-imagepicker .add-tile:hover {
+  border-color: var(--gp-accent);
+  color: var(--gp-accent-text);
+}
+
+app-imagepicker .add-plus {
+  font-size: 22px;
+  line-height: 1;
+}
+
+/* hidden file box */
+app-imagepicker .file-box {
+  display: none;
+}
+
+app-imagepicker .picker-hint {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--gp-muted);
+}
+
+/* ==== picture carousel ==== */
+/* a 16:9 frame, the pictures lie on top of each other and the current one fades in */
+app-carousel .carousel {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: var(--gp-radius-lg);
+  background: var(--gp-ink);
+}
+
+app-carousel .slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+app-carousel .slide.active {
+  opacity: 1;
+}
+
+app-carousel .arrow {
+  position: absolute;
+  top: 50%;
+  width: 40px;
+  height: 40px;
+  margin-top: -20px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(20, 23, 31, 0.55);
+  color: #fff;
+  font-size: 26px;
+  line-height: 38px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+app-carousel .arrow:hover {
+  background: var(--gp-ink);
+}
+
+app-carousel .arrow.prev {
+  left: 12px;
+}
+
+app-carousel .arrow.next {
+  right: 12px;
+}
+
+app-carousel .counter {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(20, 23, 31, 0.6);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+app-carousel .dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 12px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+app-carousel .dot {
+  width: 9px;
+  height: 9px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+}
+
+app-carousel .dot.active {
+  background: #fff;
+}
+
+app-carousel .arrow:focus-visible,
+app-carousel .dot:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+app-carousel .carousel.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 16 / 6;
+  background: var(--gp-field);
+  border: 1px dashed var(--gp-border);
+  color: var(--gp-muted);
+  font-size: 14px;
+}

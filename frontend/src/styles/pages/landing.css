@@ -1,0 +1,226 @@
+/* ==== landing page ==== */
+app-landing {
+  display: block;
+}
+
+app-landing .screen {
+  display: grid;
+  align-content: center;
+  min-height: calc(100vh - var(--gp-nav-h));
+  padding: 48px 0;
+  scroll-margin-top: var(--gp-nav-h);
+}
+
+app-landing .screen.white {
+  background: var(--gp-surface);
+}
+
+app-landing .wrap {
+  width: min(1240px, calc(100% - 48px));
+  margin: 0 auto;
+}
+
+/* first screen: words on the left, the picture up to the right edge */
+app-landing .hero {
+  grid-template-columns: 1.1fr 0.9fr;
+  align-content: stretch;
+  padding: 0;
+}
+
+app-landing .hero-text {
+  align-self: center;
+  justify-self: end;
+  width: min(680px, 100%);
+  padding: 24px 40px 24px 24px;
+}
+
+app-landing .hero h1 {
+  margin: 12px 0 16px;
+  font-size: clamp(28px, 3.2vw, 50px);
+}
+
+app-landing .hero h1 mark {
+  padding: 0 0.12em;
+  background: var(--gp-accent);
+  color: var(--gp-ink);
+  white-space: nowrap;
+}
+
+app-landing .hero-lead {
+  max-width: 42ch;
+  margin: 0 0 24px;
+  font-size: 17px;
+}
+
+app-landing .cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+app-landing .stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 40px;
+  margin-top: 36px;
+  padding-top: 22px;
+  border-top: 1px solid var(--gp-line);
+}
+
+app-landing .stats b {
+  display: block;
+  font-size: 28px;
+  line-height: 1;
+  color: var(--gp-ink);
+}
+
+app-landing .stats span {
+  display: block;
+  margin-top: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gp-muted);
+}
+
+app-landing .hero-photo {
+  position: relative;
+  min-height: 300px;
+  background: var(--gp-ink);
+  clip-path: polygon(13% 0, 100% 0, 100% 100%, 0 100%);
+}
+
+app-landing .hero-photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* the screens under it */
+app-landing .sec-title {
+  margin-bottom: 24px;
+  font-size: clamp(20px, 2.3vw, 30px);
+}
+
+app-landing .block-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+app-landing .block-head .sec-title {
+  margin: 0;
+}
+
+app-landing .split {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 56px;
+  align-items: center;
+}
+
+app-landing .split p {
+  max-width: 46ch;
+  font-size: 17px;
+}
+
+app-landing .split .points {
+  font-size: 17px;
+}
+
+app-landing .race-day {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 20px;
+  margin: 0 0 32px;
+  padding: 24px 0 0;
+  border-top: 3px solid var(--gp-ink);
+  list-style: none;
+}
+
+app-landing .race-day li {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  justify-items: start;
+}
+
+app-landing .race-day strong {
+  font-size: 17px;
+  color: var(--gp-ink);
+}
+
+app-landing .race-day span {
+  font-size: 14.5px;
+  color: var(--gp-muted);
+}
+
+app-landing .tower-note {
+  margin: 0;
+  padding: 8px 16px;
+  border-top: 1px solid var(--gp-line);
+  font: 500 11px var(--gp-mono);
+  text-align: right;
+  color: var(--gp-muted);
+}
+
+/* orange band above the footer */
+app-landing .cta-band {
+  padding: 56px 0;
+  background: var(--gp-accent);
+}
+
+app-landing .cta-band .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px 40px;
+}
+
+app-landing .cta-band h2 {
+  margin: 0;
+  font-size: clamp(22px, 2.6vw, 34px);
+}
+
+@media (max-width: 960px) {
+  app-landing .screen {
+    min-height: 0;
+    padding: 48px 0;
+  }
+
+  app-landing .wrap {
+    width: calc(100% - 32px);
+  }
+
+  app-landing .hero,
+  app-landing .split {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  app-landing .hero {
+    padding: 0;
+  }
+
+  app-landing .hero-text {
+    justify-self: stretch;
+    width: auto;
+    padding: 32px 16px 8px;
+  }
+
+  app-landing .hero-photo {
+    height: 280px;
+    clip-path: none;
+  }
+
+  app-landing .race-day {
+    grid-template-columns: 1fr;
+  }
+}

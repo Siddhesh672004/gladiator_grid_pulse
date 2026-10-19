@@ -1,0 +1,46 @@
+/* ==== error page ==== */
+app-error .error-page {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 4px;
+  max-width: 620px;
+  min-height: calc(100vh - var(--gp-nav-h) - 6px);
+  margin: 0 auto;
+  padding: 40px 20px 80px;
+  text-align: center;
+}
+
+app-error .error-logo {
+  margin-bottom: 40px;
+  color: var(--gp-ink);
+  text-decoration: none;
+}
+
+/* a red flag on its pole: the session is stopped */
+app-error .red-flag {
+  width: 96px;
+  height: 62px;
+  margin-bottom: 26px;
+  border-left: 6px solid var(--gp-ink);
+  background: var(--gp-red);
+  transform: skewY(-8deg);
+}
+
+app-error .error-page h1 {
+  margin: 4px 0 6px;
+  font-size: clamp(24px, 3.4vw, 36px);
+}
+
+app-error .error-page p {
+  margin: 0;
+  font-size: 16px;
+}
+
+app-error .error-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 28px;
+}

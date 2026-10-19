@@ -1,6 +1,6 @@
 import { Directive, ElementRef, OnDestroy, OnInit } from '@angular/core';
 
-// <section appReveal>: the block fades up the first time it scrolls into view (css: .on-scroll / .seen in styles.css)
+// <section appReveal>: the block fades up the first time it scrolls into view (css: .on-scroll / .seen in styles/components.css)
 @Directive({
   selector: '[appReveal]'
 })

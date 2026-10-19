@@ -1,0 +1,140 @@
+/* ==== driver home ==== */
+app-home-page .home {
+  display: grid;
+  gap: 20px;
+}
+
+/* welcome block: words on the left, the next session on the right */
+app-home-page .welcome {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: 28px;
+  align-items: center;
+  padding: 30px 32px;
+}
+
+app-home-page .welcome h1 {
+  margin: 8px 0 10px;
+  font-size: clamp(22px, 2.8vw, 32px);
+  overflow-wrap: anywhere;
+}
+
+app-home-page .welcome p {
+  margin: 0;
+}
+
+app-home-page .welcome-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+app-home-page .next-card {
+  display: grid;
+  gap: 4px;
+  padding: 20px 22px 24px;
+  background: var(--gp-field);
+  border-left: 4px solid var(--gp-accent);
+  color: var(--gp-text);
+  text-decoration: none;
+  transition: transform 0.2s var(--ease-out);
+}
+
+app-home-page .next-card strong {
+  font-size: 19px;
+  color: var(--gp-ink);
+}
+
+app-home-page .next-card .mono {
+  font-size: 13px;
+  color: var(--gp-ink);
+}
+
+app-home-page .next-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin-top: 10px;
+}
+
+/* one line per page of the driver */
+app-home-page .action {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 4px;
+  border-top: 1px solid var(--gp-line);
+  color: var(--gp-text);
+  text-decoration: none;
+}
+
+app-home-page .action > .mono {
+  font-size: 12px;
+  color: var(--gp-accent-text);
+}
+
+app-home-page .action-body {
+  flex: 1;
+  min-width: 0;
+}
+
+app-home-page .action strong,
+app-home-page .action small {
+  display: block;
+}
+
+app-home-page .action strong {
+  color: var(--gp-ink);
+}
+
+app-home-page .action small {
+  font-size: 13px;
+  color: var(--gp-muted);
+}
+
+app-home-page .action app-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--gp-muted);
+  transition: transform 0.2s var(--ease-out), color 0.15s ease;
+}
+
+app-home-page .light-steps {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+}
+
+app-home-page .light-steps li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  color: var(--gp-ink);
+}
+
+app-home-page .contact p {
+  margin: 4px 0 0;
+}
+
+@media (hover: hover) {
+  app-home-page a.next-card:hover {
+    transform: translateY(-2px);
+  }
+
+  app-home-page .action:hover app-icon {
+    color: var(--gp-accent-text);
+    transform: translateX(4px);
+  }
+}
+
+@media (max-width: 900px) {
+  app-home-page .welcome {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 22px 20px;
+  }
+}

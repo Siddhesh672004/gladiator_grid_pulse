@@ -1,0 +1,299 @@
+/* ==== how it works ==== */
+/* one chapter is as high as the window */
+app-howitworks {
+  --head: var(--gp-nav-h);
+  --bar: 49px;
+  display: block;
+}
+
+/* chapter numbers, stay under the top bar */
+app-howitworks .chapter-bar {
+  position: sticky;
+  top: var(--head);
+  z-index: 800;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: var(--bar);
+  padding: 0 max(24px, calc((100% - 1240px) / 2));
+  background: var(--gp-surface);
+  border-bottom: 1px solid var(--gp-line);
+  overflow-x: auto;
+}
+
+app-howitworks .chapter-bar .tag,
+app-howitworks .chapter-bar .group {
+  flex: none;
+}
+
+app-howitworks .chapter-bar .group {
+  margin-left: 20px;
+  font: 700 11px var(--gp-mono);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--gp-muted);
+}
+
+app-howitworks .chapter-bar button {
+  flex: none;
+  min-width: 34px;
+  height: 30px;
+  border: 1px solid var(--gp-line);
+  border-radius: 3px;
+  background: var(--gp-surface);
+  color: var(--gp-muted);
+  font: 700 12px var(--gp-mono);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+app-howitworks .chapter-bar button:hover {
+  border-color: var(--gp-ink);
+  color: var(--gp-ink);
+}
+
+app-howitworks .chapter-bar button.current {
+  border-color: var(--gp-ink);
+  background: var(--gp-ink);
+  color: #fff;
+}
+
+app-howitworks .slide {
+  display: grid;
+  align-content: center;
+  min-height: calc(100vh - var(--head) - var(--bar));
+  padding: 40px 0;
+  scroll-margin-top: calc(var(--head) + var(--bar));
+}
+
+app-howitworks .slide.white {
+  background: var(--gp-surface);
+}
+
+app-howitworks .wrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: center;
+  width: min(1100px, calc(100% - 48px));
+  margin: 0 auto;
+}
+
+app-howitworks .slide h2 {
+  margin: 10px 0 14px;
+  font-size: clamp(26px, 3.2vw, 42px);
+}
+
+app-howitworks .say {
+  max-width: 40ch;
+  margin: 0 0 22px;
+  font-size: 18px;
+}
+
+app-howitworks .points {
+  font-size: 16px;
+}
+
+/* the drawn screen: a small window with a title bar */
+app-howitworks .window {
+  background: var(--gp-surface);
+  border: 1px solid var(--gp-line);
+  border-radius: var(--gp-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--gp-shadow);
+}
+
+app-howitworks .window-bar {
+  padding: 9px 16px;
+  background: var(--gp-ink);
+  color: #c9ccd2;
+  font-size: 11.5px;
+  font-weight: 500;
+}
+
+app-howitworks .window-body {
+  display: grid;
+  gap: 12px;
+  padding: 22px;
+}
+
+app-howitworks .window-body small {
+  display: block;
+  font-family: var(--gp-font);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--gp-muted);
+}
+
+app-howitworks .window-body b {
+  display: block;
+  color: var(--gp-ink);
+}
+
+app-howitworks .window-body .btn {
+  cursor: default;
+  text-align: center;
+}
+
+app-howitworks .box,
+app-howitworks .chip,
+app-howitworks .code span,
+app-howitworks .kpis span {
+  padding: 9px 12px;
+  border: 1px solid var(--gp-border);
+  border-radius: var(--gp-radius);
+  color: var(--gp-ink);
+  font-weight: 500;
+}
+
+app-howitworks .pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+app-howitworks .row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--gp-line);
+}
+
+app-howitworks .row:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+app-howitworks .row > :first-child {
+  flex: 1;
+}
+
+app-howitworks .acts {
+  display: flex;
+  gap: 6px;
+}
+
+app-howitworks .note {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--gp-muted);
+}
+
+app-howitworks .code {
+  display: flex;
+  gap: 8px;
+}
+
+app-howitworks .code span {
+  display: grid;
+  place-items: center;
+  flex: 0 1 40px;
+  min-width: 0;
+  height: 46px;
+  padding: 0;
+  font-size: 18px;
+}
+
+app-howitworks .chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+app-howitworks .chip {
+  flex: 1;
+  min-width: 150px;
+  font-size: 13.5px;
+}
+
+app-howitworks .chip.on {
+  border-color: var(--gp-ink);
+  box-shadow: inset 0 0 0 1px var(--gp-ink);
+}
+
+app-howitworks .stars.big {
+  margin: 0;
+  font-size: 24px;
+}
+
+app-howitworks .bubble {
+  justify-self: start;
+  max-width: 85%;
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: var(--gp-radius);
+  background: var(--gp-field);
+  font-size: 14px;
+}
+
+app-howitworks .bubble.me {
+  justify-self: end;
+  background: var(--gp-ink);
+  color: #fff;
+}
+
+app-howitworks .kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+app-howitworks .kpis span {
+  border-color: var(--gp-line);
+}
+
+app-howitworks .bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 90px;
+}
+
+app-howitworks .bars i {
+  flex: 1;
+  border-radius: 2px 2px 0 0;
+  background: var(--gp-ink);
+}
+
+app-howitworks .bars i:last-child {
+  background: var(--gp-accent);
+}
+
+app-howitworks .phase-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font: 700 13px var(--gp-mono);
+  color: var(--gp-ink);
+}
+
+app-howitworks .window-body .tower-row {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* phones: words above the drawing */
+@media (max-width: 960px) {
+  app-howitworks .chapter-bar {
+    padding: 0 16px;
+  }
+
+  app-howitworks .slide {
+    min-height: 0;
+    padding: 44px 0;
+  }
+
+  app-howitworks .wrap {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    width: calc(100% - 32px);
+  }
+
+  app-howitworks .kpis {
+    grid-template-columns: 1fr 1fr;
+  }
+}

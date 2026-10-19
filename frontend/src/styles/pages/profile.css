@@ -1,0 +1,77 @@
+/* ==== driver profile ==== */
+app-userprofile .next-part {
+  margin-top: 28px;
+}
+
+app-userprofile .profile-note {
+  margin: 0 0 18px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--gp-accent);
+  border-radius: var(--gp-radius);
+  background: var(--gp-accent-soft);
+  font-size: 13.5px;
+}
+
+app-userprofile .update-btn {
+  margin-top: 18px;
+}
+
+app-userprofile .panel > .server-error,
+app-userprofile .panel > .success-text {
+  margin: 14px 0 0;
+}
+
+/* the account drawn as a paddock pass */
+app-userprofile .pass {
+  background: var(--gp-surface);
+  border: 1px solid var(--gp-line);
+  border-top: 4px solid var(--gp-accent);
+}
+
+app-userprofile .pass-body {
+  display: grid;
+  gap: 18px;
+  padding: 20px 22px 28px;
+}
+
+app-userprofile .pass-who {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+app-userprofile .pass-who img,
+app-userprofile .pass-initial {
+  flex: none;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+app-userprofile .pass-initial {
+  display: grid;
+  place-items: center;
+  background: var(--gp-accent);
+  color: var(--gp-ink);
+  font-size: 26px;
+  font-weight: 800;
+}
+
+app-userprofile .pass-who strong,
+app-userprofile .pass-who .mono {
+  display: block;
+}
+
+app-userprofile .pass-who strong {
+  font-size: 18px;
+  color: var(--gp-ink);
+  overflow-wrap: anywhere;
+}
+
+app-userprofile .pass-who .mono {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gp-muted);
+}

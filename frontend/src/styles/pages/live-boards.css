@@ -1,0 +1,269 @@
+/* ==== live boards: practice control, live timing, competition control ==== */
+/* the board itself (.board ...) is further up, at "session chips + the live board" */
+.picker {
+  margin-bottom: 22px;
+}
+
+.picker-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.picker-fields .field {
+  margin-bottom: 0;
+}
+
+.picker-note {
+  margin: 12px 0 0;
+}
+
+.chip-flag {
+  display: block;
+  margin-top: 6px;
+}
+
+/* header */
+.board-sub {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+}
+
+.board-meta + .board-meta::before {
+  content: "·";
+  margin-right: 14px;
+  color: #8a8d96;
+}
+
+.board-sub .live-dot {
+  margin-left: 0;
+}
+
+.board-actions .btn {
+  min-width: 128px;
+}
+
+.btn-reset {
+  background: var(--gp-red);
+}
+
+.btn-reset:hover:not(:disabled) {
+  background: var(--gp-red-dark);
+}
+
+/* table */
+.board .col-left {
+  text-align: left;
+}
+
+.board .mono {
+  font-variant-numeric: tabular-nums;
+}
+
+.board tr.state-RETIRED td {
+  color: var(--gp-muted);
+}
+
+/* row actions */
+.col-actions {
+  width: 190px;
+}
+
+.row-actions {
+  white-space: nowrap;
+}
+
+.row-actions .btn {
+  min-width: 74px;
+  margin: 0 3px;
+}
+
+.btn-start {
+  background: var(--gp-green);
+}
+
+.btn-start:hover:not(:disabled) {
+  background: var(--gp-green-dark);
+}
+
+.btn-retire {
+  background: var(--gp-surface);
+  color: var(--gp-red-dark);
+  box-shadow: inset 0 0 0 1.5px var(--gp-red);
+  clip-path: none;
+}
+
+.btn-retire:hover:not(:disabled) {
+  background: var(--gp-red-soft);
+}
+
+.no-actions {
+  color: var(--gp-muted);
+}
+
+.board-error {
+  color: var(--gp-red-dark);
+}
+
+/* phones and small tablets: the board table (with its buttons) does not fit below 840px */
+@media (max-width: 840px) {
+  .picker-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .board {
+    padding: 14px;
+  }
+
+  .board-meta + .board-meta::before {
+    content: none;
+  }
+
+  .board-actions {
+    width: 100%;
+  }
+
+  .board-actions .btn {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  /* one block per car: short values in pairs, the long ones and the buttons on a line of their own */
+  .board thead {
+    display: none;
+  }
+
+  .board table,
+  .board tbody {
+    display: block;
+  }
+
+  .board tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 18px;
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--gp-line);
+  }
+
+  .board td,
+  .board .col-left {
+    display: flow-root;
+    padding: 5px 0;
+    border: 0;
+    text-align: right;
+  }
+
+  .board td[data-label]::before {
+    content: attr(data-label);
+    float: left;
+    margin-right: 16px;
+    font: 700 11px/1.9 var(--gp-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gp-muted);
+  }
+
+  .board td[data-label="Driver"],
+  .board td[data-label="Last lap"],
+  .board td[data-label="State"],
+  .board .col-actions,
+  .board .empty {
+    grid-column: 1 / -1;
+  }
+
+  .board .col-actions {
+    width: auto;
+    padding: 0;
+    text-align: left;
+  }
+
+  .board .col-actions .btn {
+    margin: 6px 6px 4px 0;
+  }
+
+  .board .no-actions {
+    display: none;
+  }
+
+  .board .empty {
+    padding: 20px 0;
+    text-align: center;
+  }
+
+  .board tr.leader {
+    background: var(--gp-accent-soft);
+    box-shadow: inset 4px 0 0 var(--gp-accent);
+  }
+
+  .board tr.leader td,
+  .board tr.leader td:first-child {
+    background: none;
+    box-shadow: none;
+  }
+}
+
+/* ==== competition control ==== */
+/* the competition on the left, its phase and the next step on the right */
+app-admincompetitioncontrol .competition {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 32px;
+  align-items: center;
+  margin-bottom: 22px;
+}
+
+app-admincompetitioncontrol .competition-name {
+  margin: 6px 0 14px;
+  font-size: 24px;
+}
+
+app-admincompetitioncontrol .phase-box {
+  display: grid;
+  gap: 14px;
+  justify-items: start;
+}
+
+app-admincompetitioncontrol .steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+app-admincompetitioncontrol .step {
+  font: 700 12px var(--gp-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gp-border);
+}
+
+app-admincompetitioncontrol .step.done {
+  color: var(--gp-muted);
+}
+
+app-admincompetitioncontrol .step.current {
+  color: var(--gp-ink);
+  box-shadow: inset 0 -2px 0 var(--gp-accent);
+}
+
+app-admincompetitioncontrol .step-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+app-admincompetitioncontrol .phase-box .server-error {
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  app-admincompetitioncontrol .competition {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+}

@@ -19,7 +19,7 @@ Chart.register(DoughnutController, PieController, LineController, BarController,
 Chart.defaults.font.family = 'Archivo, "Segoe UI", sans-serif';
 Chart.defaults.color = '#696c74';
 
-// same colours as styles.css
+/// same colours as styles/tokens.css
 const ORANGE = '#ff5b14';
 const INK = '#17181c';
 const GREY = '#b9bbc0';

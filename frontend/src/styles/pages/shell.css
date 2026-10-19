@@ -1,0 +1,24 @@
+/* ==== app shell ==== */
+app-root main {
+  display: block;
+  min-height: calc(100vh - var(--gp-nav-h));
+}
+
+/* less motion asked for: no movement, the car just waits on the track */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .loader-lane {
+    animation: none;
+    transform: translateX(-40%);
+  }
+
+  .live-dot {
+    animation: none;
+  }
+}

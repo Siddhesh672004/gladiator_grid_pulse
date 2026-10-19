@@ -1,0 +1,67 @@
+/* GridPulse styles: the "Pit Lane" look (asphalt on concrete, one orange signal). this file: the design tokens */
+
+/* the files load in the order of angular.json "styles": material-theme.css (the popup dialog, must come first),
+   tokens, base, components (shared building blocks), then pages/ (one area each). a page's own rules start with
+   the page's tag (app-landing ...), so they cannot change another page. pages/shell.css (less motion) stays last */
+
+:root {
+  /* neutrals */
+  --gp-ink: #17181c;
+  --gp-ink-soft: #2a2b31;
+  --gp-text: #2f3137;
+  --gp-muted: #696c74;
+  --gp-grey: #5d6068;
+  --gp-border: #b9bbc0;
+  --gp-line: #e1e1dc;
+  --gp-field: #f5f5f2;
+  --gp-page: #f2f2ef;
+  --gp-surface: #ffffff;
+
+  /* the one accent: marshal orange (text on it is ink, never white) */
+  --gp-accent: #ff5b14;
+  --gp-accent-dark: #ee4f0b;
+  --gp-accent-text: #c2410c;
+  --gp-accent-soft: #ffede4;
+
+  /* red only means stop: errors, reject, delete */
+  --gp-red: #d92d20;
+  --gp-red-dark: #b42318;
+  --gp-red-soft: #fdecea;
+  --gp-logout: #d92d20;
+
+  /* flag colours */
+  --gp-green: #1e8e4e;
+  --gp-green-dark: #166c3b;
+  --gp-green-soft: #e6f4ec;
+  --gp-yellow: #ffd60a;
+  --gp-amber: #8a5a00;
+  --gp-amber-soft: #fff6d6;
+  --gp-blue: #1d5fd6;
+  --gp-blue-soft: #e8eefc;
+  --gp-purple: #7a2bd0;
+  --gp-gold: #f2b705;
+  --gp-gold-text: #f5b301;
+
+  /* dark leaderboard */
+  --gp-board: #17181c;
+  --gp-board-head: #0e0f12;
+  --gp-board-row: #1f2026;
+  --gp-board-leader: #3a2c12;
+  --gp-contact: #17181c;
+
+  /* sizes */
+  --gp-radius: 4px;
+  --gp-radius-lg: 6px;
+  --gp-cut: 22px;
+  --gp-shadow: 0 1px 2px rgba(23, 24, 28, 0.05), 0 6px 18px rgba(23, 24, 28, 0.06);
+  --gp-shadow-lg: 0 14px 36px rgba(23, 24, 28, 0.2);
+  --gp-nav-h: 64px;
+
+  /* web fonts come from the link in index.html, without internet the system fonts take over */
+  --gp-font: "Archivo", "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  --gp-mono: "JetBrains Mono", "Cascadia Mono", Consolas, Menlo, monospace;
+
+  /* motion */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+}

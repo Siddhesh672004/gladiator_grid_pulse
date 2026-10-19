@@ -1,0 +1,146 @@
+/* base: reset, text, focus, the two fonts, page layout, section titles and the white box */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--gp-font);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--gp-text);
+  background: var(--gp-page);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  color: var(--gp-ink);
+  line-height: 1.25;
+}
+
+a {
+  color: var(--gp-accent-text);
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--gp-ink);
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--gp-accent);
+  outline-offset: 2px;
+}
+
+/* wide heading font (page titles, section titles, the logo) */
+.display,
+.page-head h1,
+.board-title {
+  font-family: var(--gp-font);
+  font-weight: 800;
+  font-stretch: 125%;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+  line-height: 1.15;
+  color: var(--gp-ink);
+}
+
+/* times, prices, positions, car numbers */
+.mono {
+  font-family: var(--gp-mono);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* page layout */
+.page {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 32px 24px 56px;
+}
+
+/* pages with a wide table (registrations, feedback, payments) */
+.wide-page {
+  max-width: 1320px;
+}
+
+.slot {
+  content: "";
+  flex: none;
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border-left: 4px solid var(--gp-accent);
+  border-top: 4px solid var(--gp-accent);
+}
+
+.page-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px 24px;
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--gp-line);
+}
+
+.page-head h1 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font-size: 26px;
+}
+
+.page-head p {
+  margin: 6px 0 0;
+  max-width: 70ch;
+  color: var(--gp-muted);
+}
+
+.page-head .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* section title with the grid-slot bracket, small label above a title, white box */
+.sec-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 12px;
+  font-size: 22px;
+}
+
+.tag {
+  font: 700 11px var(--gp-mono);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--gp-accent-text);
+}
+
+.panel {
+  padding: 20px;
+  background: var(--gp-surface);
+  border: 1px solid var(--gp-line);
+  border-radius: var(--gp-radius);
+}

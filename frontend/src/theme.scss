@@ -1,7 +1,7 @@
 @use '@angular/material' as mat;
 
 // Angular Material is used for one thing only: the dialog that shows our popups. this file gives it our font and colours
-// (the popup box itself is styled in styles.css)
+// (the popup box itself is styled in styles/components.css)
 
 $asphalt: (
   50: #e9e9ea, 100: #c7c8c9, 200: #a2a3a5, 300: #7c7d81, 400: #606166,

@@ -1,0 +1,100 @@
+/* ==== photo side of the login pages ==== */
+app-authshell .auth {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--gp-surface);
+}
+
+/* picture side */
+app-authshell .auth-art {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 28px;
+  background: var(--gp-ink);
+  overflow: hidden;
+}
+
+app-authshell .auth-art img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+app-authshell .auth-logo {
+  position: relative;
+  align-self: flex-start;
+  padding: 10px 14px;
+  border-radius: 3px;
+  background: var(--gp-surface);
+  color: var(--gp-ink);
+  text-decoration: none;
+}
+
+app-authshell .auth-pitch {
+  position: relative;
+  max-width: 440px;
+  padding: 26px 28px 30px;
+  background: var(--gp-surface);
+}
+
+app-authshell .auth-pitch h1 {
+  margin: 0 0 8px;
+  font-size: 28px;
+}
+
+app-authshell .auth-pitch p {
+  margin: 0 0 16px;
+}
+
+app-authshell .auth-pitch ul {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+app-authshell .auth-pitch li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--gp-ink);
+}
+
+app-authshell .auth-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+}
+
+/* phones: the picture becomes a band on top, the form comes right after it */
+@media (max-width: 860px) {
+  app-authshell .auth {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  app-authshell .auth-art {
+    min-height: 150px;
+    padding: 16px;
+  }
+
+  app-authshell .auth-pitch {
+    display: none;
+  }
+
+  app-authshell .auth-main {
+    align-items: flex-start;
+    padding: 28px 16px 56px;
+  }
+}

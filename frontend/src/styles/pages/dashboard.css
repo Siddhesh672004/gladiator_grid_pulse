@@ -1,0 +1,145 @@
+/* ==== admin dashboard ==== */
+app-admindashboard .dash {
+  display: grid;
+  gap: 18px;
+}
+
+app-admindashboard .dash > app-pagehead {
+  margin-bottom: -18px;
+}
+
+app-admindashboard .kpi.live {
+  box-shadow: inset 0 3px 0 var(--gp-accent);
+}
+
+/* a wide panel with a narrow one next to it */
+app-admindashboard .dash-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: stretch;
+}
+
+app-admindashboard .side-stack,
+app-admindashboard .pies {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+  align-content: start;
+}
+
+app-admindashboard .chart-box {
+  position: relative;
+  height: 270px;
+}
+
+app-admindashboard .chart-box.small {
+  height: 170px;
+}
+
+app-admindashboard .chart-box.tall {
+  height: 410px;
+}
+
+/* "No revenue yet this year", in the middle of the empty chart */
+app-admindashboard .chart-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  font-size: 14px;
+  color: var(--gp-muted);
+  pointer-events: none;
+}
+
+/* nothing live: the note sits in the middle of the panel */
+app-admindashboard .monitor {
+  display: flex;
+  flex-direction: column;
+}
+
+app-admindashboard .monitor .quiet {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  min-height: 80px;
+  margin: 0;
+}
+
+app-admindashboard .panel-link {
+  display: inline-block;
+  align-self: flex-start;
+  margin-top: 14px;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+/* live race monitor */
+app-admindashboard .sub-title .live-dot {
+  margin-left: 0;
+}
+
+app-admindashboard .live-race {
+  padding: 10px 0;
+  border-top: 1px solid var(--gp-line);
+}
+
+app-admindashboard .live-race p {
+  margin: 4px 0;
+  font-size: 13px;
+}
+
+app-admindashboard .live-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+app-admindashboard .progress {
+  height: 6px;
+  background: var(--gp-field);
+  overflow: hidden;
+}
+
+app-admindashboard .progress-bar {
+  height: 100%;
+  background: var(--gp-accent);
+  transform-origin: left;
+  transition: width 0.4s var(--ease-out);
+}
+
+/* label left, number right */
+app-admindashboard .money {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+app-admindashboard .quick-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+app-admindashboard .quick-grid a {
+  padding: 9px 12px;
+  background: var(--gp-surface);
+  border: 1px solid var(--gp-line);
+  border-radius: var(--gp-radius);
+  color: var(--gp-ink);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: border-color 0.15s ease;
+}
+
+app-admindashboard .quick-grid a:hover {
+  border-color: var(--gp-ink);
+}
+
+@media (max-width: 1024px) {
+  app-admindashboard .dash-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

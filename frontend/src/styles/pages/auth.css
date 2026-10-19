@@ -1,0 +1,63 @@
+/* ==== login / signup / forgot password: the form (the photo side is app-authshell) ==== */
+.auth-box {
+  width: min(400px, 100%);
+}
+
+.auth-box.wide {
+  width: min(560px, 100%);
+}
+
+.auth-box h2 {
+  margin: 6px 0 22px;
+  font-size: 30px;
+}
+
+/* "step 1 of 2" line with the start lights */
+.auth-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
+  font: 700 12px var(--gp-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gp-muted);
+}
+
+.auth-info {
+  margin: -10px 0 20px;
+  color: var(--gp-muted);
+  overflow-wrap: anywhere;
+}
+
+.auth-box .server-error {
+  margin: 0 0 14px;
+}
+
+.auth-links {
+  margin-top: 20px;
+  padding-top: 6px;
+  border-top: 1px solid var(--gp-line);
+}
+
+.auth-switch {
+  margin: 10px 0 0;
+  font-size: 14px;
+  color: var(--gp-muted);
+}
+
+.auth-switch a {
+  color: var(--gp-accent-text);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-switch a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 560px) {
+  .auth-box h2 {
+    font-size: 25px;
+  }
+}
