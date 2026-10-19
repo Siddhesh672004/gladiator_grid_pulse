@@ -9,12 +9,10 @@ import org.springframework.stereotype.Service;
 
 import com.gridpulse.ai.dto.FaqMatch;
 import com.gridpulse.ai.dto.request.ChatRequest;
-import com.gridpulse.ai.dto.response.ChatMessageResponse;
 import com.gridpulse.ai.dto.response.ChatResponse;
 import com.gridpulse.ai.entity.ChatMessage;
 import com.gridpulse.ai.entity.FaqEntity;
 import com.gridpulse.ai.exceptions.GeminiException;
-import com.gridpulse.ai.mapper.ChatMapper;
 import com.gridpulse.ai.repository.ChatMessageRepo;
 
 import lombok.RequiredArgsConstructor;
@@ -39,7 +37,6 @@ public class ChatServiceImpl implements ChatService {
     private final FaqService faqService;
     private final ConversationMemory conversationMemory;
     private final ChatMessageRepo chatMessageRepo;
-    private final ChatMapper chatMapper;
 
     // the bot's answer + where it came from ("gemini", "faq" or "fallback")
     private record Reply(String text, String source) {
@@ -124,13 +121,6 @@ public class ChatServiceImpl implements ChatService {
             log.warn("Generation failed, sending the faq answer as it is: {}", e.getMessage());
             return new Reply(faq.getAnswer(), "faq");
         }
-    }
-
-    @Override
-    public List<ChatMessageResponse> getHistory(String sessionId) {
-        return chatMessageRepo.findBySessionIdOrderByCreatedAtAscIdAsc(sessionId).stream()
-                .map(chatMapper::toResponse)
-                .toList();
     }
 
     @Override

@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.gridpulse.ai.dto.request.ChatRequest;
-import com.gridpulse.ai.dto.response.ChatMessageResponse;
 import com.gridpulse.ai.dto.response.ChatResponse;
 import com.gridpulse.ai.dto.response.FaqResponse;
 import com.gridpulse.ai.service.ChatService;
@@ -30,11 +29,6 @@ public class ChatController {
     @PostMapping("/api/chat")
     public ResponseEntity<ChatResponse> sendMessage(@Valid @RequestBody ChatRequest request) {
         return ResponseEntity.ok(chatService.chat(request));
-    }
-
-    @GetMapping("/api/chat/history/{sessionId}")
-    public ResponseEntity<List<ChatMessageResponse>> getHistory(@PathVariable String sessionId) {
-        return ResponseEntity.ok(chatService.getHistory(sessionId));
     }
 
     @DeleteMapping("/api/chat/memory/{sessionId}")
