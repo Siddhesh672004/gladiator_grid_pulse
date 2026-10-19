@@ -61,12 +61,15 @@ Mode A - terminal (light: infra in Docker / local MySQL, services from the repo 
    the gmail check of notification-service: its log line "EMAIL: ..." (notification-service/logs)
 
 
-Mode B - full Docker (everything in containers; heavy: builds 6 images)
------------------------------------------------------------------------
+Mode B - full Docker (everything in containers; heavy: 6 services + the infra)
+-----------------------------------------------------------------------------
    fill the keys in .env (JWT_SECRET and INTERNAL_API_KEY are required; MAIL_*, SUPER_ADMIN_*, RAZORPAY_*,
    GEMINI_*, GROQ_API_KEY ... see .env.example)
+   ./mvnw -q package -DskipTests      build the jars first: the images only copy <module>/target/*.jar
    docker compose --profile apps up -d --build
        gateway :8080, core-1 :8082, core-2 :8083, notification :8084, payment :8085, ai :8086 + the infra
+       (core-2 starts once core-1 is healthy; each service gets a 256 MB heap, APP_JAVA_OPTS in .env changes it)
+   docker compose --profile ui up -d  kafka ui on http://localhost:8090 (it only starts with --profile ui)
    docker compose stop core-2         the site keeps working on core-1
    docker compose --profile apps down
 

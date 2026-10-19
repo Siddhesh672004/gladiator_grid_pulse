@@ -1,10 +1,4 @@
-# the image build only needs the maven modules; never secrets, builds or the frontend
-.git
-.env
-**/secrets.properties
-**/target
-**/logs
-**/node_modules
-angularapp
-docs
-tools
+# same rule as docker/Dockerfile.java.dockerignore (buildkit reads that one): the images only copy the built jars,
+# never sources, secrets, .env or the frontend
+*
+!*/target/*.jar

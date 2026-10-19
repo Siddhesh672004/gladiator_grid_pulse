@@ -1,0 +1,3 @@
+# the image only copies a built jar: nothing else (sources, secrets, .env, the frontend) enters the build context
+*
+!*/target/*.jar

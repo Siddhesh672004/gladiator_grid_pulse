@@ -1,5 +1,7 @@
-# local infra: mysql, redis, kafka + kafka ui. the apps run on the host (terminal mode) or here (profile "apps")
+# local infra: mysql, redis, kafka (+ kafka ui with --profile ui). the apps run on the host (terminal mode) or here (profile "apps")
 # start: copy .env.example to .env, then  docker compose up -d                        (infra only)
+#                                        docker compose --profile ui up -d             (infra + kafka ui on 8090)
+#        build the jars first:           ./mvnw -q package -DskipTests
 #                                        docker compose --profile apps up -d --build  (infra + the services)
 name: gridpulse
 
@@ -52,14 +54,19 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      # the default 1 GB heap is far more than one dev broker needs
+      KAFKA_HEAP_OPTS: -Xmx384m -Xms384m
     healthcheck:
-      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:29092 > /dev/null 2>&1"]
+      # the check tool gets a small heap of its own, else it would start with the broker's 384 MB
+      test: ["CMD-SHELL", "KAFKA_HEAP_OPTS=-Xmx128m /opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:29092 > /dev/null 2>&1"]
       interval: 15s
       timeout: 15s
       retries: 10
       start_period: 30s
 
+  # only with --profile ui
   kafka-ui:
+    profiles: [ui]
     image: kafbat/kafka-ui:v1.5.0
     ports:
       - "8090:8080"
@@ -77,6 +84,8 @@ services:
       start_period: 30s
 
   # the services, only with --profile apps (a plain "docker compose up -d" stays infra only)
+  # the images copy <module>/target/*.jar, so build the jars first (./mvnw -q package -DskipTests)
+  # every service: 256 MB heap + serial gc unless APP_JAVA_OPTS (.env) says otherwise
   # JWT_SECRET (.env) is required: both core instances and the gateway must read the same tokens
   # two core instances from one image, the gateway shares the work between them
   core-1:
@@ -84,9 +93,10 @@ services:
     image: gridpulse/core:local
     build:
       context: .
-      dockerfile: docker/Dockerfile.service
+      dockerfile: docker/Dockerfile.java
       args:
         MODULE: springapp
+    restart: unless-stopped
     ports:
       - "8082:8082"
     env_file: .env
@@ -99,6 +109,13 @@ services:
       REDIS_HOST: redis
       PAYMENT_URL: http://payment:8085
       AI_URL: http://ai:8086
+      JAVA_TOOL_OPTIONS: ${APP_JAVA_OPTS:--Xmx256m -XX:+UseSerialGC}
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:8082/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 120s
     depends_on:
       mysql:
         condition: service_healthy
@@ -107,14 +124,16 @@ services:
       kafka:
         condition: service_healthy
 
+  # starts after core-1 is healthy: both seed the super admin at start, on an empty db the second insert would fail
   core-2:
     profiles: [apps]
     image: gridpulse/core:local
     build:
       context: .
-      dockerfile: docker/Dockerfile.service
+      dockerfile: docker/Dockerfile.java
       args:
         MODULE: springapp
+    restart: unless-stopped
     ports:
       - "8083:8082"
     env_file: .env
@@ -127,6 +146,13 @@ services:
       REDIS_HOST: redis
       PAYMENT_URL: http://payment:8085
       AI_URL: http://ai:8086
+      JAVA_TOOL_OPTIONS: ${APP_JAVA_OPTS:--Xmx256m -XX:+UseSerialGC}
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:8082/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 120s
     depends_on:
       mysql:
         condition: service_healthy
@@ -134,14 +160,17 @@ services:
         condition: service_healthy
       kafka:
         condition: service_healthy
+      core-1:
+        condition: service_healthy
 
   notification:
     profiles: [apps]
     build:
       context: .
-      dockerfile: docker/Dockerfile.service
+      dockerfile: docker/Dockerfile.java
       args:
         MODULE: notification-service
+    restart: unless-stopped
     ports:
       - "8084:8084"
     env_file: .env
@@ -149,6 +178,13 @@ services:
       DB_HOST: mysql
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       KAFKA_BOOTSTRAP: kafka:29092
+      JAVA_TOOL_OPTIONS: ${APP_JAVA_OPTS:--Xmx256m -XX:+UseSerialGC}
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:8084/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 120s
     depends_on:
       mysql:
         condition: service_healthy
@@ -160,9 +196,10 @@ services:
     profiles: [apps]
     build:
       context: .
-      dockerfile: docker/Dockerfile.service
+      dockerfile: docker/Dockerfile.java
       args:
         MODULE: payment-service
+    restart: unless-stopped
     ports:
       - "8085:8085"
     env_file: .env
@@ -173,6 +210,13 @@ services:
       KAFKA_BOOTSTRAP: kafka:29092
       CORE_1_URL: http://core-1:8082
       CORE_2_URL: http://core-2:8082
+      JAVA_TOOL_OPTIONS: ${APP_JAVA_OPTS:--Xmx256m -XX:+UseSerialGC}
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:8085/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 120s
     depends_on:
       mysql:
         condition: service_healthy
@@ -184,9 +228,10 @@ services:
     profiles: [apps]
     build:
       context: .
-      dockerfile: docker/Dockerfile.service
+      dockerfile: docker/Dockerfile.java
       args:
         MODULE: ai-service
+    restart: unless-stopped
     ports:
       - "8086:8086"
     env_file: .env
@@ -199,6 +244,13 @@ services:
       CORE_1_URL: http://core-1:8082
       CORE_2_URL: http://core-2:8082
       PAYMENT_URL: http://payment:8085
+      JAVA_TOOL_OPTIONS: ${APP_JAVA_OPTS:--Xmx256m -XX:+UseSerialGC}
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:8086/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 120s
     depends_on:
       mysql:
         condition: service_healthy
@@ -212,9 +264,10 @@ services:
     profiles: [apps]
     build:
       context: .
-      dockerfile: docker/Dockerfile.service
+      dockerfile: docker/Dockerfile.java
       args:
         MODULE: gateway
+    restart: unless-stopped
     ports:
       - "8080:8080"
     env_file: .env
@@ -224,11 +277,21 @@ services:
       CORE_2_URL: http://core-2:8082
       PAYMENT_URL: http://payment:8085
       AI_URL: http://ai:8086
+      JAVA_TOOL_OPTIONS: ${APP_JAVA_OPTS:--Xmx256m -XX:+UseSerialGC}
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 120s
+    # core-2 joins the load balancer by itself once its health check answers
     depends_on:
-      - core-1
-      - core-2
-      - payment
-      - ai
+      core-1:
+        condition: service_healthy
+      payment:
+        condition: service_healthy
+      ai:
+        condition: service_healthy
 
 volumes:
   mysql-data:
